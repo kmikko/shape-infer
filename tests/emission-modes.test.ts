@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { emitJsonSchema } from "../src/emitters/json-schema";
-import { emitTypeScriptType } from "../src/emitters/typescript";
-import { emitZodSchema } from "../src/emitters/zod";
-import { inferFromJsonText } from "../src/infer";
+import { emitJsonSchema } from "../src/emitters/json-schema.ts";
+import { emitTypeScriptType } from "../src/emitters/typescript.ts";
+import { emitZodSchema } from "../src/emitters/zod.ts";
+import { inferFromJsonText } from "../src/infer.ts";
 
 describe("emission modes", () => {
   test("allOptionalProperties forces optional object properties in TypeScript output", () => {

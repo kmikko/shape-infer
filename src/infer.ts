@@ -2,14 +2,8 @@ import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname } from "node:path";
 import { createInterface } from "node:readline";
-import {
-  AstMergeOptions,
-  createNode,
-  mergeNodes,
-  mergeValue,
-  resolveAstMergeOptions,
-  SchemaNode
-} from "./ast";
+import { createNode, mergeNodes, mergeValue, resolveAstMergeOptions } from "./ast.ts";
+import type { AstMergeOptions, SchemaNode } from "./ast.ts";
 
 const DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES = 20;
 const JSONL_EXTENSIONS = new Set([".jsonl", ".ndjson"]);

@@ -8,8 +8,8 @@ import {
   isRecordLikeObject,
   isRequired,
   resolveHeuristicOptions
-} from "../src/heuristics";
-import { inferFromValues } from "../src/infer";
+} from "../src/heuristics.ts";
+import { inferFromValues } from "../src/infer.ts";
 
 describe("heuristics", () => {
   test("resolveHeuristicOptions validates bounds", () => {

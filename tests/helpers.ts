@@ -27,7 +27,7 @@ export function runCli(args: string[], stdinText?: string): Promise<CliRunResult
   return new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
-      ["--import", "tsx", cliPath, ...args],
+      [cliPath, ...args],
       {
         stdio: ["pipe", "pipe", "pipe"]
       }

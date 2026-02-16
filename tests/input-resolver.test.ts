@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { resolveInputPaths } from "../src/input-resolver";
-import { withTempDir } from "./helpers";
+import { resolveInputPaths } from "../src/input-resolver.ts";
+import { withTempDir } from "./helpers.ts";
 
 describe("resolveInputPaths", () => {
   test("expands globs, removes duplicates, and returns absolute paths", async () => {

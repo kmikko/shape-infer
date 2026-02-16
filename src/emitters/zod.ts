@@ -1,6 +1,5 @@
-import { ArrayVariant, AstMergeOptions, ObjectVariant, SchemaNode } from "../ast";
+import type { ArrayVariant, AstMergeOptions, ObjectVariant, SchemaNode } from "../ast.ts";
 import {
-  HeuristicOptions,
   buildRecordValueNode,
   inferNumberEnum,
   inferStringEnum,
@@ -8,12 +7,12 @@ import {
   isRecordLikeObject,
   isRequired,
   resolveHeuristicOptions
-} from "../heuristics";
+} from "../heuristics.ts";
+import type { HeuristicOptions } from "../heuristics.ts";
 import {
-  EmissionStyleOptions,
-  ResolvedEmissionStyleOptions,
   resolveEmissionStyleOptions
-} from "./style";
+} from "./style.ts";
+import type { EmissionStyleOptions, ResolvedEmissionStyleOptions } from "./style.ts";
 
 const INDENT = "  ";
 

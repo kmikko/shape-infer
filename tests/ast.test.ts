@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { createNode, mergeNodes, mergeValue, resolveAstMergeOptions } from "../src/ast";
-import { inferFromValues } from "../src/infer";
+import { createNode, mergeNodes, mergeValue, resolveAstMergeOptions } from "../src/ast.ts";
+import { inferFromValues } from "../src/infer.ts";
 
 describe("ast", () => {
   test("resolveAstMergeOptions floors numeric maxTrackedLiteralsPerVariant", () => {

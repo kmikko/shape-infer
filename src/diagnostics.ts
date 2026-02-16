@@ -1,7 +1,6 @@
-import { AstMergeOptions, NodeKind, SchemaNode, StringFormatKind } from "./ast";
-import { InferenceStats } from "./infer";
+import type { AstMergeOptions, NodeKind, SchemaNode, StringFormatKind } from "./ast.ts";
+import type { InferenceStats } from "./infer.ts";
 import {
-  HeuristicOptions,
   buildRecordValueNode,
   getNodeKinds,
   inferNumberEnum,
@@ -10,7 +9,8 @@ import {
   isRecordLikeObject,
   isRequired,
   resolveHeuristicOptions
-} from "./heuristics";
+} from "./heuristics.ts";
+import type { HeuristicOptions } from "./heuristics.ts";
 
 const DEFAULT_MAX_FINDINGS_PER_CATEGORY = 25;
 

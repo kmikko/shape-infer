@@ -3,22 +3,23 @@
 import { writeFile } from "node:fs/promises";
 import { stderr, stdin, stdout } from "node:process";
 import { Readable } from "node:stream";
-import { DEFAULT_AST_MERGE_OPTIONS, SchemaNode } from "./ast";
-import { analyzeSchema, formatDiagnosticsReport } from "./diagnostics";
-import { emitJsonSchema } from "./emitters/json-schema";
-import { TypeMode } from "./emitters/style";
-import { emitTypeScriptType } from "./emitters/typescript";
-import { emitZodSchema } from "./emitters/zod";
+import { DEFAULT_AST_MERGE_OPTIONS } from "./ast.ts";
+import type { SchemaNode } from "./ast.ts";
+import { analyzeSchema, formatDiagnosticsReport } from "./diagnostics.ts";
+import { emitJsonSchema } from "./emitters/json-schema.ts";
+import type { TypeMode } from "./emitters/style.ts";
+import { emitTypeScriptType } from "./emitters/typescript.ts";
+import { emitZodSchema } from "./emitters/zod.ts";
 import {
-  InputFormat,
-  InferenceFileSummary,
   detectInputFormatFromText,
   inferFromFiles,
   inferFromJsonText,
   inferFromJsonlStream
-} from "./infer";
-import { HeuristicOptions, resolveHeuristicOptions } from "./heuristics";
-import { resolveInputPaths } from "./input-resolver";
+} from "./infer.ts";
+import type { InputFormat, InferenceFileSummary } from "./infer.ts";
+import { resolveHeuristicOptions } from "./heuristics.ts";
+import type { HeuristicOptions } from "./heuristics.ts";
+import { resolveInputPaths } from "./input-resolver.ts";
 
 type OutputFormat = "typescript" | "zod" | "json-schema";
 

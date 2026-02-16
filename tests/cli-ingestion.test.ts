@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { runCli, withTempDir } from "./helpers";
+import { runCli, withTempDir } from "./helpers.ts";
 
 describe("CLI ingestion", () => {
   test("supports mixed json/jsonl input globs with auto-detect", async () => {

@@ -1,13 +1,12 @@
-import {
+import { createNode, mergeNodes } from "./ast.ts";
+import type {
   AstMergeOptions,
   NodeKind,
   ObjectVariant,
   PrimitiveVariant,
   SchemaNode,
-  StringFormatKind,
-  createNode,
-  mergeNodes
-} from "./ast";
+  StringFormatKind
+} from "./ast.ts";
 
 export interface HeuristicOptions {
   requiredThreshold: number;

@@ -14,22 +14,24 @@ pnpm install
 pnpm run build
 ```
 
+Build output is written to `dist/`.
+
 ## Usage
 
 ```bash
-node dist/cli.js --input path/to/data.jsonl --type-name MyRecord --format typescript
+node src/cli.ts --input path/to/data.jsonl --type-name MyRecord --format typescript
 ```
 
 Or stream from stdin (auto-detect JSON vs JSONL):
 
 ```bash
-cat path/to/data.jsonl | node dist/cli.js --type-name MyRecord --format zod --input-format auto
+cat path/to/data.jsonl | node src/cli.ts --type-name MyRecord --format zod --input-format auto
 ```
 
 Write output to file:
 
 ```bash
-node dist/cli.js --input path/to/data.jsonl --output schema.ts --format typescript
+node src/cli.ts --input path/to/data.jsonl --output schema.ts --format typescript
 ```
 
 ### Expanded ingestion (JSON + JSONL)
@@ -41,7 +43,7 @@ node dist/cli.js --input path/to/data.jsonl --output schema.ts --format typescri
 Examples:
 
 ```bash
-node dist/cli.js \
+node src/cli.ts \
   --input data/events.ndjson \
   --input data/archive.json \
   --input-format auto \
@@ -50,7 +52,7 @@ node dist/cli.js \
 ```
 
 ```bash
-node dist/cli.js \
+node src/cli.ts \
   --input "data/**/*.jsonl" \
   --input "data/**/*.json" \
   --input-format auto \
@@ -80,7 +82,7 @@ Supported formats:
 Example (`--format zod`):
 
 ```bash
-node dist/cli.js \
+node src/cli.ts \
   --input path/to/data.jsonl \
   --type-name Product \
   --format zod \
@@ -112,7 +114,7 @@ You can tune inference behavior from the CLI:
 Example:
 
 ```bash
-node dist/cli.js \
+node src/cli.ts \
   --input path/to/data.jsonl \
   --type-name Event \
   --format zod \
@@ -126,19 +128,25 @@ node dist/cli.js \
 Print diagnostics summary:
 
 ```bash
-node dist/cli.js --input "path/to/data/**/*.{json,jsonl}" --input-format auto --diagnostics
+node src/cli.ts --input "path/to/data/**/*.{json,jsonl}" --input-format auto --diagnostics
 ```
 
 Write diagnostics JSON report:
 
 ```bash
-node dist/cli.js --input path/to/data.jsonl --diagnostics-output diagnostics.json
+node src/cli.ts --input path/to/data.jsonl --diagnostics-output diagnostics.json
 ```
 
 ## Smoke test
 
 ```bash
 pnpm run smoke
+```
+
+Run the full quality gate (typecheck + tests + smoke + build):
+
+```bash
+pnpm run verify
 ```
 
 ## Tests
@@ -171,6 +179,12 @@ Run TypeScript type tests (`*.test-d.ts`):
 
 ```bash
 pnpm run test:type
+```
+
+Run source typechecking:
+
+```bash
+pnpm run typecheck
 ```
 
 Tests are written in TypeScript and run with Vitest.

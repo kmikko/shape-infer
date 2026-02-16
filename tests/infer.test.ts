@@ -6,8 +6,8 @@ import {
   inferFromFiles,
   inferFromJsonText,
   resolveInputFormatForFile
-} from "../src/infer";
-import { withTempDir } from "./helpers";
+} from "../src/infer.ts";
+import { withTempDir } from "./helpers.ts";
 
 describe("infer", () => {
   test("detectInputFormatFromText auto-detects json and jsonl", () => {

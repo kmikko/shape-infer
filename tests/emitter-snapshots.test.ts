@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { emitJsonSchema } from "../src/emitters/json-schema";
-import { emitTypeScriptType } from "../src/emitters/typescript";
-import { emitZodSchema } from "../src/emitters/zod";
-import { HeuristicOptions } from "../src/heuristics";
-import { inferFromValues } from "../src/infer";
+import { emitJsonSchema } from "../src/emitters/json-schema.ts";
+import { emitTypeScriptType } from "../src/emitters/typescript.ts";
+import { emitZodSchema } from "../src/emitters/zod.ts";
+import { inferFromValues } from "../src/infer.ts";
+import type { HeuristicOptions } from "../src/heuristics.ts";
 
 interface SnapshotCase {
   name: string;

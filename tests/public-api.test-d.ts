@@ -5,8 +5,8 @@ import {
   emitZodSchema,
   inferFromValues,
   resolveHeuristicOptions
-} from "../src";
-import type { HeuristicOptions, JsonSchemaObject, SchemaNode, TypeMode } from "../src";
+} from "../src/index.ts";
+import type { HeuristicOptions, JsonSchemaObject, SchemaNode, TypeMode } from "../src/index.ts";
 
 const rootNode = inferFromValues([{ id: 1 }, { id: "2" }]);
 expectTypeOf(rootNode).toEqualTypeOf<SchemaNode>();
