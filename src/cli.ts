@@ -2,13 +2,19 @@
 
 import { writeFile } from "node:fs/promises";
 import { stderr, stdin, stdout } from "node:process";
+import { SchemaNode } from "./ast";
+import { emitJsonSchema } from "./emitters/json-schema";
 import { emitTypeScriptType } from "./emitters/typescript";
+import { emitZodSchema } from "./emitters/zod";
 import { inferFromJsonlFile, inferFromJsonlStream } from "./infer";
+
+type OutputFormat = "typescript" | "zod" | "json-schema";
 
 interface CliOptions {
   inputPath?: string;
   outputPath?: string;
   typeName: string;
+  outputFormat: OutputFormat;
   help: boolean;
 }
 
@@ -28,9 +34,7 @@ async function main(): Promise<void> {
     ? await inferFromJsonlFile(options.inputPath)
     : await inferFromJsonlStream(stdin);
 
-  const outputText = emitTypeScriptType(inference.root, {
-    rootTypeName: options.typeName
-  });
+  const outputText = emitOutput(inference.root, options);
 
   if (options.outputPath) {
     await writeFile(options.outputPath, outputText, "utf8");
@@ -55,6 +59,7 @@ async function main(): Promise<void> {
 function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     typeName: "Root",
+    outputFormat: "typescript",
     help: false
   };
 
@@ -77,6 +82,11 @@ function parseArgs(argv: string[]): CliOptions {
         options.typeName = readArgValue(argv, index, arg);
         index += 1;
         break;
+      case "--format":
+      case "-f":
+        options.outputFormat = parseOutputFormat(readArgValue(argv, index, arg));
+        index += 1;
+        break;
       case "--help":
       case "-h":
         options.help = true;
@@ -89,6 +99,27 @@ function parseArgs(argv: string[]): CliOptions {
   return options;
 }
 
+function emitOutput(rootNode: SchemaNode, options: CliOptions): string {
+  switch (options.outputFormat) {
+    case "typescript":
+      return emitTypeScriptType(rootNode, {
+        rootTypeName: options.typeName
+      });
+    case "zod":
+      return emitZodSchema(rootNode, {
+        rootTypeName: options.typeName
+      });
+    case "json-schema":
+      return `${JSON.stringify(
+        emitJsonSchema(rootNode, {
+          rootTitle: options.typeName
+        }),
+        null,
+        2
+      )}\n`;
+  }
+}
+
 function readArgValue(argv: string[], index: number, argName: string): string {
   const value = argv[index + 1];
   if (!value) {
@@ -97,15 +128,34 @@ function readArgValue(argv: string[], index: number, argName: string): string {
   return value;
 }
 
+function parseOutputFormat(value: string): OutputFormat {
+  switch (value.toLowerCase()) {
+    case "ts":
+    case "typescript":
+      return "typescript";
+    case "zod":
+      return "zod";
+    case "json-schema":
+    case "jsonschema":
+    case "schema":
+      return "json-schema";
+    default:
+      throw new Error(
+        `Unsupported format: ${value}. Use one of: typescript, zod, json-schema.`
+      );
+  }
+}
+
 function buildUsage(): string {
   return [
     "Usage:",
-    "  schema-gen --input <path> [--output <path>] [--type-name <name>]",
+    "  schema-gen --input <path> [--output <path>] [--type-name <name>] [--format <format>]",
     "",
     "Options:",
     "  -i, --input      JSONL file path. If omitted, read JSONL from stdin.",
     "  -o, --output     Optional output file path. Defaults to stdout.",
     "  -t, --type-name  Root TypeScript type name. Defaults to Root.",
+    "  -f, --format     Output format: typescript | zod | json-schema. Defaults to typescript.",
     "  -h, --help       Show usage."
   ].join("\n");
 }

@@ -10,7 +10,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js",
-    "smoke": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord"
+    "smoke:ts": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format typescript",
+    "smoke:zod": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format zod",
+    "smoke:json-schema": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format json-schema",
+    "smoke": "pnpm run smoke:ts && pnpm run smoke:zod && pnpm run smoke:json-schema"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
