@@ -1,8 +1,14 @@
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
-import { createNode, mergeValue, SchemaNode } from "./ast";
+import {
+  AstMergeOptions,
+  createNode,
+  mergeValue,
+  resolveAstMergeOptions,
+  SchemaNode
+} from "./ast";
 
-const MAX_CAPTURED_PARSE_ERROR_LINES = 20;
+const DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES = 20;
 
 export interface InferenceStats {
   linesRead: number;
@@ -17,15 +23,29 @@ export interface InferenceResult {
   parseErrorLines: number[];
 }
 
-export async function inferFromJsonlFile(filePath: string): Promise<InferenceResult> {
+export interface InferOptions {
+  astMergeOptions?: Partial<AstMergeOptions>;
+  maxCapturedParseErrorLines?: number;
+}
+
+export async function inferFromJsonlFile(
+  filePath: string,
+  options: InferOptions = {}
+): Promise<InferenceResult> {
   const stream = createReadStream(filePath, { encoding: "utf8" });
-  return inferFromJsonlStream(stream);
+  return inferFromJsonlStream(stream, options);
 }
 
 export async function inferFromJsonlStream(
-  input: NodeJS.ReadableStream
+  input: NodeJS.ReadableStream,
+  options: InferOptions = {}
 ): Promise<InferenceResult> {
   const root = createNode();
+  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
+  const maxCapturedParseErrorLines = resolveMaxCapturedParseErrorLines(
+    options.maxCapturedParseErrorLines
+  );
+
   const stats: InferenceStats = {
     linesRead: 0,
     recordsMerged: 0,
@@ -51,11 +71,11 @@ export async function inferFromJsonlStream(
 
       try {
         const parsedRecord = JSON.parse(line) as unknown;
-        mergeValue(root, parsedRecord);
+        mergeValue(root, parsedRecord, astMergeOptions);
         stats.recordsMerged += 1;
       } catch {
         stats.parseErrors += 1;
-        if (parseErrorLines.length < MAX_CAPTURED_PARSE_ERROR_LINES) {
+        if (parseErrorLines.length < maxCapturedParseErrorLines) {
           parseErrorLines.push(stats.linesRead);
         }
       }
@@ -71,10 +91,22 @@ export async function inferFromJsonlStream(
   };
 }
 
-export function inferFromValues(values: Iterable<unknown>): SchemaNode {
+export function inferFromValues(
+  values: Iterable<unknown>,
+  options: InferOptions = {}
+): SchemaNode {
   const root = createNode();
+  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
   for (const value of values) {
-    mergeValue(root, value);
+    mergeValue(root, value, astMergeOptions);
   }
   return root;
+}
+
+function resolveMaxCapturedParseErrorLines(value?: number): number {
+  const resolved = value ?? DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES;
+  if (!Number.isInteger(resolved) || resolved < 0) {
+    throw new Error("maxCapturedParseErrorLines must be an integer >= 0.");
+  }
+  return resolved;
 }

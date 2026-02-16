@@ -13,7 +13,9 @@
     "smoke:ts": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format typescript",
     "smoke:zod": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format zod",
     "smoke:json-schema": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format json-schema",
-    "smoke": "pnpm run smoke:ts && pnpm run smoke:zod && pnpm run smoke:json-schema"
+    "smoke:diagnostics": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --diagnostics",
+    "smoke:phase3": "pnpm run build && node dist/cli.js --input fixtures/phase3.jsonl --type-name EventRecord --format zod --required-threshold 0.9 --enum-threshold 0.4 --min-enum-count 3 --record-min-keys 5 --record-max-presence 0.5 --diagnostics",
+    "smoke": "pnpm run smoke:ts && pnpm run smoke:zod && pnpm run smoke:json-schema && pnpm run smoke:diagnostics && pnpm run smoke:phase3"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
