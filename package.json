@@ -63,8 +63,9 @@
     "smoke": "node scripts/smoke.ts",
     "smoke:dist": "node dist/cli.js --help",
     "pack:check": "npm pack --dry-run",
+    "pack:smoke": "node scripts/pack-smoke.ts",
     "check": "pnpm run test && pnpm run test:type && pnpm run smoke",
-    "verify": "pnpm run typecheck && pnpm run check && pnpm run build && pnpm run smoke:dist && pnpm run pack:check",
+    "verify": "pnpm run typecheck && pnpm run check && pnpm run build && pnpm run smoke:dist && pnpm run pack:check && pnpm run pack:smoke",
     "test:ci": "pnpm run verify"
   },
   "dependencies": {
