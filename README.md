@@ -176,20 +176,28 @@ node src/cli.ts \
 
 ## Programmatic API
 
-The package exports AST/inference/heuristics/diagnostics/emitter APIs from `src/index.ts`.
+The package exposes a stable high-level facade from `src/index.ts`:
+
+- `generateFromValues(...)`
+- `generateFromText(...)`
+- `generateFromFiles(...)`
+
+Lower-level AST/inference/heuristics/emitter APIs are also exported for advanced usage.
 
 ```ts
-import { inferFromValues, emitZodSchema, analyzeSchema } from "./src/index.ts";
+import { generateFromValues } from "./src/index.ts";
 
-const root = inferFromValues([{ id: 1 }, { id: "2" }]);
-
-const zodText = emitZodSchema(root, {
-  rootTypeName: "Record",
-  typeMode: "strict"
+const result = generateFromValues({
+  values: [{ id: 1 }, { id: "2" }],
+  format: "zod",
+  typeName: "Record",
+  includeDiagnostics: true
 });
 
-const diagnostics = analyzeSchema(root);
-console.log(zodText, diagnostics.summary);
+console.log(result.output);
+console.log(result.stats);
+console.log(result.warnings);
+console.log(result.diagnostics?.summary);
 ```
 
 ## NPM Scripts

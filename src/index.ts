@@ -3,6 +3,7 @@ export * from "./heuristics.ts";
 export * from "./infer.ts";
 export * from "./input-resolver.ts";
 export * from "./diagnostics.ts";
+export * from "./public-api.ts";
 export * from "./emitters/style.ts";
 export * from "./emitters/typescript.ts";
 export * from "./emitters/zod.ts";

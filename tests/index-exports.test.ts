@@ -11,6 +11,9 @@ describe("index exports", () => {
     expect(typeof api.emitZodSchema).toBe("function");
     expect(typeof api.emitJsonSchema).toBe("function");
     expect(typeof api.resolveInputPaths).toBe("function");
+    expect(typeof api.generateFromValues).toBe("function");
+    expect(typeof api.generateFromText).toBe("function");
+    expect(typeof api.generateFromFiles).toBe("function");
   });
 
   test("supports end-to-end inference and emission via barrel imports", () => {

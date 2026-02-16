@@ -3,10 +3,20 @@ import {
   emitJsonSchema,
   emitTypeScriptType,
   emitZodSchema,
+  generateFromFiles,
+  generateFromText,
+  generateFromValues,
   inferFromValues,
   resolveHeuristicOptions
 } from "../src/index.ts";
-import type { HeuristicOptions, JsonSchemaObject, SchemaNode, TypeMode } from "../src/index.ts";
+import type {
+  GenerateFromFilesResult,
+  GenerateSchemaResult,
+  HeuristicOptions,
+  JsonSchemaObject,
+  SchemaNode,
+  TypeMode
+} from "../src/index.ts";
 
 const rootNode = inferFromValues([{ id: 1 }, { id: "2" }]);
 expectTypeOf(rootNode).toEqualTypeOf<SchemaNode>();
@@ -37,3 +47,22 @@ expectTypeOf(heuristics).toEqualTypeOf<HeuristicOptions>();
 
 const mode: TypeMode = "loose";
 expectTypeOf(mode).toMatchTypeOf<"strict" | "loose">();
+
+const generatedFromValues = generateFromValues({
+  values: [{ id: 1 }, { id: "2" }],
+  format: "typescript",
+  includeDiagnostics: true
+});
+expectTypeOf(generatedFromValues).toEqualTypeOf<GenerateSchemaResult>();
+
+const generatedFromText = generateFromText({
+  text: '{"id":1}\n{"id":"2"}\n',
+  inputFormat: "jsonl"
+});
+expectTypeOf(generatedFromText).toEqualTypeOf<Promise<GenerateSchemaResult>>();
+
+const generatedFromFiles = generateFromFiles({
+  inputPatterns: ["fixtures/*.json*"],
+  inputFormat: "auto"
+});
+expectTypeOf(generatedFromFiles).toEqualTypeOf<Promise<GenerateFromFilesResult>>();
