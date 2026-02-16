@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { stderr, stdin, stdout } from "node:process";
 import { Readable } from "node:stream";
+import { pathToFileURL } from "node:url";
 import type { SchemaNode } from "./ast.ts";
 import { buildUsage, parseCliArgs } from "./cli-options.ts";
 import type { CliOptions } from "./cli-options.ts";
@@ -21,19 +23,31 @@ import { resolveHeuristicOptions } from "./heuristics.ts";
 import type { HeuristicOptions } from "./heuristics.ts";
 import { resolveInputPaths } from "./input-resolver.ts";
 
-async function main(): Promise<void> {
-  const options = parseCliArgs(process.argv.slice(2));
+export interface CliIo {
+  stdin: NodeJS.ReadableStream & { isTTY?: boolean };
+  stdout: NodeJS.WritableStream;
+  stderr: NodeJS.WritableStream;
+}
+
+const DEFAULT_CLI_IO: CliIo = {
+  stdin,
+  stdout,
+  stderr
+};
+
+export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promise<void> {
+  const options = parseCliArgs(argv);
   const heuristics = resolveHeuristicOptions(options.heuristics);
   const astMergeOptions = {
     maxTrackedLiteralsPerVariant: options.maxTrackedLiteralsPerVariant
   };
 
   if (options.help) {
-    stdout.write(`${buildUsage()}\n`);
+    io.stdout.write(`${buildUsage()}\n`);
     return;
   }
 
-  if (options.inputPatterns.length === 0 && stdin.isTTY) {
+  if (options.inputPatterns.length === 0 && io.stdin.isTTY) {
     throw new Error(
       "Missing input. Use --input <path/glob> (repeatable) or pipe data through stdin."
     );
@@ -42,14 +56,14 @@ async function main(): Promise<void> {
   const inference =
     options.inputPatterns.length > 0
       ? await inferFromInputFiles(options, astMergeOptions)
-      : await inferFromStdin(options, astMergeOptions);
+      : await inferFromStdin(options, astMergeOptions, io.stdin);
 
   const outputText = emitOutput(inference.root, options, heuristics, astMergeOptions);
 
   if (options.outputPath) {
     await writeFile(options.outputPath, outputText, "utf8");
   } else {
-    stdout.write(outputText);
+    io.stdout.write(outputText);
   }
 
   if (options.diagnostics || options.diagnosticsOutputPath) {
@@ -60,14 +74,14 @@ async function main(): Promise<void> {
     });
 
     if (options.diagnostics) {
-      stderr.write(formatDiagnosticsReport(diagnostics, inference.stats));
+      io.stderr.write(formatDiagnosticsReport(diagnostics, inference.stats));
       if (options.typeMode === "loose") {
-        stderr.write(
+        io.stderr.write(
           "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n"
         );
       }
       if (options.allOptionalProperties) {
-        stderr.write(
+        io.stderr.write(
           "Diagnostics note: all optional mode forces every object property to optional in emitted schemas.\n"
         );
       }
@@ -82,10 +96,10 @@ async function main(): Promise<void> {
     }
   }
 
-  emitParseWarnings(inference.files);
+  emitParseWarnings(inference.files, io.stderr);
 
   if (inference.stats.recordsMerged === 0) {
-    stderr.write("Warning: no JSON records parsed; output schema defaults to unknown.\n");
+    io.stderr.write("Warning: no JSON records parsed; output schema defaults to unknown.\n");
   }
 }
 
@@ -103,17 +117,18 @@ async function inferFromInputFiles(
 
 async function inferFromStdin(
   options: CliOptions,
-  astMergeOptions: { maxTrackedLiteralsPerVariant: number }
+  astMergeOptions: { maxTrackedLiteralsPerVariant: number },
+  input: NodeJS.ReadableStream
 ) {
   if (options.inputFormat === "jsonl") {
-    return inferFromJsonlStream(stdin, {
+    return inferFromJsonlStream(input, {
       astMergeOptions,
       maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
       sourceName: "<stdin>"
     });
   }
 
-  const stdinText = await readStdinText();
+  const stdinText = await readStdinText(input);
   const resolvedFormat = detectInputFormatFromText(stdinText, options.inputFormat);
 
   if (resolvedFormat === "json") {
@@ -131,34 +146,37 @@ async function inferFromStdin(
   });
 }
 
-function emitParseWarnings(fileSummaries: InferenceFileSummary[]): void {
+function emitParseWarnings(
+  fileSummaries: InferenceFileSummary[],
+  output: NodeJS.WritableStream
+): void {
   for (const fileSummary of fileSummaries) {
     if (fileSummary.stats.parseErrors <= 0) {
       continue;
     }
 
     if (fileSummary.format === "jsonl") {
-      stderr.write(
+      output.write(
         `Warning: ${fileSummary.source}: skipped ${fileSummary.stats.parseErrors} line(s) that were not valid JSON.\n`
       );
     } else {
-      stderr.write(
+      output.write(
         `Warning: ${fileSummary.source}: failed to parse JSON input (${fileSummary.stats.parseErrors} error).\n`
       );
     }
 
     if (fileSummary.parseErrorLines.length > 0) {
-      stderr.write(
+      output.write(
         `Warning: ${fileSummary.source}: parse errors at lines ${fileSummary.parseErrorLines.join(", ")}.\n`
       );
     }
   }
 }
 
-async function readStdinText(): Promise<string> {
+async function readStdinText(input: NodeJS.ReadableStream): Promise<string> {
   const chunks: Buffer[] = [];
 
-  for await (const chunk of stdin) {
+  for await (const chunk of input) {
     if (typeof chunk === "string") {
       chunks.push(Buffer.from(chunk));
     } else {
@@ -207,8 +225,19 @@ function emitOutput(
   }
 }
 
-main().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-  stderr.write(`Error: ${message}\n`);
-  process.exitCode = 1;
-});
+function isDirectExecution(): boolean {
+  const entry = process.argv[1];
+  if (!entry) {
+    return false;
+  }
+
+  return import.meta.url === pathToFileURL(resolve(entry)).href;
+}
+
+if (isDirectExecution()) {
+  runCli(process.argv.slice(2)).catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    stderr.write(`Error: ${message}\n`);
+    process.exitCode = 1;
+  });
+}
