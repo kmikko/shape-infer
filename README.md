@@ -16,6 +16,12 @@ The tool merges many records into one representative schema and handles missing 
 ## Install
 
 ```bash
+pnpm add schema-generator
+```
+
+### Local Development
+
+```bash
 pnpm install
 ```
 

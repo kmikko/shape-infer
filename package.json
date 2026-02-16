@@ -4,6 +4,27 @@
   "type": "module",
   "packageManager": "pnpm@8.6.2",
   "description": "Infer a unified schema from JSON/JSONL records and emit TypeScript, Zod, or JSON Schema.",
+  "author": "Mikko",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikko/schema-generator.git"
+  },
+  "homepage": "https://github.com/mikko/schema-generator#readme",
+  "bugs": {
+    "url": "https://github.com/mikko/schema-generator/issues"
+  },
+  "keywords": [
+    "schema",
+    "json-schema",
+    "typescript",
+    "zod",
+    "codegen",
+    "jsonl",
+    "ndjson",
+    "inference",
+    "schema-inference"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -19,13 +40,13 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22"
   },
   "sideEffects": false,
-  "license": "MIT",
   "bin": {
     "schema-gen": "dist/cli.js"
   },
