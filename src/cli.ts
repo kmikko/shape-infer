@@ -6,6 +6,7 @@ import { Readable } from "node:stream";
 import { DEFAULT_AST_MERGE_OPTIONS, SchemaNode } from "./ast";
 import { analyzeSchema, formatDiagnosticsReport } from "./diagnostics";
 import { emitJsonSchema } from "./emitters/json-schema";
+import { TypeMode } from "./emitters/style";
 import { emitTypeScriptType } from "./emitters/typescript";
 import { emitZodSchema } from "./emitters/zod";
 import {
@@ -28,6 +29,8 @@ interface CliOptions {
   diagnosticsOutputPath?: string;
   typeName: string;
   outputFormat: OutputFormat;
+  typeMode: TypeMode;
+  allOptionalProperties: boolean;
   heuristics: Partial<HeuristicOptions>;
   maxTrackedLiteralsPerVariant: number;
   maxCapturedParseErrorLines: number;
@@ -76,6 +79,16 @@ async function main(): Promise<void> {
 
     if (options.diagnostics) {
       stderr.write(formatDiagnosticsReport(diagnostics, inference.stats));
+      if (options.typeMode === "loose") {
+        stderr.write(
+          "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n"
+        );
+      }
+      if (options.allOptionalProperties) {
+        stderr.write(
+          "Diagnostics note: all optional mode forces every object property to optional in emitted schemas.\n"
+        );
+      }
     }
 
     if (options.diagnosticsOutputPath) {
@@ -180,6 +193,8 @@ function parseArgs(argv: string[]): CliOptions {
     inputFormat: "auto",
     typeName: "Root",
     outputFormat: "typescript",
+    typeMode: "strict",
+    allOptionalProperties: false,
     heuristics: {},
     maxTrackedLiteralsPerVariant: DEFAULT_AST_MERGE_OPTIONS.maxTrackedLiteralsPerVariant,
     maxCapturedParseErrorLines: 20,
@@ -215,6 +230,13 @@ function parseArgs(argv: string[]): CliOptions {
       case "-f":
         options.outputFormat = parseOutputFormat(readArgValue(argv, index, arg));
         index += 1;
+        break;
+      case "--type-mode":
+        options.typeMode = parseTypeMode(readArgValue(argv, index, arg));
+        index += 1;
+        break;
+      case "--all-optional-properties":
+        options.allOptionalProperties = true;
         break;
       case "--required-threshold":
         options.heuristics.requiredThreshold = parseBoundedNumber(
@@ -326,20 +348,26 @@ function emitOutput(
       return emitTypeScriptType(rootNode, {
         rootTypeName: options.typeName,
         heuristics,
-        astMergeOptions
+        astMergeOptions,
+        typeMode: options.typeMode,
+        allOptionalProperties: options.allOptionalProperties
       });
     case "zod":
       return emitZodSchema(rootNode, {
         rootTypeName: options.typeName,
         heuristics,
-        astMergeOptions
+        astMergeOptions,
+        typeMode: options.typeMode,
+        allOptionalProperties: options.allOptionalProperties
       });
     case "json-schema":
       return `${JSON.stringify(
         emitJsonSchema(rootNode, {
           rootTitle: options.typeName,
           heuristics,
-          astMergeOptions
+          astMergeOptions,
+          typeMode: options.typeMode,
+          allOptionalProperties: options.allOptionalProperties
         }),
         null,
         2
@@ -407,6 +435,17 @@ function parseOutputFormat(value: string): OutputFormat {
   }
 }
 
+function parseTypeMode(value: string): TypeMode {
+  switch (value.toLowerCase()) {
+    case "strict":
+      return "strict";
+    case "loose":
+      return "loose";
+    default:
+      throw new Error(`Unsupported type mode: ${value}. Use one of: strict, loose.`);
+  }
+}
+
 function buildUsage(): string {
   return [
     "Usage:",
@@ -418,6 +457,8 @@ function buildUsage(): string {
     "  -o, --output     Optional output file path. Defaults to stdout.",
     "  -t, --type-name  Root TypeScript type name. Defaults to Root.",
     "  -f, --format     Output format: typescript | zod | json-schema. Defaults to typescript.",
+    "  --type-mode      Emission strictness: strict | loose. Defaults to strict.",
+    "  --all-optional-properties  Force all object properties to optional in output schemas.",
     "  --required-threshold      Property requiredness threshold (0..1). Defaults to 1.",
     "  --enum-threshold          Max distinct-ratio for enum inference (0..1). Defaults to 0.2.",
     "  --max-enum-size           Max enum literal count. Defaults to 20.",

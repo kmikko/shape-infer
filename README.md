@@ -69,6 +69,31 @@ Supported formats:
 - `zod`
 - `json-schema` (aliases: `jsonschema`, `schema`)
 
+### Emission style controls
+
+- `--type-mode strict|loose` (default `strict`)
+  - `strict`: emits literal unions/enums when inferred.
+  - `loose`: emits primitive base types instead of literal unions/enums.
+- `--all-optional-properties`
+  - Forces every object property to be optional in emitted TypeScript/Zod/JSON Schema output.
+
+Example (`--format zod`):
+
+```bash
+node dist/cli.js \
+  --input path/to/data.jsonl \
+  --type-name Product \
+  --format zod \
+  --type-mode loose \
+  --all-optional-properties
+```
+
+Typical loose-mode changes:
+
+- `z.enum(["A", "B"])` becomes `z.string()`
+- `z.union([z.enum(["A", "B"]), z.null()])` becomes `z.string().nullable()`
+- `z.array(z.enum(["A", "B"]))` becomes `z.array(z.string())`
+
 ## Phase 3 Heuristics
 
 You can tune inference behavior from the CLI:

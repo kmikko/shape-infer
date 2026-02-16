@@ -9,10 +9,15 @@ import {
   isRequired,
   resolveHeuristicOptions
 } from "../heuristics";
+import {
+  EmissionStyleOptions,
+  ResolvedEmissionStyleOptions,
+  resolveEmissionStyleOptions
+} from "./style";
 
 const INDENT = "  ";
 
-export interface ZodEmitterOptions {
+export interface ZodEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportSchema?: boolean;
   exportType?: boolean;
@@ -31,7 +36,8 @@ export function emitZodSchema(
   const schemaKeyword = exportSchema ? "export " : "";
   const typeKeyword = exportType ? "export " : "";
   const heuristics = resolveHeuristicOptions(options.heuristics);
-  const schemaText = emitNodeSchema(node, 0, heuristics, options.astMergeOptions);
+  const style = resolveEmissionStyleOptions(options);
+  const schemaText = emitNodeSchema(node, 0, heuristics, options.astMergeOptions, style);
 
   return [
     'import { z } from "zod";',
@@ -47,7 +53,8 @@ function emitNodeSchema(
   node: SchemaNode,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (node.variants.unknown) {
     return "z.unknown()";
@@ -57,42 +64,50 @@ function emitNodeSchema(
 
   if (node.variants.object) {
     variants.add(
-      emitObjectSchema(node.variants.object, indentLevel, heuristics, astMergeOptions)
+      emitObjectSchema(node.variants.object, indentLevel, heuristics, astMergeOptions, style)
     );
   }
 
   if (node.variants.array) {
     variants.add(
-      emitArraySchema(node.variants.array, indentLevel, heuristics, astMergeOptions)
+      emitArraySchema(node.variants.array, indentLevel, heuristics, astMergeOptions, style)
     );
   }
 
   if (node.variants.string) {
-    const enumCandidate = inferStringEnum(node.variants.string, heuristics);
-    if (enumCandidate) {
-      variants.add(
-        `z.enum([${enumCandidate.values.map((value) => JSON.stringify(value)).join(", ")}])`
-      );
-    } else {
-      const formatCandidate = inferStringFormat(node.variants.string, heuristics);
+    const formatCandidate = inferStringFormat(node.variants.string, heuristics);
+    if (style.typeMode === "loose") {
       variants.add(applyStringFormat("z.string()", formatCandidate?.format));
+    } else {
+      const enumCandidate = inferStringEnum(node.variants.string, heuristics);
+      if (enumCandidate) {
+        variants.add(
+          `z.enum([${enumCandidate.values.map((value) => JSON.stringify(value)).join(", ")}])`
+        );
+      } else {
+        variants.add(applyStringFormat("z.string()", formatCandidate?.format));
+      }
     }
   }
 
   if (node.variants.integer || node.variants.number) {
-    const enumCandidate = inferNumberEnum(
-      node.variants.integer,
-      node.variants.number,
-      heuristics
-    );
-    if (enumCandidate) {
-      variants.add(
-        `z.union([${enumCandidate.values
-          .map((value) => `z.literal(${formatNumberLiteral(value)})`)
-          .join(", ")}])`
-      );
-    } else {
+    if (style.typeMode === "loose") {
       variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+    } else {
+      const enumCandidate = inferNumberEnum(
+        node.variants.integer,
+        node.variants.number,
+        heuristics
+      );
+      if (enumCandidate) {
+        variants.add(
+          `z.union([${enumCandidate.values
+            .map((value) => `z.literal(${formatNumberLiteral(value)})`)
+            .join(", ")}])`
+        );
+      } else {
+        variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+      }
     }
   }
 
@@ -118,6 +133,10 @@ function emitNodeSchema(
     return resolvedVariants[0];
   }
 
+  if (style.typeMode === "loose") {
+    return emitLooseUnion(resolvedVariants);
+  }
+
   return `z.union([${resolvedVariants.join(", ")}])`;
 }
 
@@ -125,11 +144,18 @@ function emitObjectSchema(
   variant: ObjectVariant,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (isRecordLikeObject(variant, heuristics)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
-    const valueSchema = emitNodeSchema(valueNode, indentLevel + 1, heuristics, astMergeOptions);
+    const valueSchema = emitNodeSchema(
+      valueNode,
+      indentLevel + 1,
+      heuristics,
+      astMergeOptions,
+      style
+    );
     return `z.record(z.string(), ${valueSchema})`;
   }
 
@@ -151,8 +177,16 @@ function emitObjectSchema(
       continue;
     }
 
-    const optional = !isRequired(property.seenCount, variant.count, heuristics);
-    const schema = emitNodeSchema(property.node, indentLevel + 1, heuristics, astMergeOptions);
+    const optional =
+      style.allOptionalProperties ||
+      !isRequired(property.seenCount, variant.count, heuristics);
+    const schema = emitNodeSchema(
+      property.node,
+      indentLevel + 1,
+      heuristics,
+      astMergeOptions,
+      style
+    );
     const propertySchema = optional ? `${schema}.optional()` : schema;
     lines.push(`${propertyIndent}${JSON.stringify(propertyName)}: ${propertySchema},`);
   }
@@ -164,7 +198,8 @@ function emitArraySchema(
   variant: ArrayVariant,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (variant.elementCount === 0) {
     return "z.array(z.unknown())";
@@ -174,9 +209,29 @@ function emitArraySchema(
     variant.element,
     indentLevel + 1,
     heuristics,
-    astMergeOptions
+    astMergeOptions,
+    style
   );
   return `z.array(${elementSchema})`;
+}
+
+function emitLooseUnion(variants: string[]): string {
+  const nonNullVariants = variants.filter((variant) => variant !== "z.null()");
+  const hasNull = nonNullVariants.length !== variants.length;
+
+  if (!hasNull) {
+    return `z.union([${variants.join(", ")}])`;
+  }
+
+  if (nonNullVariants.length === 0) {
+    return "z.null()";
+  }
+
+  if (nonNullVariants.length === 1) {
+    return `${nonNullVariants[0]}.nullable()`;
+  }
+
+  return `z.union([${nonNullVariants.join(", ")}]).nullable()`;
 }
 
 function applyStringFormat(baseSchema: string, format?: string): string {

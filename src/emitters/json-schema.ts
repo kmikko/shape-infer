@@ -9,6 +9,11 @@ import {
   isRequired,
   resolveHeuristicOptions
 } from "../heuristics";
+import {
+  EmissionStyleOptions,
+  ResolvedEmissionStyleOptions,
+  resolveEmissionStyleOptions
+} from "./style";
 
 export type JsonSchemaValue = null | boolean | number | string | JsonSchemaValue[] | JsonSchemaObject;
 
@@ -16,7 +21,7 @@ export interface JsonSchemaObject {
   [key: string]: JsonSchemaValue;
 }
 
-export interface JsonSchemaEmitterOptions {
+export interface JsonSchemaEmitterOptions extends EmissionStyleOptions {
   rootTitle?: string;
   includeSchemaDialect?: boolean;
   heuristics?: Partial<HeuristicOptions>;
@@ -28,7 +33,8 @@ export function emitJsonSchema(
   options: JsonSchemaEmitterOptions = {}
 ): JsonSchemaObject {
   const heuristics = resolveHeuristicOptions(options.heuristics);
-  const schema = emitNodeSchema(node, heuristics, options.astMergeOptions);
+  const style = resolveEmissionStyleOptions(options);
+  const schema = emitNodeSchema(node, heuristics, options.astMergeOptions, style);
 
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error("Invalid schema root generated.");
@@ -52,7 +58,8 @@ export function emitJsonSchema(
 function emitNodeSchema(
   node: SchemaNode,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): JsonSchemaObject {
   if (node.variants.unknown) {
     return {};
@@ -61,43 +68,53 @@ function emitNodeSchema(
   const variants: JsonSchemaObject[] = [];
 
   if (node.variants.object) {
-    variants.push(emitObjectSchema(node.variants.object, heuristics, astMergeOptions));
+    variants.push(emitObjectSchema(node.variants.object, heuristics, astMergeOptions, style));
   }
 
   if (node.variants.array) {
-    variants.push(emitArraySchema(node.variants.array, heuristics, astMergeOptions));
+    variants.push(emitArraySchema(node.variants.array, heuristics, astMergeOptions, style));
   }
 
   if (node.variants.string) {
-    const enumCandidate = inferStringEnum(node.variants.string, heuristics);
-    if (enumCandidate) {
-      variants.push({
-        type: "string",
-        enum: enumCandidate.values
-      });
-    } else {
-      const stringSchema: JsonSchemaObject = { type: "string" };
-      const formatCandidate = inferStringFormat(node.variants.string, heuristics);
-      if (formatCandidate) {
-        stringSchema.format = formatCandidate.format;
+    const stringSchema: JsonSchemaObject = { type: "string" };
+    const formatCandidate = inferStringFormat(node.variants.string, heuristics);
+    if (formatCandidate) {
+      stringSchema.format = formatCandidate.format;
+    }
+
+    if (style.typeMode === "strict") {
+      const enumCandidate = inferStringEnum(node.variants.string, heuristics);
+      if (enumCandidate) {
+        variants.push({
+          ...stringSchema,
+          enum: enumCandidate.values
+        });
+      } else {
+        variants.push(stringSchema);
       }
+    } else {
       variants.push(stringSchema);
     }
   }
 
   if (node.variants.integer || node.variants.number) {
-    const enumCandidate = inferNumberEnum(
-      node.variants.integer,
-      node.variants.number,
-      heuristics
-    );
-    if (enumCandidate) {
-      variants.push({
-        type: node.variants.number ? "number" : "integer",
-        enum: enumCandidate.values
-      });
+    const baseType = node.variants.number ? "number" : "integer";
+    if (style.typeMode === "strict") {
+      const enumCandidate = inferNumberEnum(
+        node.variants.integer,
+        node.variants.number,
+        heuristics
+      );
+      if (enumCandidate) {
+        variants.push({
+          type: baseType,
+          enum: enumCandidate.values
+        });
+      } else {
+        variants.push({ type: baseType });
+      }
     } else {
-      variants.push({ type: node.variants.number ? "number" : "integer" });
+      variants.push({ type: baseType });
     }
   }
 
@@ -129,13 +146,14 @@ function emitNodeSchema(
 function emitObjectSchema(
   variant: ObjectVariant,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): JsonSchemaObject {
   if (isRecordLikeObject(variant, heuristics)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
     return {
       type: "object",
-      additionalProperties: emitNodeSchema(valueNode, heuristics, astMergeOptions)
+      additionalProperties: emitNodeSchema(valueNode, heuristics, astMergeOptions, style)
     };
   }
 
@@ -152,8 +170,16 @@ function emitObjectSchema(
       continue;
     }
 
-    properties[propertyName] = emitNodeSchema(property.node, heuristics, astMergeOptions);
-    if (isRequired(property.seenCount, variant.count, heuristics)) {
+    properties[propertyName] = emitNodeSchema(
+      property.node,
+      heuristics,
+      astMergeOptions,
+      style
+    );
+    if (
+      !style.allOptionalProperties &&
+      isRequired(property.seenCount, variant.count, heuristics)
+    ) {
       required.push(propertyName);
     }
   }
@@ -173,7 +199,8 @@ function emitObjectSchema(
 function emitArraySchema(
   variant: ArrayVariant,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): JsonSchemaObject {
   if (variant.elementCount === 0) {
     return {
@@ -184,6 +211,6 @@ function emitArraySchema(
 
   return {
     type: "array",
-    items: emitNodeSchema(variant.element, heuristics, astMergeOptions)
+    items: emitNodeSchema(variant.element, heuristics, astMergeOptions, style)
   };
 }

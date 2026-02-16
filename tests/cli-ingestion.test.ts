@@ -93,3 +93,24 @@ test("CLI stdin auto-detect parses JSON array input", async () => {
   assert.match(stdout, /"type": "object"/);
   assert.equal(stderr, "");
 });
+
+test("CLI applies loose mode and all-optional properties in zod output", async () => {
+  const { stdout, stderr } = await runCli(
+    [
+      "--input-format",
+      "auto",
+      "--type-name",
+      "LooseOptional",
+      "--format",
+      "zod",
+      "--type-mode",
+      "loose",
+      "--all-optional-properties"
+    ],
+    '[{"kind":"A"},{"kind":"B"},{"kind":null}]\n'
+  );
+
+  assert.match(stdout, /export const LooseOptionalSchema =/);
+  assert.match(stdout, /"kind": z\.string\(\)\.nullable\(\)\.optional\(\)/);
+  assert.equal(stderr, "");
+});

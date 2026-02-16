@@ -3,6 +3,7 @@ export * from "./heuristics";
 export * from "./infer";
 export * from "./input-resolver";
 export * from "./diagnostics";
+export * from "./emitters/style";
 export * from "./emitters/typescript";
 export * from "./emitters/zod";
 export * from "./emitters/json-schema";

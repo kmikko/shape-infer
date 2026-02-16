@@ -8,10 +8,15 @@ import {
   isRequired,
   resolveHeuristicOptions
 } from "../heuristics";
+import {
+  EmissionStyleOptions,
+  ResolvedEmissionStyleOptions,
+  resolveEmissionStyleOptions
+} from "./style";
 
 const INDENT = "  ";
 
-export interface TypeScriptEmitterOptions {
+export interface TypeScriptEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportType?: boolean;
   heuristics?: Partial<HeuristicOptions>;
@@ -26,7 +31,8 @@ export function emitTypeScriptType(
   const exportType = options.exportType ?? true;
   const keyword = exportType ? "export " : "";
   const heuristics = resolveHeuristicOptions(options.heuristics);
-  const typeText = emitNodeType(node, 0, heuristics, options.astMergeOptions);
+  const style = resolveEmissionStyleOptions(options);
+  const typeText = emitNodeType(node, 0, heuristics, options.astMergeOptions, style);
 
   return `${keyword}type ${rootTypeName} = ${typeText};\n`;
 }
@@ -35,7 +41,8 @@ function emitNodeType(
   node: SchemaNode,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (node.variants.unknown) {
     return "unknown";
@@ -45,29 +52,39 @@ function emitNodeType(
 
   if (node.variants.object) {
     variants.add(
-      emitObjectType(node.variants.object, indentLevel, heuristics, astMergeOptions)
+      emitObjectType(node.variants.object, indentLevel, heuristics, astMergeOptions, style)
     );
   }
 
   if (node.variants.array) {
-    variants.add(emitArrayType(node.variants.array, indentLevel, heuristics, astMergeOptions));
+    variants.add(
+      emitArrayType(node.variants.array, indentLevel, heuristics, astMergeOptions, style)
+    );
   }
 
   if (node.variants.string) {
-    const stringEnum = inferStringEnum(node.variants.string, heuristics);
-    if (stringEnum) {
-      variants.add(stringEnum.values.map((value) => JSON.stringify(value)).join(" | "));
-    } else {
+    if (style.typeMode === "loose") {
       variants.add("string");
+    } else {
+      const stringEnum = inferStringEnum(node.variants.string, heuristics);
+      if (stringEnum) {
+        variants.add(stringEnum.values.map((value) => JSON.stringify(value)).join(" | "));
+      } else {
+        variants.add("string");
+      }
     }
   }
 
   if (node.variants.integer || node.variants.number) {
-    const numberEnum = inferNumberEnum(node.variants.integer, node.variants.number, heuristics);
-    if (numberEnum) {
-      variants.add(numberEnum.values.join(" | "));
-    } else {
+    if (style.typeMode === "loose") {
       variants.add("number");
+    } else {
+      const numberEnum = inferNumberEnum(node.variants.integer, node.variants.number, heuristics);
+      if (numberEnum) {
+        variants.add(numberEnum.values.join(" | "));
+      } else {
+        variants.add("number");
+      }
     }
   }
 
@@ -100,11 +117,12 @@ function emitObjectType(
   variant: ObjectVariant,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (isRecordLikeObject(variant, heuristics)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
-    const valueType = emitNodeType(valueNode, indentLevel + 1, heuristics, astMergeOptions);
+    const valueType = emitNodeType(valueNode, indentLevel + 1, heuristics, astMergeOptions, style);
     return `Record<string, ${valueType}>`;
   }
 
@@ -126,9 +144,17 @@ function emitObjectType(
       continue;
     }
 
-    const optional = !isRequired(property.seenCount, variant.count, heuristics);
+    const optional =
+      style.allOptionalProperties ||
+      !isRequired(property.seenCount, variant.count, heuristics);
     const tsName = formatPropertyName(propertyName);
-    const tsType = emitNodeType(property.node, indentLevel + 1, heuristics, astMergeOptions);
+    const tsType = emitNodeType(
+      property.node,
+      indentLevel + 1,
+      heuristics,
+      astMergeOptions,
+      style
+    );
     lines.push(`${propertyIndent}${tsName}${optional ? "?" : ""}: ${tsType};`);
   }
 
@@ -139,7 +165,8 @@ function emitArrayType(
   variant: ArrayVariant,
   indentLevel: number,
   heuristics: HeuristicOptions,
-  astMergeOptions: Partial<AstMergeOptions> | undefined
+  astMergeOptions: Partial<AstMergeOptions> | undefined,
+  style: ResolvedEmissionStyleOptions
 ): string {
   if (variant.elementCount === 0) {
     return "Array<unknown>";
@@ -148,7 +175,8 @@ function emitArrayType(
     variant.element,
     indentLevel + 1,
     heuristics,
-    astMergeOptions
+    astMergeOptions,
+    style
   );
   return `Array<${elementType}>`;
 }
