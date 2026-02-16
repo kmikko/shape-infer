@@ -115,3 +115,21 @@ node dist/cli.js --input path/to/data.jsonl --diagnostics-output diagnostics.jso
 ```bash
 pnpm run smoke
 ```
+
+## Tests
+
+Run the automated test suite:
+
+```bash
+pnpm test
+```
+
+Tests are written in TypeScript and executed directly with Node's built-in test runner.
+
+Current test coverage focuses on:
+
+- JSON vs JSONL auto-detection (`auto|json|jsonl`)
+- JSON top-level array/object ingestion behavior
+- Multi-file ingestion merges
+- Glob/path resolution and unmatched-pattern errors
+- CLI ingestion flow (file glob + stdin auto-detect)

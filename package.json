@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js",
+    "test": "pnpm run build && node --test tests/*.test.ts",
     "smoke:ts": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format typescript",
     "smoke:zod": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format zod",
     "smoke:json-schema": "pnpm run build && node dist/cli.js --input fixtures/sample.jsonl --type-name SampleRecord --format json-schema",
