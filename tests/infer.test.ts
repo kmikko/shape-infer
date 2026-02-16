@@ -14,6 +14,7 @@ describe("infer", () => {
     expect(detectInputFormatFromText('[{"id":1}]', "auto")).toBe("json");
     expect(detectInputFormatFromText('{"id":1}', "auto")).toBe("json");
     expect(detectInputFormatFromText('{"id":1}\n{"id":2}\n', "auto")).toBe("jsonl");
+    expect(detectInputFormatFromText("   \n\t", "auto")).toBe("jsonl");
     expect(detectInputFormatFromText('{"id":1}\n', "jsonl")).toBe("jsonl");
     expect(detectInputFormatFromText('{"id":1}\n', "json")).toBe("json");
   });
@@ -49,6 +50,36 @@ describe("infer", () => {
     expect(result.stats.parseErrors).toBe(1);
     expect(result.parseErrorLines).toHaveLength(1);
     expect(result.parseErrorLines[0]).toBeGreaterThanOrEqual(1);
+  });
+
+  test("inferFromJsonText handles empty input text", () => {
+    const result = inferFromJsonText("", {
+      sourceName: "empty.json"
+    });
+
+    expect(result.stats.linesRead).toBe(0);
+    expect(result.stats.recordsMerged).toBe(0);
+    expect(result.stats.parseErrors).toBe(1);
+    expect(result.parseErrorLines).toContain(1);
+  });
+
+  test("inferFromJsonText uses parse error position when present", () => {
+    const originalParse = JSON.parse;
+
+    try {
+      JSON.parse = (() => {
+        throw new Error("Synthetic JSON parse failure at position 4.");
+      }) as typeof JSON.parse;
+
+      const result = inferFromJsonText("a\nb\nc", {
+        sourceName: "synthetic.json"
+      });
+
+      expect(result.stats.parseErrors).toBe(1);
+      expect(result.parseErrorLines).toEqual([3]);
+    } finally {
+      JSON.parse = originalParse;
+    }
   });
 
   test("resolveInputFormatForFile uses extension first, then content fallback", async () => {

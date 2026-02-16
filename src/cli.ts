@@ -225,19 +225,31 @@ function emitOutput(
   }
 }
 
-function isDirectExecution(): boolean {
-  const entry = process.argv[1];
+export function isDirectExecution(
+  entry: string | undefined = process.argv[1],
+  moduleUrl: string = import.meta.url
+): boolean {
   if (!entry) {
     return false;
   }
 
-  return import.meta.url === pathToFileURL(resolve(entry)).href;
+  return moduleUrl === pathToFileURL(resolve(entry)).href;
 }
 
-if (isDirectExecution()) {
-  runCli(process.argv.slice(2)).catch((error: unknown) => {
+export function launchCliFromProcessArgs(
+  argv: string[] = process.argv,
+  io: CliIo = DEFAULT_CLI_IO,
+  errorOutput: NodeJS.WritableStream = stderr
+): Promise<void> | undefined {
+  if (!isDirectExecution(argv[1])) {
+    return undefined;
+  }
+
+  return runCli(argv.slice(2), io).catch((error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    stderr.write(`Error: ${message}\n`);
+    errorOutput.write(`Error: ${message}\n`);
     process.exitCode = 1;
   });
 }
+
+void launchCliFromProcessArgs();

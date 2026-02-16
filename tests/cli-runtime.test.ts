@@ -1,7 +1,8 @@
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { Readable, Writable } from "node:stream";
+import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { runCli } from "../src/cli.ts";
+import { isDirectExecution, launchCliFromProcessArgs, runCli } from "../src/cli.ts";
 import { withTempDir } from "./helpers.ts";
 
 class CaptureWritable extends Writable {
@@ -21,8 +22,8 @@ class CaptureWritable extends Writable {
   }
 }
 
-function createIo(inputText: string, isTTY = false) {
-  const input = Readable.from([inputText]) as NodeJS.ReadableStream & { isTTY?: boolean };
+function createIoFromChunks(chunks: Array<string | Buffer>, isTTY = false) {
+  const input = Readable.from(chunks) as NodeJS.ReadableStream & { isTTY?: boolean };
   input.isTTY = isTTY;
 
   const output = new CaptureWritable();
@@ -33,6 +34,10 @@ function createIo(inputText: string, isTTY = false) {
     output,
     errors
   };
+}
+
+function createIo(inputText: string, isTTY = false) {
+  return createIoFromChunks([inputText], isTTY);
 }
 
 describe("cli runtime", () => {
@@ -62,6 +67,42 @@ describe("cli runtime", () => {
     ).rejects.toThrow(/Missing input/);
   });
 
+  test("isDirectExecution returns false when entry is missing", () => {
+    expect(isDirectExecution("", "file:///tmp/cli.ts")).toBe(false);
+  });
+
+  test("launchCliFromProcessArgs handles startup errors", async () => {
+    const cliEntry = fileURLToPath(new URL("../src/cli.ts", import.meta.url));
+    const io = createIo("", true);
+    const entryErrors = new CaptureWritable();
+    const previousExitCode = process.exitCode;
+
+    try {
+      process.exitCode = undefined;
+
+      const launched = launchCliFromProcessArgs(
+        [process.execPath, cliEntry, "--does-not-exist"],
+        {
+          stdin: io.input,
+          stdout: io.output,
+          stderr: io.errors
+        },
+        entryErrors
+      );
+
+      expect(launched).toBeDefined();
+      if (!launched) {
+        throw new Error("Expected launchCliFromProcessArgs to run in direct mode.");
+      }
+      await launched;
+
+      expect(entryErrors.text()).toContain("Error: Unknown argument: --does-not-exist");
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.exitCode = previousExitCode;
+    }
+  });
+
   test("parses stdin JSON in auto mode", async () => {
     const io = createIo('[{"id":1},{"id":"2"}]\n');
 
@@ -72,6 +113,20 @@ describe("cli runtime", () => {
     });
 
     expect(io.output.text()).toContain("export type FromRuntime =");
+    expect(io.output.text()).toContain("id: string | number");
+    expect(io.errors.text()).toBe("");
+  });
+
+  test("auto-detects jsonl from stdin object lines", async () => {
+    const io = createIo('{"id":1}\n{"id":"2"}\n');
+
+    await runCli(["--input-format", "auto", "--type-name", "FromJsonl", "--format", "typescript"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors
+    });
+
+    expect(io.output.text()).toContain("export type FromJsonl =");
     expect(io.output.text()).toContain("id: string | number");
     expect(io.errors.text()).toBe("");
   });
@@ -123,5 +178,85 @@ describe("cli runtime", () => {
     expect(io.errors.text()).toContain("Diagnostics summary:");
     expect(io.errors.text()).toContain("Warning: <stdin>: skipped 1 line(s)");
     expect(io.errors.text()).toContain("parse errors at lines 2");
+  });
+
+  test("supports file input flow and json-schema output file", async () => {
+    await withTempDir("schema-generator-cli-runtime-", async (directory) => {
+      const inputPath = `${directory}/records.json`;
+      const outputPath = `${directory}/schema.json`;
+
+      await writeFile(inputPath, '[{"id":1},{"id":"2"}]\n', "utf8");
+
+      const io = createIo("", true);
+      await runCli(
+        [
+          "--input",
+          inputPath,
+          "--input-format",
+          "auto",
+          "--format",
+          "json-schema",
+          "--output",
+          outputPath,
+          "--type-name",
+          "RuntimeRecord"
+        ],
+        {
+          stdin: io.input,
+          stdout: io.output,
+          stderr: io.errors
+        }
+      );
+
+      const schemaText = await readFile(outputPath, "utf8");
+      expect(schemaText).toContain('"title": "RuntimeRecord"');
+      expect(schemaText).toContain('"type": "object"');
+      expect(io.output.text()).toBe("");
+      expect(io.errors.text()).toBe("");
+    });
+  });
+
+  test("handles buffer stdin and prints json parse warning + no-record warning", async () => {
+    const io = createIoFromChunks([Buffer.from('{\n  "id": 1,\n  "name":\n}\n')]);
+
+    await runCli(["--input-format", "json", "--format", "typescript"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors
+    });
+
+    expect(io.output.text()).toContain("export type Root = unknown;");
+    expect(io.errors.text()).toContain("failed to parse JSON input");
+    expect(io.errors.text()).toContain("Warning: no JSON records parsed");
+  });
+
+  test("prints loose/optional diagnostics notes when enabled", async () => {
+    const io = createIo('[{"kind":"A"},{"kind":"B"}]\n');
+
+    await runCli(
+      [
+        "--input-format",
+        "auto",
+        "--format",
+        "zod",
+        "--diagnostics",
+        "--type-mode",
+        "loose",
+        "--all-optional-properties"
+      ],
+      {
+        stdin: io.input,
+        stdout: io.output,
+        stderr: io.errors
+      }
+    );
+
+    expect(io.output.text()).toContain("export const RootSchema");
+    expect(io.errors.text()).toContain(
+      "Diagnostics note: loose type mode collapses inferred literal enums"
+    );
+    expect(io.errors.text()).toContain(
+      "Diagnostics note: all optional mode forces every object property"
+    );
   });
 });

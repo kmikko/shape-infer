@@ -150,4 +150,53 @@ describe("diagnostics degradations", () => {
     expect(report).toContain("Top degradations:");
     expect(report).toContain("union_overflow");
   });
+
+  test("formatDiagnosticsReport renders non-union degradation details", () => {
+    const literalRoot = inferFromValues(["A", "B", "C"], {
+      astMergeOptions: {
+        maxTrackedLiteralsPerVariant: 2
+      }
+    });
+    const literalDiagnostics = analyzeSchema(literalRoot);
+    const literalReport = formatDiagnosticsReport(literalDiagnostics, {
+      linesRead: 3,
+      recordsMerged: 3,
+      parseErrors: 0,
+      skippedEmptyLines: 0
+    });
+    expect(literalReport).toContain("literal_overflow");
+
+    const recordRoot = inferFromValues([
+      { id: "A", attributes: { a: "x", b: "y", c: "z", d: "w" } },
+      { id: "B", attributes: { e: "x", f: "y", g: "z", h: "w" } },
+      { id: "C", attributes: { i: "x", j: "y", k: "z", l: "w" } }
+    ]);
+    const recordDiagnostics = analyzeSchema(recordRoot, {
+      heuristics: {
+        recordMinKeys: 4,
+        recordMaxPresence: 0.4
+      }
+    });
+    const recordReport = formatDiagnosticsReport(recordDiagnostics, {
+      linesRead: 3,
+      recordsMerged: 3,
+      parseErrors: 0,
+      skippedEmptyLines: 0
+    });
+    expect(recordReport).toContain("record_like_collapsed");
+
+    const thresholdRoot = inferFromValues([{ a: 1 }, { a: 2 }, {}]);
+    const thresholdDiagnostics = analyzeSchema(thresholdRoot, {
+      heuristics: {
+        requiredThreshold: 0.7
+      }
+    });
+    const thresholdReport = formatDiagnosticsReport(thresholdDiagnostics, {
+      linesRead: 3,
+      recordsMerged: 3,
+      parseErrors: 0,
+      skippedEmptyLines: 0
+    });
+    expect(thresholdReport).toContain("threshold_near_miss");
+  });
 });
