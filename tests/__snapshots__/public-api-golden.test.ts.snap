@@ -1,0 +1,236 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`public api golden snapshots > matches json-schema output snapshot 1`] = `
+"{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "User",
+  "type": "object",
+  "properties": {
+    "email": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "flags": {
+      "type": "object",
+      "properties": {
+        "valid": {
+          "type": "boolean"
+        },
+        "verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        }
+      ]
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "extra": {
+          "type": "string"
+        },
+        "last_seen": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login_count": {
+          "type": "integer"
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "meta",
+    "roles"
+  ]
+}
+"
+`;
+
+exports[`public api golden snapshots > matches typescript output snapshot 1`] = `
+"export type UserRecord = {
+  email?: string | null;
+  flags?: {
+    valid?: boolean;
+    verified?: boolean;
+  };
+  id: string | number;
+  meta: {
+    extra?: string;
+    last_seen?: string | null;
+    login_count?: number;
+    preferences?: {
+      theme?: string;
+    };
+  };
+  name?: string;
+  roles: Array<string>;
+};
+"
+`;
+
+exports[`public api golden snapshots > matches typescript output snapshot 2`] = `
+{
+  "conflicts": [
+    {
+      "kinds": [
+        "string",
+        "null",
+      ],
+      "occurrences": 2,
+      "path": "$.email",
+    },
+    {
+      "kinds": [
+        "string",
+        "integer",
+      ],
+      "occurrences": 3,
+      "path": "$.id",
+    },
+    {
+      "kinds": [
+        "string",
+        "null",
+      ],
+      "occurrences": 2,
+      "path": "$.meta.last_seen",
+    },
+  ],
+  "degradations": [
+    {
+      "context": "string",
+      "direction": "below",
+      "kind": "threshold_near_miss",
+      "metric": "enum_sample_count",
+      "path": "$.roles[]",
+      "threshold": 5,
+      "value": 3,
+    },
+  ],
+  "enums": [],
+  "optionalFields": [
+    {
+      "path": "$.email",
+      "presence": 0.6666666666666666,
+    },
+    {
+      "path": "$.flags",
+      "presence": 0.6666666666666666,
+    },
+    {
+      "path": "$.flags.valid",
+      "presence": 0.5,
+    },
+    {
+      "path": "$.flags.verified",
+      "presence": 0.5,
+    },
+    {
+      "path": "$.meta.extra",
+      "presence": 0.3333333333333333,
+    },
+    {
+      "path": "$.meta.last_seen",
+      "presence": 0.6666666666666666,
+    },
+    {
+      "path": "$.meta.login_count",
+      "presence": 0.6666666666666666,
+    },
+    {
+      "path": "$.meta.preferences",
+      "presence": 0.6666666666666666,
+    },
+    {
+      "path": "$.meta.preferences.theme",
+      "presence": 0.5,
+    },
+    {
+      "path": "$.name",
+      "presence": 0.6666666666666666,
+    },
+  ],
+  "recordLikeObjects": [],
+  "stringFormats": [],
+  "summary": {
+    "degradationCount": 1,
+    "enumCount": 0,
+    "literalOverflowCount": 0,
+    "maxDepth": 3,
+    "nodesVisited": 15,
+    "optionalFieldCount": 10,
+    "recordLikeCollapsedCount": 0,
+    "recordLikeObjectCount": 0,
+    "stringFormatCount": 0,
+    "thresholdNearMissCount": 1,
+    "typeConflictCount": 3,
+    "unionOverflowCount": 0,
+    "unknownNodeCount": 0,
+  },
+}
+`;
+
+exports[`public api golden snapshots > matches zod output snapshot 1`] = `
+"import { z } from "zod";
+
+export const UserSchemaSchema = z.object({
+  "email": z.union([z.string(), z.null()]).optional(),
+  "flags": z.object({
+    "valid": z.boolean().optional(),
+    "verified": z.boolean().optional(),
+  }).optional(),
+  "id": z.union([z.string(), z.number().int()]),
+  "meta": z.object({
+    "extra": z.string().optional(),
+    "last_seen": z.union([z.string(), z.null()]).optional(),
+    "login_count": z.number().int().optional(),
+    "preferences": z.object({
+      "theme": z.string().optional(),
+    }).optional(),
+  }),
+  "name": z.string().optional(),
+  "roles": z.array(z.string()),
+});
+
+export type UserSchema = z.infer<typeof UserSchemaSchema>;
+"
+`;

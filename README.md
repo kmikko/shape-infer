@@ -186,6 +186,8 @@ node src/cli.ts \
 
 The package exposes a stable high-level facade from the published entrypoints:
 
+> **Note:** The `public-api` exports (`generateFrom*`) are considered stable. Deep imports or other root exports (AST, heuristics) are considered advanced/experimental and may change in minor releases.
+
 - `generateFromValues(...)`
 - `generateFromText(...)`
 - `generateFromFiles(...)`
