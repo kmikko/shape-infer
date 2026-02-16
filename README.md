@@ -1,6 +1,6 @@
 # schema-generator
 
-Phase 3 implementation: infer a unified schema from JSONL and JSON records with advanced heuristics, diagnostics, and emitters for TypeScript, Zod, and JSON Schema.
+Infer a unified schema from JSONL and JSON input and emit TypeScript, Zod, or JSON Schema.
 
 ## Install
 
@@ -8,21 +8,15 @@ Phase 3 implementation: infer a unified schema from JSONL and JSON records with 
 pnpm install
 ```
 
-## Build
+## Run
 
-```bash
-pnpm run build
-```
-
-Build output is written to `dist/`.
-
-## Usage
+Zero-build source execution (recommended for local use):
 
 ```bash
 node src/cli.ts --input path/to/data.jsonl --type-name MyRecord --format typescript
 ```
 
-Or stream from stdin (auto-detect JSON vs JSONL):
+Read from stdin (auto-detect JSON vs JSONL):
 
 ```bash
 cat path/to/data.jsonl | node src/cli.ts --type-name MyRecord --format zod --input-format auto
@@ -34,13 +28,30 @@ Write output to file:
 node src/cli.ts --input path/to/data.jsonl --output schema.ts --format typescript
 ```
 
-### Expanded ingestion (JSON + JSONL)
+## Build Dist
 
-- Repeatable inputs: `--input` can be provided multiple times.
-- Glob support: `--input "data/**/*.{json,jsonl,ndjson}"`.
-- Input mode: `--input-format auto|jsonl|json` (default `auto`).
+```bash
+pnpm run build
+```
 
-Examples:
+Build output is written to `dist/`.
+
+Run compiled CLI:
+
+```bash
+node dist/cli.js --input path/to/data.jsonl --type-name MyRecord --format typescript
+```
+
+## Input Behavior
+
+- `--input` is repeatable.
+- Glob patterns are supported.
+- If `--input` is omitted, input is read from stdin.
+- `--input-format auto` detects per file/content.
+- JSON top-level array: merges each item as a record.
+- JSON top-level object or scalar: treated as a single record.
+
+Mixed input example:
 
 ```bash
 node src/cli.ts \
@@ -51,151 +62,87 @@ node src/cli.ts \
   --format json-schema
 ```
 
-```bash
-node src/cli.ts \
-  --input "data/**/*.jsonl" \
-  --input "data/**/*.json" \
-  --input-format auto \
-  --type-name UnifiedRecord \
-  --format typescript
-```
+## Output Formats
 
-JSON file behavior:
-
-- Top-level array: each item is merged as a record.
-- Top-level object (or scalar): treated as a single record.
-
-Supported formats:
-
-- `typescript` (or `ts`)
+- `typescript` (alias: `ts`)
 - `zod`
 - `json-schema` (aliases: `jsonschema`, `schema`)
 
-### Emission style controls
+## CLI Flags
 
-- `--type-mode strict|loose` (default `strict`)
-  - `strict`: emits literal unions/enums when inferred.
-  - `loose`: emits primitive base types instead of literal unions/enums.
-- `--all-optional-properties`
-  - Forces every object property to be optional in emitted TypeScript/Zod/JSON Schema output.
+### Core
 
-Example (`--format zod`):
+- `-i, --input <path-or-glob>`: Input file path or glob. Repeatable.
+- `--input-format <auto|jsonl|json>`: Input format mode. Default `auto`. Alias `ndjson` maps to `jsonl`.
+- `-o, --output <path>`: Write schema output to file. Default is stdout.
+- `-t, --type-name <name>`: Root type/schema name. Default `Root`.
+- `-f, --format <typescript|zod|json-schema>`: Output format. Default `typescript`.
+- `-h, --help`: Print usage.
+
+### Emission Style
+
+- `--type-mode <strict|loose>`: Emission strictness. Default `strict`.
+- `--all-optional-properties`: Force all object properties optional in emitted output.
+
+Loose mode examples:
+
+- `z.enum(["A", "B"])` -> `z.string()`
+- `z.union([z.enum(["A", "B"]), z.null()])` -> `z.string().nullable()`
+- `z.array(z.enum(["A", "B"]))` -> `z.array(z.string())`
+
+### Heuristics
+
+- `--required-threshold <0..1>`: Requiredness threshold. Default `1`.
+- `--enum-threshold <0..1>`: Max distinct-ratio for enum inference. Default `0.2`.
+- `--max-enum-size <int>=2+`: Max enum literal count. Default `20`.
+- `--min-enum-count <int>=1+`: Min samples before enum inference. Default `5`.
+- `--string-format-threshold <0..1>`: Min confidence for string format inference. Default `0.9`.
+- `--min-format-count <int>=1+`: Min samples before string format inference. Default `5`.
+- `--record-min-keys <int>=1+`: Min key count for record-like object detection. Default `40`.
+- `--record-max-presence <0..1>`: Max per-key presence for record-like object detection. Default `0.35`.
+- `--max-union-size <int>=1+`: Max union variants before fallback to unknown. Default `6`.
+- `--max-tracked-literals <int>=1+`: Max tracked distinct literals per primitive node. Default `200`.
+- `--max-captured-parse-errors <int>=0+`: Max parse-error line numbers retained per input. Default `20`.
+
+### Diagnostics
+
+- `--diagnostics`: Print diagnostics summary to stderr.
+- `--diagnostics-output <path>`: Write diagnostics JSON to file.
+- `--diagnostics-max-findings <int>=1+`: Max findings per diagnostics category. Default `25`.
+
+Diagnostics example:
 
 ```bash
 node src/cli.ts \
-  --input path/to/data.jsonl \
-  --type-name Product \
-  --format zod \
-  --type-mode loose \
-  --all-optional-properties
+  --input "path/to/data/**/*.{json,jsonl}" \
+  --input-format auto \
+  --diagnostics \
+  --diagnostics-output diagnostics.json
 ```
 
-Typical loose-mode changes:
+## NPM Scripts
 
-- `z.enum(["A", "B"])` becomes `z.string()`
-- `z.union([z.enum(["A", "B"]), z.null()])` becomes `z.string().nullable()`
-- `z.array(z.enum(["A", "B"]))` becomes `z.array(z.string())`
-
-## Phase 3 Heuristics
-
-You can tune inference behavior from the CLI:
-
-- `--required-threshold` (`0..1`, default `1`)
-- `--enum-threshold` (`0..1`, default `0.2`)
-- `--max-enum-size` (default `20`)
-- `--min-enum-count` (default `5`)
-- `--string-format-threshold` (`0..1`, default `0.9`)
-- `--min-format-count` (default `5`)
-- `--record-min-keys` (default `40`)
-- `--record-max-presence` (`0..1`, default `0.35`)
-- `--max-union-size` (default `6`)
-- `--max-tracked-literals` (default `200`)
-
-Example:
-
-```bash
-node src/cli.ts \
-  --input path/to/data.jsonl \
-  --type-name Event \
-  --format zod \
-  --required-threshold 0.95 \
-  --enum-threshold 0.1 \
-  --string-format-threshold 0.95
-```
-
-## Diagnostics
-
-Print diagnostics summary:
-
-```bash
-node src/cli.ts --input "path/to/data/**/*.{json,jsonl}" --input-format auto --diagnostics
-```
-
-Write diagnostics JSON report:
-
-```bash
-node src/cli.ts --input path/to/data.jsonl --diagnostics-output diagnostics.json
-```
-
-## Smoke test
-
-```bash
-pnpm run smoke
-```
-
-Run the full quality gate (typecheck + tests + smoke + build):
-
-```bash
-pnpm run verify
-```
+- `pnpm run dev -- --help`: Run CLI from `src/`.
+- `pnpm run start -- --help`: Run CLI from `dist/`.
+- `pnpm run typecheck`: Typecheck source and scripts.
+- `pnpm test`: Run Vitest tests.
+- `pnpm run test:watch`: Run tests in watch mode.
+- `pnpm run test:update`: Update golden snapshots.
+- `pnpm run test:coverage`: Run tests with coverage.
+- `pnpm run test:type`: Run `*.test-d.ts` type tests.
+- `pnpm run smoke`: Run smoke scenarios against source CLI.
+- `pnpm run check`: Run tests + type tests + smoke.
+- `pnpm run verify`: Run `typecheck + check + build`.
 
 ## Tests
 
-Run the automated test suite:
-
-```bash
-pnpm test
-```
-
-Run tests in watch mode:
-
-```bash
-pnpm run test:watch
-```
-
-Update golden snapshots:
-
-```bash
-pnpm run test:update
-```
-
-Run coverage:
-
-```bash
-pnpm run test:coverage
-```
-
-Run TypeScript type tests (`*.test-d.ts`):
-
-```bash
-pnpm run test:type
-```
-
-Run source typechecking:
-
-```bash
-pnpm run typecheck
-```
-
 Tests are written in TypeScript and run with Vitest.
 
-Current test coverage focuses on:
+Coverage currently includes:
 
-- Golden snapshot outputs for TypeScript, Zod, and JSON Schema emitters
-- Focused AST and heuristic behavior checks
-- JSON vs JSONL auto-detection (`auto|json|jsonl`)
-- JSON top-level array/object ingestion behavior
-- Multi-file ingestion merges
-- Glob/path resolution and unmatched-pattern errors
-- CLI ingestion flow (file glob + stdin auto-detect)
-- Fuzz-like deterministic mixed-type regression checks
+- Emitter golden snapshots (TypeScript, Zod, JSON Schema)
+- AST and heuristic behavior checks
+- JSON/JSONL ingestion and auto-detection
+- Glob/path resolution and error handling
+- CLI integration behavior
+- Fuzz-like deterministic mixed-type regressions
