@@ -175,7 +175,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
 export function buildUsage(): string {
   return [
     "Usage:",
-    "  schema-gen --input <path-or-glob> [--input <path-or-glob> ...] [--input-format <format>] [--output <path>] [--type-name <name>] [--format <format>] [phase-3 options]",
+    "  schema-gen --input <path-or-glob> [--input <path-or-glob> ...] [--input-format <format>] [--output <path>] [--type-name <name>] [--format <format>] [options]",
     "",
     "Options:",
     "  -i, --input      Input file path or glob. Repeatable.",
