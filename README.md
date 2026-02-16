@@ -176,16 +176,21 @@ node src/cli.ts \
 
 ## Programmatic API
 
-The package exposes a stable high-level facade from `src/index.ts`:
+The package exposes a stable high-level facade from the published entrypoints:
 
 - `generateFromValues(...)`
 - `generateFromText(...)`
 - `generateFromFiles(...)`
 
-Lower-level AST/inference/heuristics/emitter APIs are also exported for advanced usage.
+Import from either:
+
+- `"schema-generator"` (root export)
+- `"schema-generator/public-api"` (facade-only subpath export)
+
+Lower-level AST/inference/heuristics/emitter APIs are also available from the root export for advanced usage.
 
 ```ts
-import { generateFromValues } from "./src/index.ts";
+import { generateFromValues } from "schema-generator";
 
 const result = generateFromValues({
   values: [{ id: 1 }, { id: "2" }],
@@ -213,8 +218,9 @@ console.log(result.diagnostics?.summary);
 - `pnpm run test:type`: Run `*.test-d.ts` type-level tests.
 - `pnpm run smoke`: Run source CLI smoke scenarios.
 - `pnpm run smoke:dist`: Run compiled CLI smoke check.
+- `pnpm run pack:check`: Validate package contents with `npm pack --dry-run`.
 - `pnpm run check`: Run tests + type tests + smoke.
-- `pnpm run verify`: Run `typecheck + check + build + smoke:dist`.
+- `pnpm run verify`: Run `typecheck + check + build + smoke:dist + pack:check`.
 - `pnpm run test:ci`: Alias for `verify`.
 
 ## Testing Notes
