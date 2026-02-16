@@ -52,6 +52,17 @@ describe("infer", () => {
     expect(result.parseErrorLines[0]).toBeGreaterThanOrEqual(1);
   });
 
+  test("inferFromJsonText can skip parse error line capture", () => {
+    const result = inferFromJsonText('{\n  "id": 1,\n  "name":\n}\n', {
+      sourceName: "broken-no-lines.json",
+      maxCapturedParseErrorLines: 0
+    });
+
+    expect(result.stats.recordsMerged).toBe(0);
+    expect(result.stats.parseErrors).toBe(1);
+    expect(result.parseErrorLines).toEqual([]);
+  });
+
   test("inferFromJsonText handles empty input text", () => {
     const result = inferFromJsonText("", {
       sourceName: "empty.json"
@@ -82,6 +93,58 @@ describe("infer", () => {
     }
   });
 
+  test("inferFromJsonText falls back to line 1 when parse position is invalid", () => {
+    const originalParse = JSON.parse;
+
+    try {
+      JSON.parse = (() => {
+        throw new Error("Synthetic JSON parse failure at position -1.");
+      }) as typeof JSON.parse;
+
+      const result = inferFromJsonText("a\nb\nc", {
+        sourceName: "synthetic-invalid-position.json"
+      });
+
+      expect(result.stats.parseErrors).toBe(1);
+      expect(result.parseErrorLines).toEqual([1]);
+    } finally {
+      JSON.parse = originalParse;
+    }
+  });
+
+  test("inferFromJsonText falls back when parse position overflows number range", () => {
+    const originalParse = JSON.parse;
+
+    try {
+      JSON.parse = (() => {
+        throw new Error(`Synthetic JSON parse failure at position ${"9".repeat(400)}.`);
+      }) as typeof JSON.parse;
+
+      const result = inferFromJsonText("a\nb\nc", {
+        sourceName: "synthetic-overflow-position.json"
+      });
+
+      expect(result.stats.parseErrors).toBe(1);
+      expect(result.parseErrorLines).toEqual([1]);
+    } finally {
+      JSON.parse = originalParse;
+    }
+  });
+
+  test("inferFromJsonText validates maxCapturedParseErrorLines", () => {
+    expect(() =>
+      inferFromJsonText("{}", {
+        maxCapturedParseErrorLines: -1
+      })
+    ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
+
+    expect(() =>
+      inferFromJsonText("{}", {
+        maxCapturedParseErrorLines: 0.5
+      })
+    ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
+  });
+
   test("resolveInputFormatForFile uses extension first, then content fallback", async () => {
     await withTempDir("schema-generator-infer-", async (directory) => {
       const jsonlFile = path.join(directory, "events.ndjson");
@@ -98,6 +161,16 @@ describe("infer", () => {
       await expect(resolveInputFormatForFile(jsonFile, "auto")).resolves.toBe("json");
       await expect(resolveInputFormatForFile(unknownJsonFile, "auto")).resolves.toBe("json");
       await expect(resolveInputFormatForFile(unknownJsonlFile, "auto")).resolves.toBe("jsonl");
+    });
+  });
+
+  test("resolveInputFormatForFile respects explicit format override", async () => {
+    await withTempDir("schema-generator-infer-", async (directory) => {
+      const inputFile = path.join(directory, "events.any");
+      await writeFile(inputFile, '{"id":1}\n{"id":2}\n', "utf8");
+
+      await expect(resolveInputFormatForFile(inputFile, "json")).resolves.toBe("json");
+      await expect(resolveInputFormatForFile(inputFile, "jsonl")).resolves.toBe("jsonl");
     });
   });
 
@@ -118,5 +191,27 @@ describe("infer", () => {
       expect(result.files).toHaveLength(2);
       expect(result.files.map((entry) => entry.format)).toEqual(["jsonl", "json"]);
     });
+  });
+
+  test("inferFromFiles tracks skipped empty JSONL lines", async () => {
+    await withTempDir("schema-generator-infer-", async (directory) => {
+      const jsonlFile = path.join(directory, "empty-lines.jsonl");
+      await writeFile(jsonlFile, '\n{"id":1}\n\n{"id":2}\n', "utf8");
+
+      const result = await inferFromFiles([jsonlFile], {
+        inputFormat: "auto"
+      });
+
+      expect(result.stats.linesRead).toBe(4);
+      expect(result.stats.recordsMerged).toBe(2);
+      expect(result.stats.skippedEmptyLines).toBe(2);
+      expect(result.files[0].stats.skippedEmptyLines).toBe(2);
+    });
+  });
+
+  test("inferFromFiles throws on empty input file list", async () => {
+    await expect(inferFromFiles([], { inputFormat: "auto" })).rejects.toThrow(
+      /No input files provided/
+    );
   });
 });

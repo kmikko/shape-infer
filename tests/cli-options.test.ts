@@ -55,6 +55,21 @@ describe("cli-options", () => {
     });
   });
 
+  test("parses explicit strict mode and schema aliases", () => {
+    const options = parseCliArgs([
+      "--input-format",
+      "json",
+      "--format",
+      "schema",
+      "--type-mode",
+      "strict"
+    ]);
+
+    expect(options.inputFormat).toBe("json");
+    expect(options.outputFormat).toBe("json-schema");
+    expect(options.typeMode).toBe("strict");
+  });
+
   test("parses heuristic numeric options", () => {
     const options = parseCliArgs([
       "--required-threshold",
@@ -112,6 +127,16 @@ describe("cli-options", () => {
     );
     expect(() => parseCliArgs(["--required-threshold", "1.5"])).toThrow(
       /between 0 and 1/
+    );
+  });
+
+  test("throws for unsupported enum-like argument values", () => {
+    expect(() => parseCliArgs(["--input-format", "yaml"])).toThrow(
+      /Unsupported input format/
+    );
+    expect(() => parseCliArgs(["--format", "avro"])).toThrow(/Unsupported format/);
+    expect(() => parseCliArgs(["--type-mode", "relaxed"])).toThrow(
+      /Unsupported type mode/
     );
   });
 

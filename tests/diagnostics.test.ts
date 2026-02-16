@@ -107,6 +107,43 @@ describe("diagnostics degradations", () => {
       )
     ).toBe(true);
 
+    const numberEnumRoot = inferFromValues([1, 2, 3, 1]);
+    const numberEnumDiagnostics = analyzeSchema(numberEnumRoot, {
+      heuristics: {
+        minEnumCount: 2,
+        enumThreshold: 0.7
+      }
+    });
+
+    expect(
+      numberEnumDiagnostics.degradations.some(
+        (entry) =>
+          entry.kind === "threshold_near_miss" &&
+          entry.metric === "enum_distinct_ratio" &&
+          entry.path === "$" &&
+          entry.context === "number"
+      )
+    ).toBe(true);
+
+    const numberEnumCountRoot = inferFromValues([1, 2, 3, 1, 2, 3]);
+    const numberEnumCountDiagnostics = analyzeSchema(numberEnumCountRoot, {
+      heuristics: {
+        minEnumCount: 2,
+        maxEnumSize: 2,
+        enumThreshold: 1
+      }
+    });
+
+    expect(
+      numberEnumCountDiagnostics.degradations.some(
+        (entry) =>
+          entry.kind === "threshold_near_miss" &&
+          entry.metric === "enum_distinct_count" &&
+          entry.path === "$" &&
+          entry.context === "number"
+      )
+    ).toBe(true);
+
     const formatRoot = inferFromValues([
       "foo@example.com",
       "bar@example.com",
@@ -126,6 +163,31 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "format_confidence" &&
+          entry.path === "$"
+      )
+    ).toBe(true);
+
+    const formatCountRoot = inferFromValues([
+      "foo@example.com",
+      "bar@example.com",
+      "baz@example.com",
+      "qux@example.com",
+      "not-an-email",
+      "also-not-an-email"
+    ]);
+
+    const formatCountDiagnostics = analyzeSchema(formatCountRoot, {
+      heuristics: {
+        minFormatCount: 5,
+        stringFormatThreshold: 0.1
+      }
+    });
+
+    expect(
+      formatCountDiagnostics.degradations.some(
+        (entry) =>
+          entry.kind === "threshold_near_miss" &&
+          entry.metric === "format_sample_count" &&
           entry.path === "$"
       )
     ).toBe(true);
