@@ -21,6 +21,8 @@ pnpm add schema-generator
 
 ### Local Development
 
+See [Releasing Docs](docs/releasing.md) for publish instructions.
+
 ```bash
 pnpm install
 ```
