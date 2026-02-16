@@ -149,12 +149,39 @@ Run the automated test suite:
 pnpm test
 ```
 
-Tests are written in TypeScript and executed directly with Node's built-in test runner.
+Run tests in watch mode:
+
+```bash
+pnpm run test:watch
+```
+
+Update golden snapshots:
+
+```bash
+pnpm run test:update
+```
+
+Run coverage:
+
+```bash
+pnpm run test:coverage
+```
+
+Run TypeScript type tests (`*.test-d.ts`):
+
+```bash
+pnpm run test:type
+```
+
+Tests are written in TypeScript and run with Vitest.
 
 Current test coverage focuses on:
 
+- Golden snapshot outputs for TypeScript, Zod, and JSON Schema emitters
+- Focused AST and heuristic behavior checks
 - JSON vs JSONL auto-detection (`auto|json|jsonl`)
 - JSON top-level array/object ingestion behavior
 - Multi-file ingestion merges
 - Glob/path resolution and unmatched-pattern errors
 - CLI ingestion flow (file glob + stdin auto-detect)
+- Fuzz-like deterministic mixed-type regression checks
