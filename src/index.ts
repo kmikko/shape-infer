@@ -1,6 +1,7 @@
 export * from "./ast";
 export * from "./heuristics";
 export * from "./infer";
+export * from "./input-resolver";
 export * from "./diagnostics";
 export * from "./emitters/typescript";
 export * from "./emitters/zod";

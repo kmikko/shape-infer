@@ -1,0 +1,19 @@
+[
+  {
+    "id": 10,
+    "name": "Carol",
+    "tags": [
+      "infra"
+    ],
+    "meta": {
+      "active": true
+    }
+  },
+  {
+    "id": "11",
+    "meta": {
+      "active": false,
+      "score": 1
+    }
+  }
+]

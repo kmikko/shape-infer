@@ -2,18 +2,28 @@
 
 import { writeFile } from "node:fs/promises";
 import { stderr, stdin, stdout } from "node:process";
+import { Readable } from "node:stream";
 import { DEFAULT_AST_MERGE_OPTIONS, SchemaNode } from "./ast";
 import { analyzeSchema, formatDiagnosticsReport } from "./diagnostics";
 import { emitJsonSchema } from "./emitters/json-schema";
 import { emitTypeScriptType } from "./emitters/typescript";
 import { emitZodSchema } from "./emitters/zod";
-import { inferFromJsonlFile, inferFromJsonlStream } from "./infer";
+import {
+  InputFormat,
+  InferenceFileSummary,
+  detectInputFormatFromText,
+  inferFromFiles,
+  inferFromJsonText,
+  inferFromJsonlStream
+} from "./infer";
 import { HeuristicOptions, resolveHeuristicOptions } from "./heuristics";
+import { resolveInputPaths } from "./input-resolver";
 
 type OutputFormat = "typescript" | "zod" | "json-schema";
 
 interface CliOptions {
-  inputPath?: string;
+  inputPatterns: string[];
+  inputFormat: InputFormat;
   outputPath?: string;
   diagnosticsOutputPath?: string;
   typeName: string;
@@ -38,19 +48,16 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (!options.inputPath && stdin.isTTY) {
-    throw new Error("Missing input. Use --input <path> or pipe JSONL data through stdin.");
+  if (options.inputPatterns.length === 0 && stdin.isTTY) {
+    throw new Error(
+      "Missing input. Use --input <path/glob> (repeatable) or pipe data through stdin."
+    );
   }
 
-  const inference = options.inputPath
-    ? await inferFromJsonlFile(options.inputPath, {
-        astMergeOptions,
-        maxCapturedParseErrorLines: options.maxCapturedParseErrorLines
-      })
-    : await inferFromJsonlStream(stdin, {
-        astMergeOptions,
-        maxCapturedParseErrorLines: options.maxCapturedParseErrorLines
-      });
+  const inference =
+    options.inputPatterns.length > 0
+      ? await inferFromInputFiles(options, astMergeOptions)
+      : await inferFromStdin(options, astMergeOptions);
 
   const outputText = emitOutput(inference.root, options, heuristics, astMergeOptions);
 
@@ -80,22 +87,97 @@ async function main(): Promise<void> {
     }
   }
 
-  if (inference.stats.parseErrors > 0) {
-    stderr.write(
-      `Warning: skipped ${inference.stats.parseErrors} line(s) that were not valid JSON.\n`
-    );
-    if (inference.parseErrorLines.length > 0) {
-      stderr.write(`Warning: parse errors at lines ${inference.parseErrorLines.join(", ")}.\n`);
-    }
-  }
+  emitParseWarnings(inference.files);
 
   if (inference.stats.recordsMerged === 0) {
     stderr.write("Warning: no JSON records parsed; output schema defaults to unknown.\n");
   }
 }
 
+async function inferFromInputFiles(
+  options: CliOptions,
+  astMergeOptions: { maxTrackedLiteralsPerVariant: number }
+) {
+  const resolvedInputPaths = await resolveInputPaths(options.inputPatterns);
+  return inferFromFiles(resolvedInputPaths, {
+    astMergeOptions,
+    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
+    inputFormat: options.inputFormat
+  });
+}
+
+async function inferFromStdin(
+  options: CliOptions,
+  astMergeOptions: { maxTrackedLiteralsPerVariant: number }
+) {
+  if (options.inputFormat === "jsonl") {
+    return inferFromJsonlStream(stdin, {
+      astMergeOptions,
+      maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
+      sourceName: "<stdin>"
+    });
+  }
+
+  const stdinText = await readStdinText();
+  const resolvedFormat = detectInputFormatFromText(stdinText, options.inputFormat);
+
+  if (resolvedFormat === "json") {
+    return inferFromJsonText(stdinText, {
+      astMergeOptions,
+      maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
+      sourceName: "<stdin>"
+    });
+  }
+
+  return inferFromJsonlStream(Readable.from([stdinText]), {
+    astMergeOptions,
+    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
+    sourceName: "<stdin>"
+  });
+}
+
+function emitParseWarnings(fileSummaries: InferenceFileSummary[]): void {
+  for (const fileSummary of fileSummaries) {
+    if (fileSummary.stats.parseErrors <= 0) {
+      continue;
+    }
+
+    if (fileSummary.format === "jsonl") {
+      stderr.write(
+        `Warning: ${fileSummary.source}: skipped ${fileSummary.stats.parseErrors} line(s) that were not valid JSON.\n`
+      );
+    } else {
+      stderr.write(
+        `Warning: ${fileSummary.source}: failed to parse JSON input (${fileSummary.stats.parseErrors} error).\n`
+      );
+    }
+
+    if (fileSummary.parseErrorLines.length > 0) {
+      stderr.write(
+        `Warning: ${fileSummary.source}: parse errors at lines ${fileSummary.parseErrorLines.join(", ")}.\n`
+      );
+    }
+  }
+}
+
+async function readStdinText(): Promise<string> {
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of stdin) {
+    if (typeof chunk === "string") {
+      chunks.push(Buffer.from(chunk));
+    } else {
+      chunks.push(Buffer.from(chunk));
+    }
+  }
+
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
+    inputPatterns: [],
+    inputFormat: "auto",
     typeName: "Root",
     outputFormat: "typescript",
     heuristics: {},
@@ -112,7 +194,11 @@ function parseArgs(argv: string[]): CliOptions {
     switch (arg) {
       case "--input":
       case "-i":
-        options.inputPath = readArgValue(argv, index, arg);
+        options.inputPatterns.push(readArgValue(argv, index, arg));
+        index += 1;
+        break;
+      case "--input-format":
+        options.inputFormat = parseInputFormat(readArgValue(argv, index, arg));
         index += 1;
         break;
       case "--output":
@@ -270,7 +356,11 @@ function readArgValue(argv: string[], index: number, argName: string): string {
 }
 
 function parseIntegerMin(value: string, minimum: number, argName: string): number {
-  const parsed = Number.parseInt(value, 10);
+  if (!/^-?\d+$/.test(value)) {
+    throw new Error(`${argName} must be an integer >= ${minimum}.`);
+  }
+
+  const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < minimum) {
     throw new Error(`${argName} must be an integer >= ${minimum}.`);
   }
@@ -283,6 +373,20 @@ function parseBoundedNumber(value: string, min: number, max: number, argName: st
     throw new Error(`${argName} must be a finite number between ${min} and ${max}.`);
   }
   return parsed;
+}
+
+function parseInputFormat(value: string): InputFormat {
+  switch (value.toLowerCase()) {
+    case "auto":
+      return "auto";
+    case "jsonl":
+    case "ndjson":
+      return "jsonl";
+    case "json":
+      return "json";
+    default:
+      throw new Error(`Unsupported input format: ${value}. Use one of: auto, jsonl, json.`);
+  }
 }
 
 function parseOutputFormat(value: string): OutputFormat {
@@ -306,10 +410,11 @@ function parseOutputFormat(value: string): OutputFormat {
 function buildUsage(): string {
   return [
     "Usage:",
-    "  schema-gen --input <path> [--output <path>] [--type-name <name>] [--format <format>] [phase-3 options]",
+    "  schema-gen --input <path-or-glob> [--input <path-or-glob> ...] [--input-format <format>] [--output <path>] [--type-name <name>] [--format <format>] [phase-3 options]",
     "",
     "Options:",
-    "  -i, --input      JSONL file path. If omitted, read JSONL from stdin.",
+    "  -i, --input      Input file path or glob. Repeatable.",
+    "  --input-format   Input format: auto | jsonl | json. Defaults to auto.",
     "  -o, --output     Optional output file path. Defaults to stdout.",
     "  -t, --type-name  Root TypeScript type name. Defaults to Root.",
     "  -f, --format     Output format: typescript | zod | json-schema. Defaults to typescript.",

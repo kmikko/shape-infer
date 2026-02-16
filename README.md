@@ -1,6 +1,6 @@
 # schema-generator
 
-Phase 3 implementation: infer a unified schema from JSONL records with advanced heuristics, diagnostics, and emitters for TypeScript, Zod, and JSON Schema.
+Phase 3 implementation: infer a unified schema from JSONL and JSON records with advanced heuristics, diagnostics, and emitters for TypeScript, Zod, and JSON Schema.
 
 ## Install
 
@@ -20,10 +20,10 @@ pnpm run build
 node dist/cli.js --input path/to/data.jsonl --type-name MyRecord --format typescript
 ```
 
-Or stream JSONL from stdin:
+Or stream from stdin (auto-detect JSON vs JSONL):
 
 ```bash
-cat path/to/data.jsonl | node dist/cli.js --type-name MyRecord --format zod
+cat path/to/data.jsonl | node dist/cli.js --type-name MyRecord --format zod --input-format auto
 ```
 
 Write output to file:
@@ -31,6 +31,37 @@ Write output to file:
 ```bash
 node dist/cli.js --input path/to/data.jsonl --output schema.ts --format typescript
 ```
+
+### Expanded ingestion (JSON + JSONL)
+
+- Repeatable inputs: `--input` can be provided multiple times.
+- Glob support: `--input "data/**/*.{json,jsonl,ndjson}"`.
+- Input mode: `--input-format auto|jsonl|json` (default `auto`).
+
+Examples:
+
+```bash
+node dist/cli.js \
+  --input data/events.ndjson \
+  --input data/archive.json \
+  --input-format auto \
+  --type-name EventRecord \
+  --format json-schema
+```
+
+```bash
+node dist/cli.js \
+  --input "data/**/*.jsonl" \
+  --input "data/**/*.json" \
+  --input-format auto \
+  --type-name UnifiedRecord \
+  --format typescript
+```
+
+JSON file behavior:
+
+- Top-level array: each item is merged as a record.
+- Top-level object (or scalar): treated as a single record.
 
 Supported formats:
 
@@ -70,7 +101,7 @@ node dist/cli.js \
 Print diagnostics summary:
 
 ```bash
-node dist/cli.js --input path/to/data.jsonl --diagnostics
+node dist/cli.js --input "path/to/data/**/*.{json,jsonl}" --input-format auto --diagnostics
 ```
 
 Write diagnostics JSON report:
