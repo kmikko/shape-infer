@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@8.6.2",
-  "description": "Infer a unified schema from JSONL and JSON records.",
+  "description": "Infer a unified schema from JSON/JSONL records and emit TypeScript, Zod, or JSON Schema.",
   "bin": {
     "schema-gen": "dist/cli.js"
   },
@@ -19,8 +19,9 @@
     "test:coverage": "vitest run --coverage",
     "test:type": "vitest run --typecheck --typecheck.only",
     "smoke": "node scripts/smoke.ts",
+    "smoke:dist": "node dist/cli.js --help",
     "check": "pnpm run test && pnpm run test:type && pnpm run smoke",
-    "verify": "pnpm run typecheck && pnpm run check && pnpm run build",
+    "verify": "pnpm run typecheck && pnpm run check && pnpm run build && pnpm run smoke:dist",
     "test:ci": "pnpm run verify"
   },
   "dependencies": {

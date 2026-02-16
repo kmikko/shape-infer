@@ -131,8 +131,9 @@ node src/cli.ts \
 - `pnpm run test:coverage`: Run tests with coverage.
 - `pnpm run test:type`: Run `*.test-d.ts` type tests.
 - `pnpm run smoke`: Run smoke scenarios against source CLI.
+- `pnpm run smoke:dist`: Sanity-check compiled CLI in `dist/`.
 - `pnpm run check`: Run tests + type tests + smoke.
-- `pnpm run verify`: Run `typecheck + check + build`.
+- `pnpm run verify`: Run `typecheck + check + build + smoke:dist`.
 
 ## Tests
 
