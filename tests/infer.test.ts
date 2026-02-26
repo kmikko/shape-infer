@@ -1,9 +1,14 @@
+import { Readable } from "node:stream";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 import {
   detectInputFormatFromText,
+  inferFromFile,
   inferFromFiles,
+  inferFromJsonFile,
+  inferFromJsonlFile,
+  inferFromJsonlStream,
   inferFromJsonText,
   resolveInputFormatForFile
 } from "../src/infer.ts";
@@ -213,5 +218,86 @@ describe("infer", () => {
     await expect(inferFromFiles([], { inputFormat: "auto" })).rejects.toThrow(
       /No input files provided/
     );
+  });
+
+  test("file and stream helpers use default source names and inferFromFile defaults to auto format", async () => {
+    await withTempDir("schema-generator-infer-", async (directory) => {
+      const jsonlFile = path.join(directory, "records.jsonl");
+      const jsonFile = path.join(directory, "records.json");
+
+      await writeFile(jsonlFile, '{"id":1}\n{"id":2}\n', "utf8");
+      await writeFile(jsonFile, '{"id":1}', "utf8");
+
+      const jsonlFileResult = await inferFromJsonlFile(jsonlFile);
+      expect(jsonlFileResult.files[0].source).toBe(jsonlFile);
+
+      const jsonFileResult = await inferFromJsonFile(jsonFile);
+      expect(jsonFileResult.files[0].source).toBe(jsonFile);
+
+      const streamResult = await inferFromJsonlStream(Readable.from(['{"id":1}\n']));
+      expect(streamResult.files[0].source).toBe("<stream>");
+
+      const inferFromFileResult = await inferFromFile(jsonlFile);
+      expect(inferFromFileResult.files[0].format).toBe("jsonl");
+    });
+  });
+
+  test("inferFromJsonText falls back when error thrown is not an Error object", () => {
+    const originalParse = JSON.parse;
+
+    try {
+      JSON.parse = (() => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        // Throw a plain non-Error value with no position info — exercises the String(error) branch
+        throw "unexpected character";
+      }) as typeof JSON.parse;
+
+      const result = inferFromJsonText("a\nb", {
+        sourceName: "non-error.json"
+      });
+
+      // String(error) path: no "position \d+" match → extractJsonParseErrorLine returns undefined
+      // → falls back to line 1
+      expect(result.stats.parseErrors).toBe(1);
+      expect(result.parseErrorLines).toEqual([1]);
+    } finally {
+      JSON.parse = originalParse;
+    }
+  });
+
+  test("inferFromJsonlStream handles trailing newlines and empty lines", async () => {
+    const content = '\n{"id":1}\n\n{"id":2}\n';
+    const stream = Readable.from([content]);
+    const result = await inferFromJsonlStream(stream, { sourceName: "trailing.jsonl" });
+
+    expect(result.stats.linesRead).toBe(4);
+    expect(result.stats.recordsMerged).toBe(2);
+    expect(result.stats.skippedEmptyLines).toBe(2);
+    expect(result.stats.parseErrors).toBe(0);
+    expect(result.files[0].source).toBe("trailing.jsonl");
+    expect(result.files[0].format).toBe("jsonl");
+  });
+
+  test("inferFromJsonlStream handles mixed valid and invalid lines", async () => {
+    const content = '{"id":1}\nBAD_JSON\n{"id":2}\nALSO_BAD\n';
+    const stream = Readable.from([content]);
+    const result = await inferFromJsonlStream(stream, { sourceName: "mixed.jsonl" });
+
+    expect(result.stats.linesRead).toBe(4);
+    expect(result.stats.recordsMerged).toBe(2);
+    expect(result.stats.parseErrors).toBe(2);
+    expect(result.parseErrorLines).toEqual([2, 4]);
+  });
+
+  test("inferFromJsonlStream caps captured parse error lines at maxCapturedParseErrorLines", async () => {
+    const lines = Array.from({ length: 10 }, (_, i) => `BAD_LINE_${i}`).join("\n");
+    const stream = Readable.from([lines]);
+    const result = await inferFromJsonlStream(stream, {
+      sourceName: "capped.jsonl",
+      maxCapturedParseErrorLines: 3
+    });
+
+    expect(result.stats.parseErrors).toBe(10);
+    expect(result.parseErrorLines).toHaveLength(3);
   });
 });
