@@ -1,5 +1,5 @@
 {
-  "name": "schema-generator",
+  "name": "shape-infer",
   "version": "0.1.0",
   "type": "module",
   "packageManager": "pnpm@8.6.2",
@@ -8,11 +8,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mikko/schema-generator.git"
+    "url": "https://github.com/kmikko/shape-infer.git"
   },
-  "homepage": "https://github.com/mikko/schema-generator#readme",
+  "homepage": "https://github.com/kmikko/shape-infer#readme",
   "bugs": {
-    "url": "https://github.com/mikko/schema-generator/issues"
+    "url": "https://github.com/kmikko/shape-infer/issues"
   },
   "keywords": [
     "schema",
@@ -48,7 +48,7 @@
   },
   "sideEffects": false,
   "bin": {
-    "schema-gen": "dist/cli.js"
+    "shape-infer": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",

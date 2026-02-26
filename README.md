@@ -1,4 +1,4 @@
-# schema-generator
+# shape-infer
 
 Infer a unified schema from mixed JSONL/JSON datasets and emit:
 
@@ -16,7 +16,7 @@ The tool merges many records into one representative schema and handles missing 
 ## Install
 
 ```bash
-pnpm add schema-generator
+pnpm add shape-infer
 ```
 
 ### Local Development
@@ -57,10 +57,10 @@ node dist/cli.js --input data.jsonl --format typescript
 ## CLI Usage
 
 ```bash
-schema-gen --input <path-or-glob> [--input <path-or-glob> ...] [options]
+shape-infer --input <path-or-glob> [--input <path-or-glob> ...] [options]
 ```
 
-The npm `bin` command name is `schema-gen` and points to `dist/cli.js`.
+The npm `bin` command name is `shape-infer` and points to `dist/cli.js`.
 
 ## Input Behavior
 
@@ -191,11 +191,11 @@ The package exposes a facade-only API from the published entrypoints:
 
 Import from either:
 
-- `"schema-generator"` (root export)
-- `"schema-generator/public-api"` (facade-only subpath export)
+- `"shape-infer"` (root export)
+- `"shape-infer/public-api"` (facade-only subpath export)
 
 ```ts
-import { generateFromText } from "schema-generator";
+import { generateFromText } from "shape-infer";
 
 const result = await generateFromText({
   text: '[{"id":1},{"id":"2"}]',

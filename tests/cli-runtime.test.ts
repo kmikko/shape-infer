@@ -2,7 +2,11 @@ import { readFile, writeFile } from "node:fs/promises";
 import { Readable, Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { isDirectExecution, launchCliFromProcessArgs, runCli } from "../src/cli.ts";
+import {
+  isDirectExecution,
+  launchCliFromProcessArgs,
+  runCli,
+} from "../src/cli.ts";
 import { withTempDir } from "./helpers.ts";
 
 class CaptureWritable extends Writable {
@@ -11,9 +15,11 @@ class CaptureWritable extends Writable {
   _write(
     chunk: string | Buffer,
     _encoding: BufferEncoding,
-    callback: (error?: Error | null) => void
+    callback: (error?: Error | null) => void,
   ): void {
-    this.chunks.push(typeof chunk === "string" ? chunk : chunk.toString("utf8"));
+    this.chunks.push(
+      typeof chunk === "string" ? chunk : chunk.toString("utf8"),
+    );
     callback();
   }
 
@@ -23,7 +29,9 @@ class CaptureWritable extends Writable {
 }
 
 function createIoFromChunks(chunks: Array<string | Buffer>, isTTY = false) {
-  const input = Readable.from(chunks) as NodeJS.ReadableStream & { isTTY?: boolean };
+  const input = Readable.from(chunks) as NodeJS.ReadableStream & {
+    isTTY?: boolean;
+  };
   input.isTTY = isTTY;
 
   const output = new CaptureWritable();
@@ -32,7 +40,7 @@ function createIoFromChunks(chunks: Array<string | Buffer>, isTTY = false) {
   return {
     input,
     output,
-    errors
+    errors,
   };
 }
 
@@ -47,7 +55,7 @@ describe("cli runtime", () => {
     await runCli(["--help"], {
       stdin: io.input,
       stdout: io.output,
-      stderr: io.errors
+      stderr: io.errors,
     });
 
     expect(io.output.text()).toContain("Usage:");
@@ -62,8 +70,8 @@ describe("cli runtime", () => {
       runCli([], {
         stdin: io.input,
         stdout: io.output,
-        stderr: io.errors
-      })
+        stderr: io.errors,
+      }),
     ).rejects.toThrow(/Missing input/);
   });
 
@@ -85,18 +93,22 @@ describe("cli runtime", () => {
         {
           stdin: io.input,
           stdout: io.output,
-          stderr: io.errors
+          stderr: io.errors,
         },
-        entryErrors
+        entryErrors,
       );
 
       expect(launched).toBeDefined();
       if (!launched) {
-        throw new Error("Expected launchCliFromProcessArgs to run in direct mode.");
+        throw new Error(
+          "Expected launchCliFromProcessArgs to run in direct mode.",
+        );
       }
       await launched;
 
-      expect(entryErrors.text()).toContain("Error: Unknown argument: --does-not-exist");
+      expect(entryErrors.text()).toContain(
+        "Error: Unknown argument: --does-not-exist",
+      );
       expect(process.exitCode).toBe(1);
     } finally {
       process.exitCode = previousExitCode;
@@ -106,11 +118,21 @@ describe("cli runtime", () => {
   test("parses stdin JSON in auto mode", async () => {
     const io = createIo('[{"id":1},{"id":"2"}]\n');
 
-    await runCli(["--input-format", "auto", "--type-name", "FromRuntime", "--format", "typescript"], {
-      stdin: io.input,
-      stdout: io.output,
-      stderr: io.errors
-    });
+    await runCli(
+      [
+        "--input-format",
+        "auto",
+        "--type-name",
+        "FromRuntime",
+        "--format",
+        "typescript",
+      ],
+      {
+        stdin: io.input,
+        stdout: io.output,
+        stderr: io.errors,
+      },
+    );
 
     expect(io.output.text()).toContain("export type FromRuntime =");
     expect(io.output.text()).toContain("id: string | number");
@@ -120,11 +142,21 @@ describe("cli runtime", () => {
   test("auto-detects jsonl from stdin object lines", async () => {
     const io = createIo('{"id":1}\n{"id":"2"}\n');
 
-    await runCli(["--input-format", "auto", "--type-name", "FromJsonl", "--format", "typescript"], {
-      stdin: io.input,
-      stdout: io.output,
-      stderr: io.errors
-    });
+    await runCli(
+      [
+        "--input-format",
+        "auto",
+        "--type-name",
+        "FromJsonl",
+        "--format",
+        "typescript",
+      ],
+      {
+        stdin: io.input,
+        stdout: io.output,
+        stderr: io.errors,
+      },
+    );
 
     expect(io.output.text()).toContain("export type FromJsonl =");
     expect(io.output.text()).toContain("id: string | number");
@@ -132,7 +164,7 @@ describe("cli runtime", () => {
   });
 
   test("emits diagnostics output file", async () => {
-    await withTempDir("schema-generator-cli-runtime-", async (directory) => {
+    await withTempDir("shape-infer-cli-runtime-", async (directory) => {
       const diagnosticsPath = `${directory}/diagnostics.json`;
       const io = createIo('{"id":1}\n{"id":2}\n');
 
@@ -143,13 +175,13 @@ describe("cli runtime", () => {
           "--format",
           "typescript",
           "--diagnostics-output",
-          diagnosticsPath
+          diagnosticsPath,
         ],
         {
           stdin: io.input,
           stdout: io.output,
-          stderr: io.errors
-        }
+          stderr: io.errors,
+        },
       );
 
       const diagnosticsText = await readFile(diagnosticsPath, "utf8");
@@ -168,11 +200,14 @@ describe("cli runtime", () => {
   test("prints parse warnings for invalid jsonl lines", async () => {
     const io = createIo('{"id":1}\nnot-json\n{"id":2}\n');
 
-    await runCli(["--input-format", "jsonl", "--format", "typescript", "--diagnostics"], {
-      stdin: io.input,
-      stdout: io.output,
-      stderr: io.errors
-    });
+    await runCli(
+      ["--input-format", "jsonl", "--format", "typescript", "--diagnostics"],
+      {
+        stdin: io.input,
+        stdout: io.output,
+        stderr: io.errors,
+      },
+    );
 
     expect(io.output.text()).toContain("export type Root =");
     expect(io.errors.text()).toContain("Diagnostics summary:");
@@ -181,7 +216,7 @@ describe("cli runtime", () => {
   });
 
   test("supports file input flow and json-schema output file", async () => {
-    await withTempDir("schema-generator-cli-runtime-", async (directory) => {
+    await withTempDir("shape-infer-cli-runtime-", async (directory) => {
       const inputPath = `${directory}/records.json`;
       const outputPath = `${directory}/schema.json`;
 
@@ -199,13 +234,13 @@ describe("cli runtime", () => {
           "--output",
           outputPath,
           "--type-name",
-          "RuntimeRecord"
+          "RuntimeRecord",
         ],
         {
           stdin: io.input,
           stdout: io.output,
-          stderr: io.errors
-        }
+          stderr: io.errors,
+        },
       );
 
       const schemaText = await readFile(outputPath, "utf8");
@@ -217,12 +252,14 @@ describe("cli runtime", () => {
   });
 
   test("handles buffer stdin and prints json parse warning + no-record warning", async () => {
-    const io = createIoFromChunks([Buffer.from('{\n  "id": 1,\n  "name":\n}\n')]);
+    const io = createIoFromChunks([
+      Buffer.from('{\n  "id": 1,\n  "name":\n}\n'),
+    ]);
 
     await runCli(["--input-format", "json", "--format", "typescript"], {
       stdin: io.input,
       stdout: io.output,
-      stderr: io.errors
+      stderr: io.errors,
     });
 
     expect(io.output.text()).toContain("export type Root = unknown;");
@@ -242,21 +279,21 @@ describe("cli runtime", () => {
         "--diagnostics",
         "--type-mode",
         "loose",
-        "--all-optional-properties"
+        "--all-optional-properties",
       ],
       {
         stdin: io.input,
         stdout: io.output,
-        stderr: io.errors
-      }
+        stderr: io.errors,
+      },
     );
 
     expect(io.output.text()).toContain("export const RootSchema");
     expect(io.errors.text()).toContain(
-      "Diagnostics note: loose type mode collapses inferred literal enums"
+      "Diagnostics note: loose type mode collapses inferred literal enums",
     );
     expect(io.errors.text()).toContain(
-      "Diagnostics note: all optional mode forces every object property"
+      "Diagnostics note: all optional mode forces every object property",
     );
   });
 });

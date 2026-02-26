@@ -10,7 +10,7 @@ import {
   inferFromJsonlFile,
   inferFromJsonlStream,
   inferFromJsonText,
-  resolveInputFormatForFile
+  resolveInputFormatForFile,
 } from "../src/infer.ts";
 import { withTempDir } from "./helpers.ts";
 
@@ -18,7 +18,9 @@ describe("infer", () => {
   test("detectInputFormatFromText auto-detects json and jsonl", () => {
     expect(detectInputFormatFromText('[{"id":1}]', "auto")).toBe("json");
     expect(detectInputFormatFromText('{"id":1}', "auto")).toBe("json");
-    expect(detectInputFormatFromText('{"id":1}\n{"id":2}\n', "auto")).toBe("jsonl");
+    expect(detectInputFormatFromText('{"id":1}\n{"id":2}\n', "auto")).toBe(
+      "jsonl",
+    );
     expect(detectInputFormatFromText("   \n\t", "auto")).toBe("jsonl");
     expect(detectInputFormatFromText('{"id":1}\n', "jsonl")).toBe("jsonl");
     expect(detectInputFormatFromText('{"id":1}\n', "json")).toBe("json");
@@ -26,7 +28,7 @@ describe("infer", () => {
 
   test("inferFromJsonText merges top-level array values", () => {
     const result = inferFromJsonText('[{"id":1},{"id":"2"}]', {
-      sourceName: "array.json"
+      sourceName: "array.json",
     });
 
     expect(result.stats.recordsMerged).toBe(2);
@@ -38,7 +40,7 @@ describe("infer", () => {
 
   test("inferFromJsonText parses a top-level object as one record", () => {
     const result = inferFromJsonText('{"id":1}', {
-      sourceName: "single.json"
+      sourceName: "single.json",
     });
 
     expect(result.stats.recordsMerged).toBe(1);
@@ -48,7 +50,7 @@ describe("infer", () => {
 
   test("inferFromJsonText captures parse errors with line information", () => {
     const result = inferFromJsonText('{\n  "id": 1,\n  "name":\n}\n', {
-      sourceName: "broken.json"
+      sourceName: "broken.json",
     });
 
     expect(result.stats.recordsMerged).toBe(0);
@@ -60,7 +62,7 @@ describe("infer", () => {
   test("inferFromJsonText can skip parse error line capture", () => {
     const result = inferFromJsonText('{\n  "id": 1,\n  "name":\n}\n', {
       sourceName: "broken-no-lines.json",
-      maxCapturedParseErrorLines: 0
+      maxCapturedParseErrorLines: 0,
     });
 
     expect(result.stats.recordsMerged).toBe(0);
@@ -70,7 +72,7 @@ describe("infer", () => {
 
   test("inferFromJsonText handles empty input text", () => {
     const result = inferFromJsonText("", {
-      sourceName: "empty.json"
+      sourceName: "empty.json",
     });
 
     expect(result.stats.linesRead).toBe(0);
@@ -88,7 +90,7 @@ describe("infer", () => {
       }) as typeof JSON.parse;
 
       const result = inferFromJsonText("a\nb\nc", {
-        sourceName: "synthetic.json"
+        sourceName: "synthetic.json",
       });
 
       expect(result.stats.parseErrors).toBe(1);
@@ -107,7 +109,7 @@ describe("infer", () => {
       }) as typeof JSON.parse;
 
       const result = inferFromJsonText("a\nb\nc", {
-        sourceName: "synthetic-invalid-position.json"
+        sourceName: "synthetic-invalid-position.json",
       });
 
       expect(result.stats.parseErrors).toBe(1);
@@ -122,11 +124,13 @@ describe("infer", () => {
 
     try {
       JSON.parse = (() => {
-        throw new Error(`Synthetic JSON parse failure at position ${"9".repeat(400)}.`);
+        throw new Error(
+          `Synthetic JSON parse failure at position ${"9".repeat(400)}.`,
+        );
       }) as typeof JSON.parse;
 
       const result = inferFromJsonText("a\nb\nc", {
-        sourceName: "synthetic-overflow-position.json"
+        sourceName: "synthetic-overflow-position.json",
       });
 
       expect(result.stats.parseErrors).toBe(1);
@@ -139,19 +143,19 @@ describe("infer", () => {
   test("inferFromJsonText validates maxCapturedParseErrorLines", () => {
     expect(() =>
       inferFromJsonText("{}", {
-        maxCapturedParseErrorLines: -1
-      })
+        maxCapturedParseErrorLines: -1,
+      }),
     ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
 
     expect(() =>
       inferFromJsonText("{}", {
-        maxCapturedParseErrorLines: 0.5
-      })
+        maxCapturedParseErrorLines: 0.5,
+      }),
     ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
   });
 
   test("resolveInputFormatForFile uses extension first, then content fallback", async () => {
-    await withTempDir("schema-generator-infer-", async (directory) => {
+    await withTempDir("shape-infer-infer-", async (directory) => {
       const jsonlFile = path.join(directory, "events.ndjson");
       const jsonFile = path.join(directory, "events.json");
       const unknownJsonFile = path.join(directory, "ambiguous.data");
@@ -162,25 +166,37 @@ describe("infer", () => {
       await writeFile(unknownJsonFile, '[{"id":1}]', "utf8");
       await writeFile(unknownJsonlFile, '{"id":1}\n{"id":2}\n', "utf8");
 
-      await expect(resolveInputFormatForFile(jsonlFile, "auto")).resolves.toBe("jsonl");
-      await expect(resolveInputFormatForFile(jsonFile, "auto")).resolves.toBe("json");
-      await expect(resolveInputFormatForFile(unknownJsonFile, "auto")).resolves.toBe("json");
-      await expect(resolveInputFormatForFile(unknownJsonlFile, "auto")).resolves.toBe("jsonl");
+      await expect(resolveInputFormatForFile(jsonlFile, "auto")).resolves.toBe(
+        "jsonl",
+      );
+      await expect(resolveInputFormatForFile(jsonFile, "auto")).resolves.toBe(
+        "json",
+      );
+      await expect(
+        resolveInputFormatForFile(unknownJsonFile, "auto"),
+      ).resolves.toBe("json");
+      await expect(
+        resolveInputFormatForFile(unknownJsonlFile, "auto"),
+      ).resolves.toBe("jsonl");
     });
   });
 
   test("resolveInputFormatForFile respects explicit format override", async () => {
-    await withTempDir("schema-generator-infer-", async (directory) => {
+    await withTempDir("shape-infer-infer-", async (directory) => {
       const inputFile = path.join(directory, "events.any");
       await writeFile(inputFile, '{"id":1}\n{"id":2}\n', "utf8");
 
-      await expect(resolveInputFormatForFile(inputFile, "json")).resolves.toBe("json");
-      await expect(resolveInputFormatForFile(inputFile, "jsonl")).resolves.toBe("jsonl");
+      await expect(resolveInputFormatForFile(inputFile, "json")).resolves.toBe(
+        "json",
+      );
+      await expect(resolveInputFormatForFile(inputFile, "jsonl")).resolves.toBe(
+        "jsonl",
+      );
     });
   });
 
   test("inferFromFiles merges mixed jsonl and json inputs in auto mode", async () => {
-    await withTempDir("schema-generator-infer-", async (directory) => {
+    await withTempDir("shape-infer-infer-", async (directory) => {
       const jsonlFile = path.join(directory, "part-a.jsonl");
       const jsonFile = path.join(directory, "part-b.json");
 
@@ -188,23 +204,26 @@ describe("infer", () => {
       await writeFile(jsonFile, '[{"id":"3"}]', "utf8");
 
       const result = await inferFromFiles([jsonlFile, jsonFile], {
-        inputFormat: "auto"
+        inputFormat: "auto",
       });
 
       expect(result.stats.recordsMerged).toBe(3);
       expect(result.stats.parseErrors).toBe(0);
       expect(result.files).toHaveLength(2);
-      expect(result.files.map((entry) => entry.format)).toEqual(["jsonl", "json"]);
+      expect(result.files.map((entry) => entry.format)).toEqual([
+        "jsonl",
+        "json",
+      ]);
     });
   });
 
   test("inferFromFiles tracks skipped empty JSONL lines", async () => {
-    await withTempDir("schema-generator-infer-", async (directory) => {
+    await withTempDir("shape-infer-infer-", async (directory) => {
       const jsonlFile = path.join(directory, "empty-lines.jsonl");
       await writeFile(jsonlFile, '\n{"id":1}\n\n{"id":2}\n', "utf8");
 
       const result = await inferFromFiles([jsonlFile], {
-        inputFormat: "auto"
+        inputFormat: "auto",
       });
 
       expect(result.stats.linesRead).toBe(4);
@@ -216,12 +235,12 @@ describe("infer", () => {
 
   test("inferFromFiles throws on empty input file list", async () => {
     await expect(inferFromFiles([], { inputFormat: "auto" })).rejects.toThrow(
-      /No input files provided/
+      /No input files provided/,
     );
   });
 
   test("file and stream helpers use default source names and inferFromFile defaults to auto format", async () => {
-    await withTempDir("schema-generator-infer-", async (directory) => {
+    await withTempDir("shape-infer-infer-", async (directory) => {
       const jsonlFile = path.join(directory, "records.jsonl");
       const jsonFile = path.join(directory, "records.json");
 
@@ -234,7 +253,9 @@ describe("infer", () => {
       const jsonFileResult = await inferFromJsonFile(jsonFile);
       expect(jsonFileResult.files[0].source).toBe(jsonFile);
 
-      const streamResult = await inferFromJsonlStream(Readable.from(['{"id":1}\n']));
+      const streamResult = await inferFromJsonlStream(
+        Readable.from(['{"id":1}\n']),
+      );
       expect(streamResult.files[0].source).toBe("<stream>");
 
       const inferFromFileResult = await inferFromFile(jsonlFile);
@@ -253,7 +274,7 @@ describe("infer", () => {
       }) as typeof JSON.parse;
 
       const result = inferFromJsonText("a\nb", {
-        sourceName: "non-error.json"
+        sourceName: "non-error.json",
       });
 
       // String(error) path: no "position \d+" match → extractJsonParseErrorLine returns undefined
@@ -268,7 +289,9 @@ describe("infer", () => {
   test("inferFromJsonlStream handles trailing newlines and empty lines", async () => {
     const content = '\n{"id":1}\n\n{"id":2}\n';
     const stream = Readable.from([content]);
-    const result = await inferFromJsonlStream(stream, { sourceName: "trailing.jsonl" });
+    const result = await inferFromJsonlStream(stream, {
+      sourceName: "trailing.jsonl",
+    });
 
     expect(result.stats.linesRead).toBe(4);
     expect(result.stats.recordsMerged).toBe(2);
@@ -281,7 +304,9 @@ describe("infer", () => {
   test("inferFromJsonlStream handles mixed valid and invalid lines", async () => {
     const content = '{"id":1}\nBAD_JSON\n{"id":2}\nALSO_BAD\n';
     const stream = Readable.from([content]);
-    const result = await inferFromJsonlStream(stream, { sourceName: "mixed.jsonl" });
+    const result = await inferFromJsonlStream(stream, {
+      sourceName: "mixed.jsonl",
+    });
 
     expect(result.stats.linesRead).toBe(4);
     expect(result.stats.recordsMerged).toBe(2);
@@ -290,11 +315,13 @@ describe("infer", () => {
   });
 
   test("inferFromJsonlStream caps captured parse error lines at maxCapturedParseErrorLines", async () => {
-    const lines = Array.from({ length: 10 }, (_, i) => `BAD_LINE_${i}`).join("\n");
+    const lines = Array.from({ length: 10 }, (_, i) => `BAD_LINE_${i}`).join(
+      "\n",
+    );
     const stream = Readable.from([lines]);
     const result = await inferFromJsonlStream(stream, {
       sourceName: "capped.jsonl",
-      maxCapturedParseErrorLines: 3
+      maxCapturedParseErrorLines: 3,
     });
 
     expect(result.stats.parseErrors).toBe(10);

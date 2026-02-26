@@ -9,7 +9,7 @@
     "enabled": true,
     "reportFolder": "<projectFolder>/etc",
     "reportTempFolder": "<projectFolder>/temp/api",
-    "reportFileName": "schema-generator.api.md"
+    "reportFileName": "shape-infer.api.md"
   },
   "docModel": {
     "enabled": false

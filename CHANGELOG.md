@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release of schema-generator.
+- Initial release of shape-infer.
 - CLI with support for JSON/JSONL input and TypeScript/Zod/JSON-Schema output.
 - Programmatic API with `generateFromText` and `generateFromFiles`.
 - Type inference heuristics for enums, string formats (date, email, uuid, uri), and record-like objects.

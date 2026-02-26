@@ -2,9 +2,9 @@
 
 /**
  * Pack smoke test — simulates installing the published tarball and verifies:
- * 1. Runtime imports from "schema-generator" (root) and "schema-generator/public-api"
+ * 1. Runtime imports from "shape-infer" (root) and "shape-infer/public-api"
  * 2. generateFromText facade returns expected output shape
- * 3. CLI bin (`schema-gen --help`) works
+ * 3. CLI bin (`shape-infer --help`) works
  */
 
 import { execSync, spawnSync } from "node:child_process";
@@ -18,7 +18,10 @@ const root = process.cwd();
 // 1. Pack the tarball
 // ---------------------------------------------------------------------------
 console.log("\n[pack-smoke] Packing tarball…");
-const packOutput = execSync("npm pack --json", { cwd: root, encoding: "utf-8" });
+const packOutput = execSync("npm pack --json", {
+  cwd: root,
+  encoding: "utf-8",
+});
 const packInfo = JSON.parse(packOutput) as { filename: string }[];
 const tarball = path.resolve(root, packInfo[0].filename);
 console.log(`[pack-smoke] Tarball: ${tarball}`);
@@ -31,50 +34,60 @@ console.log(`[pack-smoke] Temp dir: ${tmpDir}`);
 
 fs.writeFileSync(
   path.join(tmpDir, "package.json"),
-  JSON.stringify({ name: "pack-smoke-consumer", version: "1.0.0", type: "module" }, null, 2)
+  JSON.stringify(
+    { name: "pack-smoke-consumer", version: "1.0.0", type: "module" },
+    null,
+    2,
+  ),
 );
 
 console.log("[pack-smoke] Installing tarball…");
 execSync(`npm install "${tarball}"`, { cwd: tmpDir, stdio: "pipe" });
 
 // ---------------------------------------------------------------------------
-// 3. Verify root import ("schema-generator")
+// 3. Verify root import ("shape-infer")
 // ---------------------------------------------------------------------------
 console.log("[pack-smoke] Verifying root import…");
 const rootImportScript = `
-  import { generateFromText } from "schema-generator";
+  import { generateFromText } from "shape-infer";
   if (typeof generateFromText !== "function") {
     throw new Error("generateFromText is not a function on root import");
   }
   console.log("[pack-smoke]   ✓ root import OK");
 `;
-execSync(`node --input-type=module -e '${rootImportScript.replace(/'/g, "'\\''")}'`, {
-  cwd: tmpDir,
-  stdio: "inherit"
-});
+execSync(
+  `node --input-type=module -e '${rootImportScript.replace(/'/g, "'\\''")}'`,
+  {
+    cwd: tmpDir,
+    stdio: "inherit",
+  },
+);
 
 // ---------------------------------------------------------------------------
-// 4. Verify subpath import ("schema-generator/public-api")
+// 4. Verify subpath import ("shape-infer/public-api")
 // ---------------------------------------------------------------------------
 console.log("[pack-smoke] Verifying public-api subpath import…");
 const subpathScript = `
-  import { generateFromText, generateFromFiles } from "schema-generator/public-api";
+  import { generateFromText, generateFromFiles } from "shape-infer/public-api";
   for (const [name, fn] of [["generateFromText", generateFromText], ["generateFromFiles", generateFromFiles]]) {
     if (typeof fn !== "function") throw new Error(name + " is not a function on subpath import");
   }
   console.log("[pack-smoke]   ✓ public-api subpath import OK");
 `;
-execSync(`node --input-type=module -e '${subpathScript.replace(/'/g, "'\\''")}'`, {
-  cwd: tmpDir,
-  stdio: "inherit"
-});
+execSync(
+  `node --input-type=module -e '${subpathScript.replace(/'/g, "'\\''")}'`,
+  {
+    cwd: tmpDir,
+    stdio: "inherit",
+  },
+);
 
 // ---------------------------------------------------------------------------
 // 5. Verify generateFromText output shape
 // ---------------------------------------------------------------------------
 console.log("[pack-smoke] Verifying generateFromText output shape…");
 const shapeScript = `
-  import { generateFromText } from "schema-generator";
+  import { generateFromText } from "shape-infer";
   const result = await generateFromText({
     text: '[{"id":1,"name":"a"},{"id":2,"name":"b"}]',
     inputFormat: "json",
@@ -95,16 +108,19 @@ const shapeScript = `
   }
   console.log("[pack-smoke]   ✓ generateFromText output shape OK");
 `;
-execSync(`node --input-type=module -e '${shapeScript.replace(/'/g, "'\\''")}'`, {
-  cwd: tmpDir,
-  stdio: "inherit"
-});
+execSync(
+  `node --input-type=module -e '${shapeScript.replace(/'/g, "'\\''")}'`,
+  {
+    cwd: tmpDir,
+    stdio: "inherit",
+  },
+);
 
 // ---------------------------------------------------------------------------
 // 6. Verify CLI bin works
 // ---------------------------------------------------------------------------
-console.log("[pack-smoke] Verifying CLI bin (schema-gen)…");
-const binPath = path.join(tmpDir, "node_modules", ".bin", "schema-gen");
+console.log("[pack-smoke] Verifying CLI bin (shape-infer)…");
+const binPath = path.join(tmpDir, "node_modules", ".bin", "shape-infer");
 if (!fs.existsSync(binPath)) {
   throw new Error("CLI bin symlink not found at " + binPath);
 }
@@ -115,7 +131,9 @@ if (!fs.existsSync(binTarget)) {
 if (!binTarget.endsWith("cli.js")) {
   throw new Error("CLI bin target unexpected: " + binTarget);
 }
-console.log("[pack-smoke]   ✓ CLI bin OK (-> " + path.basename(binTarget) + ")");
+console.log(
+  "[pack-smoke]   ✓ CLI bin OK (-> " + path.basename(binTarget) + ")",
+);
 
 // ---------------------------------------------------------------------------
 // Cleanup

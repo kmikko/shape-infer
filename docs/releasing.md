@@ -26,5 +26,5 @@
    - Verify the package on npm.
    - Test install in a fresh project:
      ```bash
-     npm install schema-generator
+     npm install shape-infer
      ```

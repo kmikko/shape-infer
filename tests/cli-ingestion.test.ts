@@ -5,7 +5,7 @@ import { runCli, withTempDir } from "./helpers.ts";
 
 describe("CLI ingestion", () => {
   test("supports mixed json/jsonl input globs with auto-detect", async () => {
-    await withTempDir("schema-generator-cli-", async (directory) => {
+    await withTempDir("shape-infer-cli-", async (directory) => {
       await writeFile(path.join(directory, "a.jsonl"), '{"id":1}\n', "utf8");
       await writeFile(path.join(directory, "b.json"), '[{"id":"2"}]\n', "utf8");
 
@@ -17,7 +17,7 @@ describe("CLI ingestion", () => {
         "--type-name",
         "AutoMixed",
         "--format",
-        "typescript"
+        "typescript",
       ]);
 
       expect(stdout).toMatch(/export type AutoMixed =/);
@@ -28,8 +28,15 @@ describe("CLI ingestion", () => {
 
   test("stdin auto-detect parses JSON array input", async () => {
     const { stdout, stderr } = await runCli(
-      ["--input-format", "auto", "--type-name", "FromStdin", "--format", "json-schema"],
-      '[{"id":1},{"id":"2"}]\n'
+      [
+        "--input-format",
+        "auto",
+        "--type-name",
+        "FromStdin",
+        "--format",
+        "json-schema",
+      ],
+      '[{"id":1},{"id":"2"}]\n',
     );
 
     expect(stdout).toMatch(/"title": "FromStdin"/);
@@ -48,9 +55,9 @@ describe("CLI ingestion", () => {
         "zod",
         "--type-mode",
         "loose",
-        "--all-optional-properties"
+        "--all-optional-properties",
       ],
-      '[{"kind":"A"},{"kind":"B"},{"kind":null}]\n'
+      '[{"kind":"A"},{"kind":"B"},{"kind":null}]\n',
     );
 
     expect(stdout).toMatch(/export const LooseOptionalSchema =/);
