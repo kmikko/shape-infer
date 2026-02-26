@@ -2,3 +2,6 @@
 build
 coverage
 tests/fixtures
+
+# API Extractor
+etc
