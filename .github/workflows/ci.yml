@@ -30,5 +30,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify
-        run: pnpm run verify
+      - name: Run test suite
+        run: pnpm run test:all
+
+      - name: Run checks
+        run: pnpm run check:all

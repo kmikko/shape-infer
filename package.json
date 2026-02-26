@@ -54,7 +54,8 @@
     "build": "tsc -p tsconfig.build.json",
     "check:type": "tsc -p tsconfig.json",
     "check:lint": "eslint . --ext .ts",
-    "check:all": "pnpm run check:type && pnpm run check:lint",
+    "check:pack": "npm pack --dry-run",
+    "check:all": "pnpm run check:type && pnpm run check:lint && pnpm run api:check && pnpm run check:pack",
     "api:check": "pnpm run build && api-extractor run -c api-extractor.index.json && api-extractor run -c api-extractor.public-api.json",
     "api:update": "pnpm run build && api-extractor run --local -c api-extractor.index.json && api-extractor run --local -c api-extractor.public-api.json",
     "dev": "node src/cli.ts",
@@ -64,14 +65,10 @@
     "test:update": "vitest run -u",
     "test:coverage": "vitest run --coverage",
     "test:type": "vitest run --typecheck --typecheck.only",
-    "test:all": "pnpm run test && pnpm run smoke",
-    "smoke": "node scripts/smoke.ts",
-    "smoke:dist": "node dist/cli.js --help",
-    "pack:check": "npm pack --dry-run",
-    "pack:smoke": "node scripts/pack-smoke.ts",
-    "check": "pnpm run test && pnpm run test:type && pnpm run smoke",
-    "verify": "pnpm run check:type && pnpm run check && pnpm run api:check && pnpm run smoke:dist && pnpm run pack:check && pnpm run pack:smoke",
-    "test:ci": "pnpm run verify"
+    "test:smoke": "node scripts/smoke.ts",
+    "test:cli": "pnpm run build && node dist/cli.js --help",
+    "test:pack": "node scripts/pack-smoke.ts",
+    "test:all": "pnpm run test && pnpm run test:type && pnpm run test:smoke && pnpm run test:cli && pnpm run test:pack"
   },
   "dependencies": {
     "fast-glob": "^3.3.3"

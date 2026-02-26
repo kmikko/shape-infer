@@ -216,7 +216,7 @@ console.log(result.diagnostics?.summary);
 - `pnpm run dev -- --help`: Run CLI from `src/`.
 - `pnpm run start -- --help`: Run CLI from `dist/`.
 - `pnpm run build`: Compile `src` to `dist`.
-- `pnpm run typecheck`: Typecheck source and scripts.
+- `pnpm run check:type`: Typecheck source and scripts.
 - `pnpm run api:check`: Validate published API reports for root and `public-api` entrypoints.
 - `pnpm run api:update`: Refresh API report baselines after intentional public API changes.
 - `pnpm test`: Run Vitest tests.
@@ -224,12 +224,12 @@ console.log(result.diagnostics?.summary);
 - `pnpm run test:update`: Update snapshot files.
 - `pnpm run test:coverage`: Run tests with coverage output.
 - `pnpm run test:type`: Run `*.test-d.ts` type-level tests.
-- `pnpm run smoke`: Run source CLI smoke scenarios.
-- `pnpm run smoke:dist`: Run compiled CLI smoke check.
-- `pnpm run pack:check`: Validate package contents with `npm pack --dry-run`.
-- `pnpm run check`: Run tests + type tests + smoke.
-- `pnpm run verify`: Run `typecheck + check + build + smoke:dist + pack:check`.
-- `pnpm run test:ci`: Alias for `verify`.
+- `pnpm run test:smoke`: Run source CLI smoke scenarios.
+- `pnpm run test:cli`: Build and run compiled CLI smoke check.
+- `pnpm run test:pack`: Run consumer pack smoke scenarios.
+- `pnpm run test:all`: Run full test suite (unit + type + smoke + CLI + pack).
+- `pnpm run check:pack`: Validate package contents with `npm pack --dry-run`.
+- `pnpm run check:all`: Run typecheck + lint + API report validation + pack check.
 
 ## Testing Notes
 

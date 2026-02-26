@@ -7,9 +7,10 @@
 2. **Verify locally**
    - Run full verification suite:
      ```bash
-     pnpm run verify
+     pnpm run test:all
+     pnpm run check:all
      ```
-   - This runs typechecks, unit tests, build, and consumer smoke tests.
+   - This runs tests, smoke checks, typechecks, linting, API validation, and package checks.
 
 3. **Commit and Tag**
    - Commit changes: `git commit -am "chore: release vX.Y.Z"`
