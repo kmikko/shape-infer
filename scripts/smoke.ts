@@ -10,24 +10,52 @@ interface SmokeCase {
 
 const root = process.cwd();
 const cliPath = path.resolve(root, "src/cli.ts");
-const fixture = (fileName: string): string => path.resolve(root, "fixtures", fileName);
+const fixture = (fileName: string): string =>
+  path.resolve(root, "tests", "fixtures", "smoke", fileName);
 
 const cases: SmokeCase[] = [
   {
     name: "typescript output",
-    args: ["--input", fixture("sample.jsonl"), "--type-name", "SampleRecord", "--format", "typescript"]
+    args: [
+      "--input",
+      fixture("sample.jsonl"),
+      "--type-name",
+      "SampleRecord",
+      "--format",
+      "typescript",
+    ],
   },
   {
     name: "zod output",
-    args: ["--input", fixture("sample.jsonl"), "--type-name", "SampleRecord", "--format", "zod"]
+    args: [
+      "--input",
+      fixture("sample.jsonl"),
+      "--type-name",
+      "SampleRecord",
+      "--format",
+      "zod",
+    ],
   },
   {
     name: "json-schema output",
-    args: ["--input", fixture("sample.jsonl"), "--type-name", "SampleRecord", "--format", "json-schema"]
+    args: [
+      "--input",
+      fixture("sample.jsonl"),
+      "--type-name",
+      "SampleRecord",
+      "--format",
+      "json-schema",
+    ],
   },
   {
     name: "diagnostics output",
-    args: ["--input", fixture("sample.jsonl"), "--type-name", "SampleRecord", "--diagnostics"]
+    args: [
+      "--input",
+      fixture("sample.jsonl"),
+      "--type-name",
+      "SampleRecord",
+      "--diagnostics",
+    ],
   },
   {
     name: "multi-input merge",
@@ -44,21 +72,21 @@ const cases: SmokeCase[] = [
       "MixedRecord",
       "--format",
       "typescript",
-      "--diagnostics"
-    ]
+      "--diagnostics",
+    ],
   },
   {
     name: "glob ingestion",
     args: [
       "--input",
-      path.resolve(root, "fixtures", "sample*.json*"),
+      path.resolve(root, "tests", "fixtures", "smoke", "sample*.json*"),
       "--input-format",
       "auto",
       "--type-name",
       "MixedRecord",
       "--format",
-      "json-schema"
-    ]
+      "json-schema",
+    ],
   },
   {
     name: "phase3 heuristics",
@@ -79,9 +107,9 @@ const cases: SmokeCase[] = [
       "5",
       "--record-max-presence",
       "0.5",
-      "--diagnostics"
-    ]
-  }
+      "--diagnostics",
+    ],
+  },
 ];
 
 for (const smokeCase of cases) {
@@ -93,7 +121,7 @@ for (const smokeCase of cases) {
 function runCase(args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [cliPath, ...args], {
-      stdio: "inherit"
+      stdio: "inherit",
     });
 
     child.on("error", reject);

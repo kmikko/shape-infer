@@ -45,43 +45,43 @@ const FIXTURE_CASES: FixtureCase[] = [
     fileName: "pokedex.json",
     inputFormat: "json",
     sampleMode: "json-array",
-    typeBaseName: "Pokedex"
+    typeBaseName: "Pokedex",
   },
   {
     fileName: "sample-mtg-allidentifiers-100.json",
     inputFormat: "json",
     sampleMode: "json-map-keys",
-    typeBaseName: "MtgAllIdentifiers"
+    typeBaseName: "MtgAllIdentifiers",
   },
   {
     fileName: "sample-gharchive-100.jsonl",
     inputFormat: "jsonl",
     sampleMode: "jsonl-lines",
-    typeBaseName: "GhArchiveEvents"
+    typeBaseName: "GhArchiveEvents",
   },
   {
     fileName: "sample-ol-editions-100.jsonl",
     inputFormat: "jsonl",
     sampleMode: "jsonl-lines",
-    typeBaseName: "OpenLibraryEditions"
+    typeBaseName: "OpenLibraryEditions",
   },
   {
     fileName: "sample-ol-works-100.jsonl",
     inputFormat: "jsonl",
     sampleMode: "jsonl-lines",
-    typeBaseName: "OpenLibraryWorks"
+    typeBaseName: "OpenLibraryWorks",
   },
   {
     fileName: "sample-openfoodfacts-products-100.jsonl",
     inputFormat: "jsonl",
     sampleMode: "jsonl-lines",
-    typeBaseName: "OpenFoodFactsProducts"
-  }
+    typeBaseName: "OpenFoodFactsProducts",
+  },
 ];
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const FIXTURES_DIR = path.join(__dirname, "fixtures");
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "samples");
 
 describe("real-world golden snapshots", () => {
   test("fixture manifest includes at least three fixtures", () => {
@@ -98,7 +98,10 @@ describe("real-world golden snapshots", () => {
   for (const fixture of FIXTURE_CASES) {
     test(`fixture: ${fixture.fileName}`, () => {
       const fixturePath = path.join(FIXTURES_DIR, fixture.fileName);
-      const { values, sampleSummary } = loadAndSampleFixture(fixturePath, fixture);
+      const { values, sampleSummary } = loadAndSampleFixture(
+        fixturePath,
+        fixture,
+      );
 
       expect(values.length).toBeGreaterThan(0);
 
@@ -106,7 +109,7 @@ describe("real-world golden snapshots", () => {
         fixture: fixture.fileName,
         sampleSummary,
         strict: emitFixtureOutputs(values, fixture.typeBaseName, "strict"),
-        loose: emitFixtureOutputs(values, fixture.typeBaseName, "loose")
+        loose: emitFixtureOutputs(values, fixture.typeBaseName, "loose"),
       };
 
       expect(snapshotPayload).toMatchSnapshot();
@@ -116,19 +119,19 @@ describe("real-world golden snapshots", () => {
 
 function loadAndSampleFixture(
   fixturePath: string,
-  fixture: FixtureCase
+  fixture: FixtureCase,
 ): { values: unknown[]; sampleSummary: SampleSummary } {
   const raw = readFileSync(fixturePath, "utf8");
 
   if (fixture.inputFormat === "jsonl" && fixture.sampleMode !== "jsonl-lines") {
     throw new Error(
-      `Fixture ${fixture.fileName} has incompatible inputFormat/sampleMode: ${fixture.inputFormat}/${fixture.sampleMode}.`
+      `Fixture ${fixture.fileName} has incompatible inputFormat/sampleMode: ${fixture.inputFormat}/${fixture.sampleMode}.`,
     );
   }
 
   if (fixture.inputFormat === "json" && fixture.sampleMode === "jsonl-lines") {
     throw new Error(
-      `Fixture ${fixture.fileName} has incompatible inputFormat/sampleMode: ${fixture.inputFormat}/${fixture.sampleMode}.`
+      `Fixture ${fixture.fileName} has incompatible inputFormat/sampleMode: ${fixture.inputFormat}/${fixture.sampleMode}.`,
     );
   }
 
@@ -147,9 +150,9 @@ function loadAndSampleFixture(
         limits: {
           jsonArrayItems: JSON_ARRAY_SAMPLE_LIMIT,
           jsonlLines: JSONL_SAMPLE_LIMIT,
-          jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT
-        }
-      }
+          jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT,
+        },
+      },
     };
   }
 
@@ -169,20 +172,20 @@ function loadAndSampleFixture(
           limits: {
             jsonArrayItems: JSON_ARRAY_SAMPLE_LIMIT,
             jsonlLines: JSONL_SAMPLE_LIMIT,
-            jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT
-          }
-        }
+            jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT,
+          },
+        },
       };
     }
 
     if (isRecord(parsedJson)) {
       const arrayPropertyEntry = Object.entries(parsedJson).find(([, value]) =>
-        Array.isArray(value)
+        Array.isArray(value),
       );
 
       if (!arrayPropertyEntry) {
         throw new Error(
-          `Fixture ${fixture.fileName} uses json-array sampling but has no top-level array property.`
+          `Fixture ${fixture.fileName} uses json-array sampling but has no top-level array property.`,
         );
       }
 
@@ -191,7 +194,7 @@ function loadAndSampleFixture(
       const sampledArrayValue = topLevelArray.slice(0, JSON_ARRAY_SAMPLE_LIMIT);
       const sampledObject = {
         ...parsedJson,
-        [arrayPropertyName]: sampledArrayValue
+        [arrayPropertyName]: sampledArrayValue,
       };
 
       return {
@@ -206,14 +209,14 @@ function loadAndSampleFixture(
           limits: {
             jsonArrayItems: JSON_ARRAY_SAMPLE_LIMIT,
             jsonlLines: JSONL_SAMPLE_LIMIT,
-            jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT
-          }
-        }
+            jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT,
+          },
+        },
       };
     }
 
     throw new Error(
-      `Fixture ${fixture.fileName} uses json-array sampling but root JSON value is not an array or object.`
+      `Fixture ${fixture.fileName} uses json-array sampling but root JSON value is not an array or object.`,
     );
   }
 
@@ -235,9 +238,9 @@ function loadAndSampleFixture(
       limits: {
         jsonArrayItems: JSON_ARRAY_SAMPLE_LIMIT,
         jsonlLines: JSONL_SAMPLE_LIMIT,
-        jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT
-      }
-    }
+        jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT,
+      },
+    },
   };
 }
 
@@ -264,14 +267,19 @@ function parseJsonlRecords(raw: string, fileName: string): unknown[] {
       values.push(JSON.parse(trimmedLine));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to parse ${fileName} JSONL line ${index + 1}: ${message}`);
+      throw new Error(
+        `Failed to parse ${fileName} JSONL line ${index + 1}: ${message}`,
+      );
     }
   }
 
   return values;
 }
 
-function resolveJsonMapContainer(parsedJson: unknown, fileName: string): Record<string, unknown> {
+function resolveJsonMapContainer(
+  parsedJson: unknown,
+  fileName: string,
+): Record<string, unknown> {
   if (isRecord(parsedJson)) {
     return parsedJson;
   }
@@ -285,7 +293,7 @@ function resolveJsonMapContainer(parsedJson: unknown, fileName: string): Record<
   }
 
   throw new Error(
-    `Fixture ${fileName} uses json-map-keys sampling but JSON root is not an object or a single-item object array.`
+    `Fixture ${fileName} uses json-map-keys sampling but JSON root is not an object or a single-item object array.`,
   );
 }
 
@@ -296,26 +304,26 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function emitFixtureOutputs(
   values: unknown[],
   typeBaseName: string,
-  typeMode: "strict" | "loose"
+  typeMode: "strict" | "loose",
 ): ModeOutputs {
   return {
     typescript: generateFromValues({
       values,
       format: "typescript",
       typeName: typeBaseName,
-      typeMode
+      typeMode,
     }).output,
     zod: generateFromValues({
       values,
       format: "zod",
       typeName: typeBaseName,
-      typeMode
+      typeMode,
     }).output,
     jsonSchema: generateFromValues({
       values,
       format: "json-schema",
       typeName: typeBaseName,
-      typeMode
-    }).output
+      typeMode,
+    }).output,
   };
 }
