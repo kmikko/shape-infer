@@ -46,10 +46,8 @@ describe("public api golden snapshots", () => {
       format: "typescript",
       typeName: "UserRecord",
       typeMode: "strict",
-      includeDiagnostics: true,
     });
     expect(result.output).toMatchSnapshot();
-    expect(result.diagnostics).toMatchSnapshot();
   });
 
   test("matches zod output snapshot", async () => {

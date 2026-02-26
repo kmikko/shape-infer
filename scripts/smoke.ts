@@ -48,16 +48,6 @@ const cases: SmokeCase[] = [
     ],
   },
   {
-    name: "diagnostics output",
-    args: [
-      "--input",
-      fixture("sample.jsonl"),
-      "--type-name",
-      "SampleRecord",
-      "--diagnostics",
-    ],
-  },
-  {
     name: "multi-input merge",
     args: [
       "--input",
@@ -72,7 +62,6 @@ const cases: SmokeCase[] = [
       "MixedRecord",
       "--format",
       "typescript",
-      "--diagnostics",
     ],
   },
   {
@@ -86,28 +75,6 @@ const cases: SmokeCase[] = [
       "MixedRecord",
       "--format",
       "json-schema",
-    ],
-  },
-  {
-    name: "phase3 heuristics",
-    args: [
-      "--input",
-      fixture("phase3.jsonl"),
-      "--type-name",
-      "EventRecord",
-      "--format",
-      "zod",
-      "--required-threshold",
-      "0.9",
-      "--enum-threshold",
-      "0.4",
-      "--min-enum-count",
-      "3",
-      "--record-min-keys",
-      "5",
-      "--record-max-presence",
-      "0.5",
-      "--diagnostics",
     ],
   },
 ];

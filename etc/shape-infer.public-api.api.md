@@ -5,77 +5,6 @@
 ```ts
 
 // @public (undocumented)
-export interface GenerateAstMergeOptions {
-    // (undocumented)
-    maxTrackedLiteralsPerVariant?: number;
-}
-
-// @public (undocumented)
-export interface GenerateDiagnostics {
-    // (undocumented)
-    conflicts: Array<{
-        path: string;
-        kinds: string[];
-        occurrences: number;
-    }>;
-    // (undocumented)
-    degradations: unknown[];
-    // (undocumented)
-    enums: Array<{
-        path: string;
-        type: "string" | "number";
-        valueCount: number;
-        distinctRatio: number;
-        preview: Array<string | number>;
-    }>;
-    // (undocumented)
-    optionalFields: Array<{
-        path: string;
-        presence: number;
-    }>;
-    // (undocumented)
-    recordLikeObjects: string[];
-    // (undocumented)
-    stringFormats: Array<{
-        path: string;
-        format: string;
-        confidence: number;
-    }>;
-    // (undocumented)
-    summary: GenerateDiagnosticsSummary;
-}
-
-// @public (undocumented)
-export interface GenerateDiagnosticsSummary {
-    // (undocumented)
-    degradationCount: number;
-    // (undocumented)
-    enumCount: number;
-    // (undocumented)
-    literalOverflowCount: number;
-    // (undocumented)
-    maxDepth: number;
-    // (undocumented)
-    nodesVisited: number;
-    // (undocumented)
-    optionalFieldCount: number;
-    // (undocumented)
-    recordLikeCollapsedCount: number;
-    // (undocumented)
-    recordLikeObjectCount: number;
-    // (undocumented)
-    stringFormatCount: number;
-    // (undocumented)
-    thresholdNearMissCount: number;
-    // (undocumented)
-    typeConflictCount: number;
-    // (undocumented)
-    unionOverflowCount: number;
-    // (undocumented)
-    unknownNodeCount: number;
-}
-
-// @public (undocumented)
 export function generateFromFiles(options: GenerateFromFilesOptions): Promise<GenerateFromFilesResult>;
 
 // @public (undocumented)
@@ -86,8 +15,6 @@ export interface GenerateFromFilesOptions extends GenerateSchemaOptions {
     inputFormat?: GenerateInputFormat;
     // (undocumented)
     inputPatterns: string[];
-    // (undocumented)
-    maxCapturedParseErrorLines?: number;
 }
 
 // @public (undocumented)
@@ -104,33 +31,9 @@ export interface GenerateFromTextOptions extends GenerateSchemaOptions {
     // (undocumented)
     inputFormat?: GenerateInputFormat;
     // (undocumented)
-    maxCapturedParseErrorLines?: number;
-    // (undocumented)
     sourceName?: string;
     // (undocumented)
     text: string;
-}
-
-// @public (undocumented)
-export interface GenerateHeuristicOptions {
-    // (undocumented)
-    enumThreshold?: number;
-    // (undocumented)
-    maxEnumSize?: number;
-    // (undocumented)
-    maxUnionSize?: number;
-    // (undocumented)
-    minEnumCount?: number;
-    // (undocumented)
-    minFormatCount?: number;
-    // (undocumented)
-    recordMaxPresence?: number;
-    // (undocumented)
-    recordMinKeys?: number;
-    // (undocumented)
-    requiredThreshold?: number;
-    // (undocumented)
-    stringFormatThreshold?: number;
 }
 
 // @public (undocumented)
@@ -165,15 +68,7 @@ export interface GenerateSchemaOptions {
     // (undocumented)
     allOptionalProperties?: boolean;
     // (undocumented)
-    astMergeOptions?: GenerateAstMergeOptions;
-    // (undocumented)
-    diagnosticsMaxFindings?: number;
-    // (undocumented)
     format?: GenerationOutputFormat;
-    // (undocumented)
-    heuristics?: GenerateHeuristicOptions;
-    // (undocumented)
-    includeDiagnostics?: boolean;
     // (undocumented)
     typeMode?: GenerateTypeMode;
     // (undocumented)
@@ -182,8 +77,6 @@ export interface GenerateSchemaOptions {
 
 // @public (undocumented)
 export interface GenerateSchemaResult {
-    // (undocumented)
-    diagnostics?: GenerateDiagnostics;
     // (undocumented)
     files: GenerateInferenceFileSummary[];
     // (undocumented)

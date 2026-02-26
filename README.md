@@ -89,65 +89,24 @@ The npm `bin` command name is `shape-infer` and points to `dist/cli.js`.
   - `zod`
   - `json-schema` (aliases: `jsonschema`, `schema`)
 - If no records are parsed, output falls back to unknown schema/type.
-- If union complexity exceeds `--max-union-size`, output falls back to unknown at that node.
 
 ## CLI Flags
 
-### Core
+### Core (shown in `--help`)
 
 - `-i, --input <path-or-glob>`: Input file path or glob. Repeatable.
 - `--input-format <auto|jsonl|json>`: Input format mode. Default `auto`. Alias `ndjson` maps to `jsonl`.
 - `-o, --output <path>`: Write schema output to file (default stdout).
 - `-t, --type-name <name>`: Root type/schema name (default `Root`).
 - `-f, --format <typescript|zod|json-schema>`: Output format (default `typescript`).
+- `--mode <strict|loose>`: Emission strictness (default `strict`).
+- `--all-optional`: Force all object properties optional in emitted schemas.
 - `-h, --help`: Print usage.
-
-### Emission Style
-
-- `--type-mode <strict|loose>`: Emission strictness (default `strict`).
-- `--all-optional-properties`: Force all object properties optional in emitted schemas.
 
 Loose mode behavior:
 
 - literal enums collapse to base primitives
 - nullable unions are normalized in Zod (`x | null` -> `.nullable()`)
-
-### Heuristics
-
-- `--required-threshold <0..1>`: Requiredness threshold (default `1`).
-- `--enum-threshold <0..1>`: Max distinct-ratio for enum inference (default `0.2`).
-- `--max-enum-size <int>=2+`: Max enum literal count (default `20`).
-- `--min-enum-count <int>=1+`: Min sample count for enum inference (default `5`).
-- `--string-format-threshold <0..1>`: Min confidence for format inference (default `0.9`).
-- `--min-format-count <int>=1+`: Min sample count for format inference (default `5`).
-- `--record-min-keys <int>=1+`: Min key count for record-like object detection (default `40`).
-- `--record-max-presence <0..1>`: Max key presence for record-like detection (default `0.35`).
-- `--max-union-size <int>=1+`: Max union variants before unknown fallback (default `6`).
-- `--max-tracked-literals <int>=1+`: Max tracked literals per primitive node (default `200`).
-- `--max-captured-parse-errors <int>=0+`: Max parse-error line numbers retained per input (default `20`).
-
-Supported string format inference: `date-time`, `date`, `email`, `uuid`, `uri`.
-
-### Diagnostics
-
-- `--diagnostics`: Print diagnostics report to stderr.
-- `--diagnostics-output <path>`: Write diagnostics JSON report to file.
-- `--diagnostics-max-findings <int>=1+`: Cap findings per diagnostics category (default `25`).
-
-Diagnostics include:
-
-- type conflicts
-- optional field presence
-- inferred enums
-- inferred string formats
-- record-like object paths
-- degradation findings:
-  - `union_overflow`
-  - `literal_overflow`
-  - `record_like_collapsed`
-  - `threshold_near_miss`
-
-When diagnostics are enabled with loose/optional emission flags, CLI prints explanatory notes about those mode effects.
 
 ## Parse Warnings
 
@@ -159,7 +118,7 @@ Warnings are written to stderr:
 
 ## Examples
 
-Mixed files + glob + diagnostics:
+Mixed files + glob:
 
 ```bash
 node src/cli.ts \
@@ -167,9 +126,7 @@ node src/cli.ts \
   --input "fixtures/sample*.json*" \
   --input-format auto \
   --format zod \
-  --type-name MixedRecord \
-  --diagnostics \
-  --diagnostics-output diagnostics.json
+  --type-name MixedRecord
 ```
 
 Loose mode + all optional:
@@ -178,8 +135,8 @@ Loose mode + all optional:
 node src/cli.ts \
   --input fixtures/sample.jsonl \
   --format json-schema \
-  --type-mode loose \
-  --all-optional-properties
+  --mode loose \
+  --all-optional
 ```
 
 ## Programmatic API
@@ -202,13 +159,11 @@ const result = await generateFromText({
   inputFormat: "json",
   format: "zod",
   typeName: "Record",
-  includeDiagnostics: true,
 });
 
 console.log(result.output);
 console.log(result.stats);
 console.log(result.warnings);
-console.log(result.diagnostics?.summary);
 ```
 
 ## NPM Scripts
@@ -240,5 +195,4 @@ The suite includes:
 - emitter snapshot/golden tests
 - parser/inference edge-case tests (JSON, JSONL, auto-detect)
 - CLI parser/runtime integration tests
-- diagnostics and degradation behavior tests
 - fuzz-like deterministic mixed-type fixtures

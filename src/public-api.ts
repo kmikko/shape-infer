@@ -1,6 +1,5 @@
 import { Readable } from "node:stream";
 import type { SchemaNode } from "./ast.ts";
-import { analyzeSchema } from "./diagnostics.ts";
 import { emitJsonSchema } from "./emitters/json-schema.ts";
 import { emitTypeScriptType } from "./emitters/typescript.ts";
 import { emitZodSchema } from "./emitters/zod.ts";
@@ -17,22 +16,6 @@ export type GenerationOutputFormat = "typescript" | "zod" | "json-schema";
 export type GenerateInputFormat = "auto" | "jsonl" | "json";
 export type GenerateTypeMode = "strict" | "loose";
 
-export interface GenerateHeuristicOptions {
-  requiredThreshold?: number;
-  enumThreshold?: number;
-  maxEnumSize?: number;
-  minEnumCount?: number;
-  stringFormatThreshold?: number;
-  minFormatCount?: number;
-  recordMinKeys?: number;
-  recordMaxPresence?: number;
-  maxUnionSize?: number;
-}
-
-export interface GenerateAstMergeOptions {
-  maxTrackedLiteralsPerVariant?: number;
-}
-
 export interface GenerateInferenceStats {
   linesRead: number;
   recordsMerged: number;
@@ -47,71 +30,22 @@ export interface GenerateInferenceFileSummary {
   parseErrorLines: number[];
 }
 
-export interface GenerateDiagnosticsSummary {
-  nodesVisited: number;
-  maxDepth: number;
-  typeConflictCount: number;
-  optionalFieldCount: number;
-  enumCount: number;
-  stringFormatCount: number;
-  recordLikeObjectCount: number;
-  unknownNodeCount: number;
-  degradationCount: number;
-  unionOverflowCount: number;
-  literalOverflowCount: number;
-  recordLikeCollapsedCount: number;
-  thresholdNearMissCount: number;
-}
-
-export interface GenerateDiagnostics {
-  summary: GenerateDiagnosticsSummary;
-  conflicts: Array<{
-    path: string;
-    kinds: string[];
-    occurrences: number;
-  }>;
-  optionalFields: Array<{
-    path: string;
-    presence: number;
-  }>;
-  enums: Array<{
-    path: string;
-    type: "string" | "number";
-    valueCount: number;
-    distinctRatio: number;
-    preview: Array<string | number>;
-  }>;
-  stringFormats: Array<{
-    path: string;
-    format: string;
-    confidence: number;
-  }>;
-  recordLikeObjects: string[];
-  degradations: unknown[];
-}
-
 export interface GenerateSchemaOptions {
   format?: GenerationOutputFormat;
   typeName?: string;
   typeMode?: GenerateTypeMode;
   allOptionalProperties?: boolean;
-  heuristics?: GenerateHeuristicOptions;
-  astMergeOptions?: GenerateAstMergeOptions;
-  includeDiagnostics?: boolean;
-  diagnosticsMaxFindings?: number;
 }
 
 export interface GenerateFromFilesOptions extends GenerateSchemaOptions {
   inputPatterns: string[];
   inputFormat?: GenerateInputFormat;
-  maxCapturedParseErrorLines?: number;
   cwd?: string;
 }
 
 export interface GenerateFromTextOptions extends GenerateSchemaOptions {
   text: string;
   inputFormat?: GenerateInputFormat;
-  maxCapturedParseErrorLines?: number;
   sourceName?: string;
 }
 
@@ -123,7 +57,6 @@ export interface GenerateSchemaResult {
   stats: GenerateInferenceStats;
   parseErrorLines: number[];
   files: GenerateInferenceFileSummary[];
-  diagnostics?: GenerateDiagnostics;
   warnings: string[];
 }
 
@@ -143,9 +76,7 @@ export async function generateFromFiles(
     options.cwd,
   );
   const inference = await inferFromFiles(resolvedInputPaths, {
-    astMergeOptions: options.astMergeOptions,
     inputFormat: options.inputFormat,
-    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
   });
   const result = finalizeGeneration(inference, options);
 
@@ -161,8 +92,6 @@ export async function generateFromText(
   const sourceName = options.sourceName ?? "<text>";
   const inference = await inferFromText(options.text, {
     inputFormat: options.inputFormat,
-    astMergeOptions: options.astMergeOptions,
-    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
     sourceName,
   });
 
@@ -171,8 +100,6 @@ export async function generateFromText(
 
 interface InferTextOptions {
   inputFormat?: GenerateInputFormat;
-  astMergeOptions?: GenerateAstMergeOptions;
-  maxCapturedParseErrorLines?: number;
   sourceName: string;
 }
 
@@ -182,8 +109,6 @@ async function inferFromText(
 ): Promise<InferenceResult> {
   if (options.inputFormat === "jsonl") {
     return inferFromJsonlStream(Readable.from([text]), {
-      astMergeOptions: options.astMergeOptions,
-      maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
       sourceName: options.sourceName,
     });
   }
@@ -191,15 +116,11 @@ async function inferFromText(
   const resolvedFormat = detectInputFormatFromText(text, options.inputFormat);
   if (resolvedFormat === "json") {
     return inferFromJsonText(text, {
-      astMergeOptions: options.astMergeOptions,
-      maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
       sourceName: options.sourceName,
     });
   }
 
   return inferFromJsonlStream(Readable.from([text]), {
-    astMergeOptions: options.astMergeOptions,
-    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
     sourceName: options.sourceName,
   });
 }
@@ -216,13 +137,6 @@ function finalizeGeneration(
     options,
     typeName,
   );
-  const diagnostics = options.includeDiagnostics
-    ? analyzeSchema(inference.root, {
-        heuristics: options.heuristics,
-        astMergeOptions: options.astMergeOptions,
-        maxFindingsPerCategory: options.diagnosticsMaxFindings,
-      })
-    : undefined;
   const warnings = buildWarnings(
     inference.files,
     inference.stats.recordsMerged,
@@ -236,7 +150,6 @@ function finalizeGeneration(
     stats: inference.stats,
     parseErrorLines: inference.parseErrorLines,
     files: inference.files,
-    diagnostics,
     warnings,
   };
 }
@@ -251,16 +164,12 @@ function emitGenerationOutput(
     case "typescript":
       return emitTypeScriptType(root, {
         rootTypeName: typeName,
-        heuristics: options.heuristics,
-        astMergeOptions: options.astMergeOptions,
         typeMode: options.typeMode,
         allOptionalProperties: options.allOptionalProperties,
       });
     case "zod":
       return emitZodSchema(root, {
         rootTypeName: typeName,
-        heuristics: options.heuristics,
-        astMergeOptions: options.astMergeOptions,
         typeMode: options.typeMode,
         allOptionalProperties: options.allOptionalProperties,
       });
@@ -268,8 +177,6 @@ function emitGenerationOutput(
       return `${JSON.stringify(
         emitJsonSchema(root, {
           rootTitle: typeName,
-          heuristics: options.heuristics,
-          astMergeOptions: options.astMergeOptions,
           typeMode: options.typeMode,
           allOptionalProperties: options.allOptionalProperties,
         }),

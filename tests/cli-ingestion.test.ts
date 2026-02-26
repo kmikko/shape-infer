@@ -53,9 +53,9 @@ describe("CLI ingestion", () => {
         "LooseOptional",
         "--format",
         "zod",
-        "--type-mode",
+        "--mode",
         "loose",
-        "--all-optional-properties",
+        "--all-optional",
       ],
       '[{"kind":"A"},{"kind":"B"},{"kind":null}]\n',
     );

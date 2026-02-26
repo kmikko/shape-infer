@@ -6,7 +6,6 @@ import { stderr, stdin, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
 import { buildUsage, parseCliArgs } from "./cli-options.ts";
 import type { CliOptions } from "./cli-options.ts";
-import { formatDiagnosticsReport } from "./diagnostics.ts";
 import { generateFromFiles, generateFromText } from "./public-api.ts";
 import type { GenerateSchemaOptions } from "./public-api.ts";
 
@@ -46,13 +45,11 @@ export async function runCli(
           ...generationOptions,
           inputPatterns: options.inputPatterns,
           inputFormat: options.inputFormat,
-          maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
         })
       : await generateFromText({
           ...generationOptions,
           text: await readStdinText(io.stdin),
           inputFormat: options.inputFormat,
-          maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
           sourceName: "<stdin>",
         });
 
@@ -60,44 +57,6 @@ export async function runCli(
     await writeFile(options.outputPath, generation.output, "utf8");
   } else {
     io.stdout.write(generation.output);
-  }
-
-  if (options.diagnostics) {
-    if (!generation.diagnostics) {
-      throw new Error("Diagnostics were requested but were not generated.");
-    }
-
-    io.stderr.write(
-      formatDiagnosticsReport(
-        generation.diagnostics as unknown as Parameters<
-          typeof formatDiagnosticsReport
-        >[0],
-        generation.stats,
-      ),
-    );
-    if (options.typeMode === "loose") {
-      io.stderr.write(
-        "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n",
-      );
-    }
-    if (options.allOptionalProperties) {
-      io.stderr.write(
-        "Diagnostics note: all optional mode forces every object property to optional in emitted schemas.\n",
-      );
-    }
-  }
-
-  if (options.diagnosticsOutputPath) {
-    if (!generation.diagnostics) {
-      throw new Error(
-        "Diagnostics output was requested but diagnostics were not generated.",
-      );
-    }
-    await writeFile(
-      options.diagnosticsOutputPath,
-      `${JSON.stringify(generation.diagnostics, null, 2)}\n`,
-      "utf8",
-    );
   }
 
   for (const warning of generation.warnings) {
@@ -125,13 +84,6 @@ function resolveGenerationOptions(options: CliOptions): GenerateSchemaOptions {
     typeName: options.typeName,
     typeMode: options.typeMode,
     allOptionalProperties: options.allOptionalProperties,
-    heuristics: options.heuristics,
-    astMergeOptions: {
-      maxTrackedLiteralsPerVariant: options.maxTrackedLiteralsPerVariant,
-    },
-    includeDiagnostics:
-      options.diagnostics || Boolean(options.diagnosticsOutputPath),
-    diagnosticsMaxFindings: options.diagnosticsMaxFindings,
   };
 }
 

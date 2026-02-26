@@ -14,7 +14,6 @@ expectTypeOf(format).toMatchTypeOf<"typescript" | "zod" | "json-schema">();
 const sharedOptions: GenerateSchemaOptions = {
   format: "zod",
   typeName: "Product",
-  includeDiagnostics: true,
 };
 expectTypeOf(sharedOptions).toMatchTypeOf<GenerateSchemaOptions>();
 

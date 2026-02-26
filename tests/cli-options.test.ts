@@ -12,9 +12,6 @@ describe("cli-options", () => {
       outputFormat: "typescript",
       typeMode: "strict",
       allOptionalProperties: false,
-      maxCapturedParseErrorLines: 20,
-      diagnostics: false,
-      diagnosticsMaxFindings: 25,
       help: false,
     });
   });
@@ -31,14 +28,9 @@ describe("cli-options", () => {
       "ts",
       "--input-format",
       "ndjson",
-      "--type-mode",
+      "--mode",
       "loose",
-      "--all-optional-properties",
-      "--diagnostics",
-      "--diagnostics-output",
-      "diag.json",
-      "--diagnostics-max-findings",
-      "10",
+      "--all-optional",
     ]);
 
     expect(options).toMatchObject({
@@ -49,9 +41,6 @@ describe("cli-options", () => {
       inputFormat: "jsonl",
       typeMode: "loose",
       allOptionalProperties: true,
-      diagnostics: true,
-      diagnosticsOutputPath: "diag.json",
-      diagnosticsMaxFindings: 10,
     });
   });
 
@@ -61,54 +50,13 @@ describe("cli-options", () => {
       "json",
       "--format",
       "schema",
-      "--type-mode",
+      "--mode",
       "strict",
     ]);
 
     expect(options.inputFormat).toBe("json");
     expect(options.outputFormat).toBe("json-schema");
     expect(options.typeMode).toBe("strict");
-  });
-
-  test("parses heuristic numeric options", () => {
-    const options = parseCliArgs([
-      "--required-threshold",
-      "0.95",
-      "--enum-threshold",
-      "0.25",
-      "--max-enum-size",
-      "30",
-      "--min-enum-count",
-      "3",
-      "--string-format-threshold",
-      "0.8",
-      "--min-format-count",
-      "2",
-      "--record-min-keys",
-      "8",
-      "--record-max-presence",
-      "0.5",
-      "--max-union-size",
-      "4",
-      "--max-tracked-literals",
-      "300",
-      "--max-captured-parse-errors",
-      "12",
-    ]);
-
-    expect(options.heuristics).toEqual({
-      requiredThreshold: 0.95,
-      enumThreshold: 0.25,
-      maxEnumSize: 30,
-      minEnumCount: 3,
-      stringFormatThreshold: 0.8,
-      minFormatCount: 2,
-      recordMinKeys: 8,
-      recordMaxPresence: 0.5,
-      maxUnionSize: 4,
-    });
-    expect(options.maxTrackedLiteralsPerVariant).toBe(300);
-    expect(options.maxCapturedParseErrorLines).toBe(12);
   });
 
   test("throws for unknown argument", () => {
@@ -122,15 +70,24 @@ describe("cli-options", () => {
     expect(() => parseCliArgs(["-i"])).toThrow(/Missing value/);
   });
 
-  test("throws for strict integer and bounded-number validation", () => {
-    expect(() => parseCliArgs(["--max-enum-size", "2.5"])).toThrow(
-      /integer >= 2/,
+  test("throws for removed arguments", () => {
+    expect(() => parseCliArgs(["--type-mode", "loose"])).toThrow(
+      /Removed argument: --type-mode/,
     );
-    expect(() => parseCliArgs(["--max-captured-parse-errors", "-1"])).toThrow(
-      /integer >= 0/,
+    expect(() => parseCliArgs(["--optional-fields"])).toThrow(
+      /Removed argument: --optional-fields/,
     );
-    expect(() => parseCliArgs(["--required-threshold", "1.5"])).toThrow(
-      /between 0 and 1/,
+    expect(() => parseCliArgs(["--all-optional-properties"])).toThrow(
+      /Removed argument: --all-optional-properties/,
+    );
+    expect(() => parseCliArgs(["--required-threshold", "0.9"])).toThrow(
+      /Removed argument: --required-threshold/,
+    );
+    expect(() => parseCliArgs(["--diagnostics"])).toThrow(
+      /Removed argument: --diagnostics/,
+    );
+    expect(() => parseCliArgs(["--diagnostics-output", "diag.json"])).toThrow(
+      /Removed argument: --diagnostics-output/,
     );
   });
 
@@ -141,17 +98,21 @@ describe("cli-options", () => {
     expect(() => parseCliArgs(["--format", "avro"])).toThrow(
       /Unsupported format/,
     );
-    expect(() => parseCliArgs(["--type-mode", "relaxed"])).toThrow(
+    expect(() => parseCliArgs(["--mode", "relaxed"])).toThrow(
       /Unsupported type mode/,
     );
   });
 
-  test("buildUsage includes key option groups", () => {
+  test("buildUsage shows only public options", () => {
     const usage = buildUsage();
 
+    expect(usage).toContain("--mode");
+    expect(usage).toContain("--all-optional");
     expect(usage).toContain("--input-format");
-    expect(usage).toContain("--all-optional-properties");
-    expect(usage).toContain("--max-captured-parse-errors");
-    expect(usage).toContain("--diagnostics-max-findings");
+    expect(usage).not.toContain("--type-mode");
+    expect(usage).not.toContain("--optional-fields");
+    expect(usage).not.toContain("--all-optional-properties");
+    expect(usage).not.toContain("--max-captured-parse-errors");
+    expect(usage).not.toContain("--diagnostics-max-findings");
   });
 });

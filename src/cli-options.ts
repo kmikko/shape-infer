@@ -1,7 +1,5 @@
-import { DEFAULT_AST_MERGE_OPTIONS } from "./ast.ts";
 import type { TypeMode } from "./emitters/style.ts";
 import type { InputFormat } from "./infer.ts";
-import type { HeuristicOptions } from "./heuristics.ts";
 
 export type OutputFormat = "typescript" | "zod" | "json-schema";
 
@@ -9,16 +7,10 @@ export interface CliOptions {
   inputPatterns: string[];
   inputFormat: InputFormat;
   outputPath?: string;
-  diagnosticsOutputPath?: string;
   typeName: string;
   outputFormat: OutputFormat;
   typeMode: TypeMode;
   allOptionalProperties: boolean;
-  heuristics: Partial<HeuristicOptions>;
-  maxTrackedLiteralsPerVariant: number;
-  maxCapturedParseErrorLines: number;
-  diagnostics: boolean;
-  diagnosticsMaxFindings: number;
   help: boolean;
 }
 
@@ -30,12 +22,6 @@ export function parseCliArgs(argv: string[]): CliOptions {
     outputFormat: "typescript",
     typeMode: "strict",
     allOptionalProperties: false,
-    heuristics: {},
-    maxTrackedLiteralsPerVariant:
-      DEFAULT_AST_MERGE_OPTIONS.maxTrackedLiteralsPerVariant,
-    maxCapturedParseErrorLines: 20,
-    diagnostics: false,
-    diagnosticsMaxFindings: 25,
     help: false,
   };
 
@@ -69,126 +55,19 @@ export function parseCliArgs(argv: string[]): CliOptions {
         );
         index += 1;
         break;
-      case "--type-mode":
+      case "--mode":
         options.typeMode = parseTypeMode(readArgValue(argv, index, arg));
         index += 1;
         break;
-      case "--all-optional-properties":
+      case "--all-optional":
         options.allOptionalProperties = true;
-        break;
-      case "--required-threshold":
-        options.heuristics.requiredThreshold = parseBoundedNumber(
-          readArgValue(argv, index, arg),
-          0,
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--enum-threshold":
-        options.heuristics.enumThreshold = parseBoundedNumber(
-          readArgValue(argv, index, arg),
-          0,
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--max-enum-size":
-        options.heuristics.maxEnumSize = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          2,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--min-enum-count":
-        options.heuristics.minEnumCount = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--string-format-threshold":
-        options.heuristics.stringFormatThreshold = parseBoundedNumber(
-          readArgValue(argv, index, arg),
-          0,
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--min-format-count":
-        options.heuristics.minFormatCount = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--record-min-keys":
-        options.heuristics.recordMinKeys = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--record-max-presence":
-        options.heuristics.recordMaxPresence = parseBoundedNumber(
-          readArgValue(argv, index, arg),
-          0,
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--max-union-size":
-        options.heuristics.maxUnionSize = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--max-tracked-literals":
-        options.maxTrackedLiteralsPerVariant = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--max-captured-parse-errors":
-        options.maxCapturedParseErrorLines = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          0,
-          arg,
-        );
-        index += 1;
-        break;
-      case "--diagnostics":
-        options.diagnostics = true;
-        break;
-      case "--diagnostics-output":
-        options.diagnosticsOutputPath = readArgValue(argv, index, arg);
-        index += 1;
-        break;
-      case "--diagnostics-max-findings":
-        options.diagnosticsMaxFindings = parseIntegerMin(
-          readArgValue(argv, index, arg),
-          1,
-          arg,
-        );
-        index += 1;
         break;
       case "--help":
       case "-h":
         options.help = true;
         break;
       default:
-        throw new Error(`Unknown argument: ${arg}`);
+        throwUnsupportedCliOption(arg);
     }
   }
 
@@ -198,7 +77,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
 export function buildUsage(): string {
   return [
     "Usage:",
-    "  shape-infer --input <path-or-glob> [--input <path-or-glob> ...] [--input-format <format>] [--output <path>] [--type-name <name>] [--format <format>] [options]",
+    "  shape-infer --input <path-or-glob> [--input <path-or-glob> ...] [--input-format <format>] [--output <path>] [--type-name <name>] [--format <format>] [--mode <strict|loose>] [--all-optional] [options]",
     "",
     "Options:",
     "  -i, --input      Input file path or glob. Repeatable.",
@@ -206,22 +85,8 @@ export function buildUsage(): string {
     "  -o, --output     Optional output file path. Defaults to stdout.",
     "  -t, --type-name  Root TypeScript type name. Defaults to Root.",
     "  -f, --format     Output format: typescript | zod | json-schema. Defaults to typescript.",
-    "  --type-mode      Emission strictness: strict | loose. Defaults to strict.",
-    "  --all-optional-properties  Force all object properties to optional in output schemas.",
-    "  --required-threshold      Property requiredness threshold (0..1). Defaults to 1.",
-    "  --enum-threshold          Max distinct-ratio for enum inference (0..1). Defaults to 0.2.",
-    "  --max-enum-size           Max enum literal count. Defaults to 20.",
-    "  --min-enum-count          Min sample count for enum inference. Defaults to 5.",
-    "  --string-format-threshold Min confidence for string format inference (0..1). Defaults to 0.9.",
-    "  --min-format-count        Min sample count for string format inference. Defaults to 5.",
-    "  --record-min-keys         Min key count to treat object as record-like. Defaults to 40.",
-    "  --record-max-presence     Max per-key presence ratio for record-like objects (0..1). Defaults to 0.35.",
-    "  --max-union-size          Max allowed union variants before falling back to unknown. Defaults to 6.",
-    "  --max-tracked-literals    Max distinct literals tracked per primitive node. Defaults to 200.",
-    "  --max-captured-parse-errors Max parse-error line numbers to retain. Defaults to 20.",
-    "  --diagnostics             Print diagnostics summary to stderr.",
-    "  --diagnostics-output      Write diagnostics JSON report to file.",
-    "  --diagnostics-max-findings Max entries per diagnostics category. Defaults to 25.",
+    "  --mode           Emission strictness: strict | loose. Defaults to strict.",
+    "  --all-optional   Force all object properties to optional in output schemas.",
     "  -h, --help       Show usage.",
   ].join("\n");
 }
@@ -232,37 +97,6 @@ function readArgValue(argv: string[], index: number, argName: string): string {
     throw new Error(`Missing value for ${argName}.`);
   }
   return value;
-}
-
-function parseIntegerMin(
-  value: string,
-  minimum: number,
-  argName: string,
-): number {
-  if (!/^-?\d+$/.test(value)) {
-    throw new Error(`${argName} must be an integer >= ${minimum}.`);
-  }
-
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < minimum) {
-    throw new Error(`${argName} must be an integer >= ${minimum}.`);
-  }
-  return parsed;
-}
-
-function parseBoundedNumber(
-  value: string,
-  min: number,
-  max: number,
-  argName: string,
-): number {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
-    throw new Error(
-      `${argName} must be a finite number between ${min} and ${max}.`,
-    );
-  }
-  return parsed;
 }
 
 function parseInputFormat(value: string): InputFormat {
@@ -310,4 +144,72 @@ function parseTypeMode(value: string): TypeMode {
         `Unsupported type mode: ${value}. Use one of: strict, loose.`,
       );
   }
+}
+
+function throwUnsupportedCliOption(arg: string): never {
+  const removedOptions = new Map<string, string>([
+    ["--type-mode", "Use --mode instead."],
+    ["--optional-fields", "Use --all-optional instead."],
+    ["--all-optional-properties", "Use --all-optional instead."],
+    [
+      "--required-threshold",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--enum-threshold",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--max-enum-size",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--min-enum-count",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--string-format-threshold",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--min-format-count",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--record-min-keys",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--record-max-presence",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--max-union-size",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--max-tracked-literals",
+      "Advanced heuristic tuning has been removed from the CLI.",
+    ],
+    [
+      "--max-captured-parse-errors",
+      "Advanced parse-error tuning has been removed from the CLI.",
+    ],
+    ["--diagnostics", "Diagnostics output has been removed from the CLI."],
+    [
+      "--diagnostics-output",
+      "Diagnostics output has been removed from the CLI.",
+    ],
+    [
+      "--diagnostics-max-findings",
+      "Diagnostics output has been removed from the CLI.",
+    ],
+  ]);
+
+  const message = removedOptions.get(arg);
+  if (message) {
+    throw new Error(`Removed argument: ${arg}. ${message}`);
+  }
+
+  throw new Error(`Unknown argument: ${arg}`);
 }

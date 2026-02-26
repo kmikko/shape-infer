@@ -59,17 +59,6 @@ describe("infer", () => {
     expect(result.parseErrorLines[0]).toBeGreaterThanOrEqual(1);
   });
 
-  test("inferFromJsonText can skip parse error line capture", () => {
-    const result = inferFromJsonText('{\n  "id": 1,\n  "name":\n}\n', {
-      sourceName: "broken-no-lines.json",
-      maxCapturedParseErrorLines: 0,
-    });
-
-    expect(result.stats.recordsMerged).toBe(0);
-    expect(result.stats.parseErrors).toBe(1);
-    expect(result.parseErrorLines).toEqual([]);
-  });
-
   test("inferFromJsonText handles empty input text", () => {
     const result = inferFromJsonText("", {
       sourceName: "empty.json",
@@ -138,20 +127,6 @@ describe("infer", () => {
     } finally {
       JSON.parse = originalParse;
     }
-  });
-
-  test("inferFromJsonText validates maxCapturedParseErrorLines", () => {
-    expect(() =>
-      inferFromJsonText("{}", {
-        maxCapturedParseErrorLines: -1,
-      }),
-    ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
-
-    expect(() =>
-      inferFromJsonText("{}", {
-        maxCapturedParseErrorLines: 0.5,
-      }),
-    ).toThrow(/maxCapturedParseErrorLines must be an integer >= 0/);
   });
 
   test("resolveInputFormatForFile uses extension first, then content fallback", async () => {
@@ -313,17 +288,16 @@ describe("infer", () => {
     expect(result.parseErrorLines).toEqual([2, 4]);
   });
 
-  test("inferFromJsonlStream caps captured parse error lines at maxCapturedParseErrorLines", async () => {
+  test("inferFromJsonlStream caps captured parse error lines at default limit", async () => {
     const lines = Array.from({ length: 10 }, (_, i) => `BAD_LINE_${i}`).join(
       "\n",
     );
     const stream = Readable.from([lines]);
     const result = await inferFromJsonlStream(stream, {
       sourceName: "capped.jsonl",
-      maxCapturedParseErrorLines: 3,
     });
 
     expect(result.stats.parseErrors).toBe(10);
-    expect(result.parseErrorLines).toHaveLength(3);
+    expect(result.parseErrorLines).toHaveLength(10);
   });
 });

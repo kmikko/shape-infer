@@ -5,19 +5,17 @@ import { generateFromFiles, generateFromText } from "../src/public-api.ts";
 import { withTempDir } from "./helpers.ts";
 
 describe("public api facade", () => {
-  test("generateFromText emits output and diagnostics", async () => {
+  test("generateFromText emits output", async () => {
     const result = await generateFromText({
       text: '[{"id":1},{"id":"2"}]',
       format: "zod",
       typeName: "FromText",
-      includeDiagnostics: true,
     });
 
     expect(result.output).toContain("export const FromTextSchema");
     expect(result.stats.recordsMerged).toBe(2);
     expect(result.warnings).toEqual([]);
     expect(result.files).toHaveLength(1);
-    expect(result.diagnostics?.summary.nodesVisited).toBeGreaterThan(0);
   });
 
   test("generateFromText reports no-record warning when parsing fails", async () => {
@@ -47,7 +45,6 @@ describe("public api facade", () => {
     expect(result.warnings).toContain(
       "Warning: <text>: parse errors at lines 2.",
     );
-    expect(result.diagnostics).toBeUndefined();
   });
 
   test("generateFromFiles resolves globs and returns merged result", async () => {
@@ -64,7 +61,6 @@ describe("public api facade", () => {
         inputFormat: "auto",
         format: "json-schema",
         typeName: "FromFiles",
-        includeDiagnostics: true,
       });
 
       expect(result.resolvedInputPaths).toHaveLength(2);
@@ -74,7 +70,6 @@ describe("public api facade", () => {
       expect(result.stats.recordsMerged).toBe(3);
       expect(result.warnings).toEqual([]);
       expect(result.output).toContain('"title": "FromFiles"');
-      expect(result.diagnostics?.summary.nodesVisited).toBeGreaterThan(0);
     });
   });
 });

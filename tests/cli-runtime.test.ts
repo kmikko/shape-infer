@@ -163,54 +163,16 @@ describe("cli runtime", () => {
     expect(io.errors.text()).toBe("");
   });
 
-  test("emits diagnostics output file", async () => {
-    await withTempDir("shape-infer-cli-runtime-", async (directory) => {
-      const diagnosticsPath = `${directory}/diagnostics.json`;
-      const io = createIo('{"id":1}\n{"id":2}\n');
-
-      await runCli(
-        [
-          "--input-format",
-          "jsonl",
-          "--format",
-          "typescript",
-          "--diagnostics-output",
-          diagnosticsPath,
-        ],
-        {
-          stdin: io.input,
-          stdout: io.output,
-          stderr: io.errors,
-        },
-      );
-
-      const diagnosticsText = await readFile(diagnosticsPath, "utf8");
-      const diagnostics = JSON.parse(diagnosticsText) as {
-        summary: {
-          nodesVisited: number;
-        };
-      };
-
-      expect(diagnostics.summary.nodesVisited).toBeGreaterThan(0);
-      expect(io.output.text()).toContain("export type Root =");
-      expect(io.errors.text()).toBe("");
-    });
-  });
-
   test("prints parse warnings for invalid jsonl lines", async () => {
     const io = createIo('{"id":1}\nnot-json\n{"id":2}\n');
 
-    await runCli(
-      ["--input-format", "jsonl", "--format", "typescript", "--diagnostics"],
-      {
-        stdin: io.input,
-        stdout: io.output,
-        stderr: io.errors,
-      },
-    );
+    await runCli(["--input-format", "jsonl", "--format", "typescript"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors,
+    });
 
     expect(io.output.text()).toContain("export type Root =");
-    expect(io.errors.text()).toContain("Diagnostics summary:");
     expect(io.errors.text()).toContain("Warning: <stdin>: skipped 1 line(s)");
     expect(io.errors.text()).toContain("parse errors at lines 2");
   });
@@ -267,7 +229,7 @@ describe("cli runtime", () => {
     expect(io.errors.text()).toContain("Warning: no JSON records parsed");
   });
 
-  test("prints loose/optional diagnostics notes when enabled", async () => {
+  test("supports loose + all-optional modes together", async () => {
     const io = createIo('[{"kind":"A"},{"kind":"B"}]\n');
 
     await runCli(
@@ -276,10 +238,9 @@ describe("cli runtime", () => {
         "auto",
         "--format",
         "zod",
-        "--diagnostics",
-        "--type-mode",
+        "--mode",
         "loose",
-        "--all-optional-properties",
+        "--all-optional",
       ],
       {
         stdin: io.input,
@@ -289,11 +250,6 @@ describe("cli runtime", () => {
     );
 
     expect(io.output.text()).toContain("export const RootSchema");
-    expect(io.errors.text()).toContain(
-      "Diagnostics note: loose type mode collapses inferred literal enums",
-    );
-    expect(io.errors.text()).toContain(
-      "Diagnostics note: all optional mode forces every object property",
-    );
+    expect(io.errors.text()).toBe("");
   });
 });

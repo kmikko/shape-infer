@@ -2,13 +2,8 @@ import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname } from "node:path";
 import { createInterface } from "node:readline";
-import {
-  createNode,
-  mergeNodes,
-  mergeValue,
-  resolveAstMergeOptions,
-} from "./ast.ts";
-import type { AstMergeOptions, SchemaNode } from "./ast.ts";
+import { createNode, mergeNodes, mergeValue } from "./ast.ts";
+import type { SchemaNode } from "./ast.ts";
 
 const DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES = 20;
 const JSONL_EXTENSIONS = new Set([".jsonl", ".ndjson"]);
@@ -39,8 +34,6 @@ export interface InferenceResult {
 }
 
 export interface InferOptions {
-  astMergeOptions?: Partial<AstMergeOptions>;
-  maxCapturedParseErrorLines?: number;
   inputFormat?: InputFormat;
   sourceName?: string;
 }
@@ -63,10 +56,6 @@ export async function inferFromJsonlStream(
 ): Promise<InferenceResult> {
   const root = createNode();
   const sourceName = options.sourceName ?? "<stream>";
-  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
-  const maxCapturedParseErrorLines = resolveMaxCapturedParseErrorLines(
-    options.maxCapturedParseErrorLines,
-  );
 
   const stats: InferenceStats = {
     linesRead: 0,
@@ -93,11 +82,11 @@ export async function inferFromJsonlStream(
 
       try {
         const parsedRecord = JSON.parse(line) as unknown;
-        mergeValue(root, parsedRecord, astMergeOptions);
+        mergeValue(root, parsedRecord);
         stats.recordsMerged += 1;
       } catch {
         stats.parseErrors += 1;
-        if (parseErrorLines.length < maxCapturedParseErrorLines) {
+        if (parseErrorLines.length < DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES) {
           parseErrorLines.push(stats.linesRead);
         }
       }
@@ -140,10 +129,6 @@ export function inferFromJsonText(
 ): InferenceResult {
   const root = createNode();
   const sourceName = options.sourceName ?? "<json>";
-  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
-  const maxCapturedParseErrorLines = resolveMaxCapturedParseErrorLines(
-    options.maxCapturedParseErrorLines,
-  );
 
   const stats: InferenceStats = {
     linesRead: countLines(jsonText),
@@ -157,19 +142,17 @@ export function inferFromJsonText(
     const parsedValue = JSON.parse(jsonText) as unknown;
     if (Array.isArray(parsedValue)) {
       for (const value of parsedValue) {
-        mergeValue(root, value, astMergeOptions);
+        mergeValue(root, value);
         stats.recordsMerged += 1;
       }
     } else {
-      mergeValue(root, parsedValue, astMergeOptions);
+      mergeValue(root, parsedValue);
       stats.recordsMerged = 1;
     }
   } catch (error) {
     stats.parseErrors = 1;
-    if (maxCapturedParseErrorLines > 0) {
-      const parseErrorLine = extractJsonParseErrorLine(error, jsonText) ?? 1;
-      parseErrorLines.push(parseErrorLine);
-    }
+    const parseErrorLine = extractJsonParseErrorLine(error, jsonText) ?? 1;
+    parseErrorLines.push(parseErrorLine);
   }
 
   return {
@@ -209,7 +192,6 @@ export async function inferFromFiles(
     throw new Error("No input files provided.");
   }
 
-  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
   const root = createNode();
   const files: InferenceFileSummary[] = [];
   const stats: InferenceStats = {
@@ -225,7 +207,7 @@ export async function inferFromFiles(
       ...options,
       sourceName: filePath,
     });
-    mergeNodes(root, result.root, astMergeOptions);
+    mergeNodes(root, result.root);
     stats.linesRead += result.stats.linesRead;
     stats.recordsMerged += result.stats.recordsMerged;
     stats.parseErrors += result.stats.parseErrors;
@@ -290,22 +272,12 @@ export function detectInputFormatFromText(
 
 export function inferFromValues(
   values: Iterable<unknown>,
-  options: InferOptions = {},
 ): SchemaNode {
   const root = createNode();
-  const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
   for (const value of values) {
-    mergeValue(root, value, astMergeOptions);
+    mergeValue(root, value);
   }
   return root;
-}
-
-function resolveMaxCapturedParseErrorLines(value?: number): number {
-  const resolved = value ?? DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES;
-  if (!Number.isInteger(resolved) || resolved < 0) {
-    throw new Error("maxCapturedParseErrorLines must be an integer >= 0.");
-  }
-  return resolved;
 }
 
 function countLines(text: string): number {
