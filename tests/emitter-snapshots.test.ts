@@ -21,7 +21,7 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
         price: 10.5,
         tags: ["sale", "europe"],
         certification: "Fairtrade",
-        launchedAt: "2024-01-02T12:00:00Z"
+        launchedAt: "2024-01-02T12:00:00Z",
       },
       {
         id: 2,
@@ -29,7 +29,7 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
         price: 12,
         tags: ["local"],
         certification: null,
-        launchedAt: "2024-01-03T12:00:00Z"
+        launchedAt: "2024-01-03T12:00:00Z",
       },
       {
         id: "3",
@@ -37,15 +37,15 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
         price: null,
         tags: [],
         certification: "Fair for Life",
-        launchedAt: "not-a-date"
-      }
+        launchedAt: "not-a-date",
+      },
     ],
     heuristics: {
       minEnumCount: 2,
       enumThreshold: 1,
       minFormatCount: 2,
-      stringFormatThreshold: 0.6
-    }
+      stringFormatThreshold: 0.6,
+    },
   },
   {
     name: "record-like-attributes",
@@ -56,8 +56,8 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
           a: "red",
           b: "dry",
           c: "fresh",
-          d: "yes"
-        }
+          d: "yes",
+        },
       },
       {
         sku: "A-2",
@@ -65,8 +65,8 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
           e: "white",
           f: "sweet",
           g: "aged",
-          h: "no"
-        }
+          h: "no",
+        },
       },
       {
         sku: "A-3",
@@ -74,17 +74,17 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
           i: "sparkling",
           j: "dry",
           k: "young",
-          l: null
-        }
-      }
+          l: null,
+        },
+      },
     ],
     heuristics: {
       minEnumCount: 2,
       enumThreshold: 1,
       recordMinKeys: 4,
-      recordMaxPresence: 0.4
-    }
-  }
+      recordMaxPresence: 0.4,
+    },
+  },
 ];
 
 describe("emitter golden snapshots", () => {
@@ -95,42 +95,42 @@ describe("emitter golden snapshots", () => {
       const snapshot = {
         typescriptStrict: emitTypeScriptType(root, {
           rootTypeName: "SnapshotType",
-          heuristics: fixture.heuristics
+          heuristics: fixture.heuristics,
         }),
         typescriptLooseOptional: emitTypeScriptType(root, {
           rootTypeName: "SnapshotType",
           typeMode: "loose",
           allOptionalProperties: true,
-          heuristics: fixture.heuristics
+          heuristics: fixture.heuristics,
         }),
         zodStrict: emitZodSchema(root, {
           rootTypeName: "SnapshotType",
-          heuristics: fixture.heuristics
+          heuristics: fixture.heuristics,
         }),
         zodLooseOptional: emitZodSchema(root, {
           rootTypeName: "SnapshotType",
           typeMode: "loose",
           allOptionalProperties: true,
-          heuristics: fixture.heuristics
+          heuristics: fixture.heuristics,
         }),
         jsonSchemaStrict: JSON.stringify(
           emitJsonSchema(root, {
             rootTitle: "SnapshotType",
-            heuristics: fixture.heuristics
+            heuristics: fixture.heuristics,
           }),
           null,
-          2
+          2,
         ),
         jsonSchemaLooseOptional: JSON.stringify(
           emitJsonSchema(root, {
             rootTitle: "SnapshotType",
             typeMode: "loose",
             allOptionalProperties: true,
-            heuristics: fixture.heuristics
+            heuristics: fixture.heuristics,
           }),
           null,
-          2
-        )
+          2,
+        ),
       };
 
       expect(snapshot).toMatchSnapshot();

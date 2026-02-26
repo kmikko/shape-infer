@@ -13,24 +13,21 @@ https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json
 gunzip -c 2024-01-01-0.json.gz | shuf -n 100 > sample-gharchive-100.jsonl
 ```
 
-
 ## MTGJSON (deeply nested, type-discriminated card objects)
 
 - Homepage: https://mtgjson.com
 - AllPrintings.json contains all sets with all printings and variations of cards. AllIdentifiers.json organizes cards by their unique UUID. GitHub
-Direct download: https://mtgjson.com/api/v5/AllIdentifiers.json.gz
+  Direct download: https://mtgjson.com/api/v5/AllIdentifiers.json.gz
 
 ```sh
 gunzip -c AllIdentifiers.json.gz | jq '[.data | to_entries | .[0:100] | from_entries]' > sample-mtg-allidentifiers-100.json
 ```
 
-
 ## Open Food Facts (JSONL, famously sparse and inconsistent)
 
 - Homepage: https://world.openfoodfacts.org/data
 - The full JSONL file is ~7GB compressed and over 43GB decompressed. GitHub Direct download: https://static.openfoodfacts.org/data/openfoodfacts-products.jsonl.gz
-Note: this is huge — for testing purposes, sampling 100 records is enough to expose structural variability.
-
+  Note: this is huge — for testing purposes, sampling 100 records is enough to expose structural variability.
 
 ```sh
 duckdb -c "
@@ -43,13 +40,11 @@ duckdb -c "COPY (SELECT * FROM read_ndjson('openfoodfacts-products.jsonl.gz', ig
 "
 ```
 
-
 ## Open Library (works/authors dump, highly variable optional fields)
 
 - Homepage: https://openlibrary.org/developers/dumps
 - Monthly dumps are available for authors, editions, and works in JSON format. Past dumps are available at https://archive.org/details/ol_exports?sort=-publicdate GitHub
-Direct download pattern: https://openlibrary.org/data/ol_dump_works_latest.txt.gz (tab-separated, each row contains a JSON object in column 5)
-
+  Direct download pattern: https://openlibrary.org/data/ol_dump_works_latest.txt.gz (tab-separated, each row contains a JSON object in column 5)
 
 ```sh
 duckdb -c "

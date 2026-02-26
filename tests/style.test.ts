@@ -5,7 +5,7 @@ describe("emitter style options", () => {
   test("resolves strict defaults", () => {
     expect(resolveEmissionStyleOptions()).toEqual({
       typeMode: "strict",
-      allOptionalProperties: false
+      allOptionalProperties: false,
     });
   });
 
@@ -13,17 +13,17 @@ describe("emitter style options", () => {
     expect(
       resolveEmissionStyleOptions({
         typeMode: "loose",
-        allOptionalProperties: true
-      })
+        allOptionalProperties: true,
+      }),
     ).toEqual({
       typeMode: "loose",
-      allOptionalProperties: true
+      allOptionalProperties: true,
     });
   });
 
   test("throws for unsupported type mode", () => {
-    expect(() => resolveEmissionStyleOptions({ typeMode: "relaxed" as never })).toThrow(
-      /Unsupported type mode/
-    );
+    expect(() =>
+      resolveEmissionStyleOptions({ typeMode: "relaxed" as never }),
+    ).toThrow(/Unsupported type mode/);
   });
 });

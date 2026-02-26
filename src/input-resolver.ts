@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 export async function resolveInputPaths(
   inputPatterns: string[],
-  cwd: string = process.cwd()
+  cwd: string = process.cwd(),
 ): Promise<string[]> {
   if (inputPatterns.length === 0) {
     return [];
@@ -19,7 +19,7 @@ export async function resolveInputPaths(
       cwd,
       dot: true,
       onlyFiles: true,
-      unique: true
+      unique: true,
     });
 
     if (matches.length === 0) {
@@ -43,7 +43,7 @@ export async function resolveInputPaths(
     throw new Error(
       `No files matched input pattern(s): ${unmatchedPatterns
         .map((pattern) => JSON.stringify(pattern))
-        .join(", ")}`
+        .join(", ")}`,
     );
   }
 

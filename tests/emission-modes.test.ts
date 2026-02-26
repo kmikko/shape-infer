@@ -9,11 +9,11 @@ describe("emission modes", () => {
     const inference = inferFromJsonText('[{"a":1},{"a":2}]');
 
     const strictOutput = emitTypeScriptType(inference.root, {
-      rootTypeName: "StrictType"
+      rootTypeName: "StrictType",
     });
     const optionalOutput = emitTypeScriptType(inference.root, {
       rootTypeName: "OptionalType",
-      allOptionalProperties: true
+      allOptionalProperties: true,
     });
 
     expect(strictOutput).toMatch(/a: number;/);
@@ -22,15 +22,15 @@ describe("emission modes", () => {
 
   test("loose type mode collapses zod enum+null union to nullable primitive", () => {
     const inference = inferFromJsonText(
-      '[{"label":"Fairtrade"},{"label":"Fair for Life"},{"label":null}]'
+      '[{"label":"Fairtrade"},{"label":"Fair for Life"},{"label":null}]',
     );
 
     const strictOutput = emitZodSchema(inference.root, {
       rootTypeName: "StrictSchema",
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     const looseOutput = emitZodSchema(inference.root, {
@@ -38,25 +38,27 @@ describe("emission modes", () => {
       typeMode: "loose",
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     expect(strictOutput).toMatch(
-      /z\.union\(\[z\.enum\(\["Fair for Life", "Fairtrade"\]\), z\.null\(\)\]\)/
+      /z\.union\(\[z\.enum\(\["Fair for Life", "Fairtrade"\]\), z\.null\(\)\]\)/,
     );
     expect(looseOutput).toMatch(/"label": z\.string\(\)\.nullable\(\)/);
   });
 
   test("loose type mode collapses zod array enum elements to primitive", () => {
-    const inference = inferFromJsonText('[{"tags":["A","B"]},{"tags":["B","A"]}]');
+    const inference = inferFromJsonText(
+      '[{"tags":["A","B"]},{"tags":["B","A"]}]',
+    );
 
     const strictOutput = emitZodSchema(inference.root, {
       rootTypeName: "StrictArray",
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     const looseOutput = emitZodSchema(inference.root, {
@@ -64,8 +66,8 @@ describe("emission modes", () => {
       typeMode: "loose",
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     expect(strictOutput).toMatch(/"tags": z\.array\(z\.enum\(\["A", "B"\]\)\)/);
@@ -76,11 +78,11 @@ describe("emission modes", () => {
     const inference = inferFromJsonText('[{"a":1,"b":"x"}]');
 
     const strictSchema = emitJsonSchema(inference.root, {
-      rootTitle: "StrictJsonSchema"
+      rootTitle: "StrictJsonSchema",
     });
     const allOptionalSchema = emitJsonSchema(inference.root, {
       rootTitle: "OptionalJsonSchema",
-      allOptionalProperties: true
+      allOptionalProperties: true,
     });
 
     expect(strictSchema.required).toEqual(["a", "b"]);
@@ -93,15 +95,15 @@ describe("emission modes", () => {
     const strictSchema = emitJsonSchema(inference.root, {
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
     const looseSchema = emitJsonSchema(inference.root, {
       typeMode: "loose",
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     expect(strictSchema.properties.kind.enum).toEqual(["A", "B"]);

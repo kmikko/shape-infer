@@ -15,7 +15,7 @@ describe("cli-options", () => {
       maxCapturedParseErrorLines: 20,
       diagnostics: false,
       diagnosticsMaxFindings: 25,
-      help: false
+      help: false,
     });
   });
 
@@ -38,7 +38,7 @@ describe("cli-options", () => {
       "--diagnostics-output",
       "diag.json",
       "--diagnostics-max-findings",
-      "10"
+      "10",
     ]);
 
     expect(options).toMatchObject({
@@ -51,7 +51,7 @@ describe("cli-options", () => {
       allOptionalProperties: true,
       diagnostics: true,
       diagnosticsOutputPath: "diag.json",
-      diagnosticsMaxFindings: 10
+      diagnosticsMaxFindings: 10,
     });
   });
 
@@ -62,7 +62,7 @@ describe("cli-options", () => {
       "--format",
       "schema",
       "--type-mode",
-      "strict"
+      "strict",
     ]);
 
     expect(options.inputFormat).toBe("json");
@@ -93,7 +93,7 @@ describe("cli-options", () => {
       "--max-tracked-literals",
       "300",
       "--max-captured-parse-errors",
-      "12"
+      "12",
     ]);
 
     expect(options.heuristics).toEqual({
@@ -105,14 +105,16 @@ describe("cli-options", () => {
       minFormatCount: 2,
       recordMinKeys: 8,
       recordMaxPresence: 0.5,
-      maxUnionSize: 4
+      maxUnionSize: 4,
     });
     expect(options.maxTrackedLiteralsPerVariant).toBe(300);
     expect(options.maxCapturedParseErrorLines).toBe(12);
   });
 
   test("throws for unknown argument", () => {
-    expect(() => parseCliArgs(["--does-not-exist"])).toThrow(/Unknown argument/);
+    expect(() => parseCliArgs(["--does-not-exist"])).toThrow(
+      /Unknown argument/,
+    );
   });
 
   test("throws for missing argument values", () => {
@@ -121,22 +123,26 @@ describe("cli-options", () => {
   });
 
   test("throws for strict integer and bounded-number validation", () => {
-    expect(() => parseCliArgs(["--max-enum-size", "2.5"])).toThrow(/integer >= 2/);
+    expect(() => parseCliArgs(["--max-enum-size", "2.5"])).toThrow(
+      /integer >= 2/,
+    );
     expect(() => parseCliArgs(["--max-captured-parse-errors", "-1"])).toThrow(
-      /integer >= 0/
+      /integer >= 0/,
     );
     expect(() => parseCliArgs(["--required-threshold", "1.5"])).toThrow(
-      /between 0 and 1/
+      /between 0 and 1/,
     );
   });
 
   test("throws for unsupported enum-like argument values", () => {
     expect(() => parseCliArgs(["--input-format", "yaml"])).toThrow(
-      /Unsupported input format/
+      /Unsupported input format/,
     );
-    expect(() => parseCliArgs(["--format", "avro"])).toThrow(/Unsupported format/);
+    expect(() => parseCliArgs(["--format", "avro"])).toThrow(
+      /Unsupported format/,
+    );
     expect(() => parseCliArgs(["--type-mode", "relaxed"])).toThrow(
-      /Unsupported type mode/
+      /Unsupported type mode/,
     );
   });
 

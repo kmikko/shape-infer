@@ -7,16 +7,18 @@ import {
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions
+  resolveHeuristicOptions,
 } from "../src/heuristics.ts";
 import { inferFromValues } from "../src/infer.ts";
 
 describe("heuristics", () => {
   test("resolveHeuristicOptions validates bounds", () => {
     expect(() => resolveHeuristicOptions({ requiredThreshold: -0.1 })).toThrow(
-      /requiredThreshold/
+      /requiredThreshold/,
     );
-    expect(() => resolveHeuristicOptions({ maxEnumSize: 1 })).toThrow(/maxEnumSize/);
+    expect(() => resolveHeuristicOptions({ maxEnumSize: 1 })).toThrow(
+      /maxEnumSize/,
+    );
   });
 
   test("isRequired honors configured threshold", () => {
@@ -32,13 +34,13 @@ describe("heuristics", () => {
     const options = resolveHeuristicOptions({
       minEnumCount: 2,
       enumThreshold: 1,
-      maxEnumSize: 10
+      maxEnumSize: 10,
     });
 
     const candidate = inferStringEnum(root.variants.string, options);
     expect(candidate).toEqual({
       values: ["A", "B"],
-      distinctRatio: 0.5
+      distinctRatio: 0.5,
     });
   });
 
@@ -47,10 +49,14 @@ describe("heuristics", () => {
     const options = resolveHeuristicOptions({
       minEnumCount: 2,
       enumThreshold: 1,
-      maxEnumSize: 10
+      maxEnumSize: 10,
     });
 
-    const candidate = inferNumberEnum(root.variants.integer, root.variants.number, options);
+    const candidate = inferNumberEnum(
+      root.variants.integer,
+      root.variants.number,
+      options,
+    );
     expect(candidate?.values).toEqual([1, 1.5, 2]);
   });
 
@@ -59,18 +65,18 @@ describe("heuristics", () => {
       "foo@example.com",
       "bar@example.com",
       "baz@example.com",
-      "not-an-email"
+      "not-an-email",
     ]);
 
     const options = resolveHeuristicOptions({
       minFormatCount: 2,
-      stringFormatThreshold: 0.7
+      stringFormatThreshold: 0.7,
     });
 
     const candidate = inferStringFormat(root.variants.string, options);
     expect(candidate).toEqual({
       format: "email",
-      confidence: 0.75
+      confidence: 0.75,
     });
   });
 
@@ -78,7 +84,7 @@ describe("heuristics", () => {
     const root = inferFromValues([
       { a: 1, b: 1, c: 1, d: 1 },
       { e: 2, f: 2, g: 2, h: 2 },
-      { i: 3, j: 3, k: 3, l: 3 }
+      { i: 3, j: 3, k: 3, l: 3 },
     ]);
 
     const objectVariant = root.variants.object;
@@ -86,8 +92,14 @@ describe("heuristics", () => {
       throw new Error("Expected object variant.");
     }
 
-    const positive = resolveHeuristicOptions({ recordMinKeys: 4, recordMaxPresence: 0.5 });
-    const negative = resolveHeuristicOptions({ recordMinKeys: 4, recordMaxPresence: 0.3 });
+    const positive = resolveHeuristicOptions({
+      recordMinKeys: 4,
+      recordMaxPresence: 0.5,
+    });
+    const negative = resolveHeuristicOptions({
+      recordMinKeys: 4,
+      recordMaxPresence: 0.3,
+    });
 
     expect(isRecordLikeObject(objectVariant, positive)).toBe(true);
     expect(isRecordLikeObject(objectVariant, negative)).toBe(false);
@@ -101,7 +113,9 @@ describe("heuristics", () => {
     }
 
     const valueNode = buildRecordValueNode(objectVariant);
-    const kinds = getNodeKinds(valueNode).sort((left, right) => left.localeCompare(right));
+    const kinds = getNodeKinds(valueNode).sort((left, right) =>
+      left.localeCompare(right),
+    );
 
     expect(kinds).toEqual(["integer", "null", "string"]);
   });

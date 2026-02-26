@@ -1,15 +1,22 @@
 import { describe, expect, test } from "vitest";
-import { createNode, mergeNodes, mergeValue, resolveAstMergeOptions } from "../src/ast.ts";
+import {
+  createNode,
+  mergeNodes,
+  mergeValue,
+  resolveAstMergeOptions,
+} from "../src/ast.ts";
 import { inferFromValues } from "../src/infer.ts";
 
 describe("ast", () => {
   test("resolveAstMergeOptions floors numeric maxTrackedLiteralsPerVariant", () => {
-    expect(resolveAstMergeOptions({ maxTrackedLiteralsPerVariant: 2.9 })).toEqual({
-      maxTrackedLiteralsPerVariant: 2
+    expect(
+      resolveAstMergeOptions({ maxTrackedLiteralsPerVariant: 2.9 }),
+    ).toEqual({
+      maxTrackedLiteralsPerVariant: 2,
     });
-    expect(() => resolveAstMergeOptions({ maxTrackedLiteralsPerVariant: 0 })).toThrow(
-      /maxTrackedLiteralsPerVariant/
-    );
+    expect(() =>
+      resolveAstMergeOptions({ maxTrackedLiteralsPerVariant: 0 }),
+    ).toThrow(/maxTrackedLiteralsPerVariant/);
   });
 
   test("mergeValue marks non-finite numbers as unknown", () => {
@@ -52,8 +59,14 @@ describe("ast", () => {
     expect(objectVariant.properties.get("a")?.seenCount).toBe(2);
     expect(objectVariant.properties.get("b")?.seenCount).toBe(1);
     expect(objectVariant.properties.get("c")?.seenCount).toBe(1);
-    expect(objectVariant.properties.get("a")?.node.variants.integer?.count).toBe(2);
-    expect(objectVariant.properties.get("b")?.node.variants.string?.count).toBe(1);
-    expect(objectVariant.properties.get("c")?.node.variants.boolean?.count).toBe(1);
+    expect(
+      objectVariant.properties.get("a")?.node.variants.integer?.count,
+    ).toBe(2);
+    expect(objectVariant.properties.get("b")?.node.variants.string?.count).toBe(
+      1,
+    );
+    expect(
+      objectVariant.properties.get("c")?.node.variants.boolean?.count,
+    ).toBe(1);
   });
 });

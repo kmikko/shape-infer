@@ -19,10 +19,13 @@ export interface CliIo {
 const DEFAULT_CLI_IO: CliIo = {
   stdin,
   stdout,
-  stderr
+  stderr,
 };
 
-export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promise<void> {
+export async function runCli(
+  argv: string[],
+  io: CliIo = DEFAULT_CLI_IO,
+): Promise<void> {
   const options = parseCliArgs(argv);
 
   if (options.help) {
@@ -32,7 +35,7 @@ export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promis
 
   if (options.inputPatterns.length === 0 && io.stdin.isTTY) {
     throw new Error(
-      "Missing input. Use --input <path/glob> (repeatable) or pipe data through stdin."
+      "Missing input. Use --input <path/glob> (repeatable) or pipe data through stdin.",
     );
   }
 
@@ -43,14 +46,14 @@ export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promis
           ...generationOptions,
           inputPatterns: options.inputPatterns,
           inputFormat: options.inputFormat,
-          maxCapturedParseErrorLines: options.maxCapturedParseErrorLines
+          maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
         })
       : await generateFromText({
           ...generationOptions,
           text: await readStdinText(io.stdin),
           inputFormat: options.inputFormat,
           maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
-          sourceName: "<stdin>"
+          sourceName: "<stdin>",
         });
 
   if (options.outputPath) {
@@ -66,30 +69,34 @@ export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promis
 
     io.stderr.write(
       formatDiagnosticsReport(
-        generation.diagnostics as unknown as Parameters<typeof formatDiagnosticsReport>[0],
-        generation.stats
-      )
+        generation.diagnostics as unknown as Parameters<
+          typeof formatDiagnosticsReport
+        >[0],
+        generation.stats,
+      ),
     );
     if (options.typeMode === "loose") {
       io.stderr.write(
-        "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n"
+        "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n",
       );
     }
     if (options.allOptionalProperties) {
       io.stderr.write(
-        "Diagnostics note: all optional mode forces every object property to optional in emitted schemas.\n"
+        "Diagnostics note: all optional mode forces every object property to optional in emitted schemas.\n",
       );
     }
   }
 
   if (options.diagnosticsOutputPath) {
     if (!generation.diagnostics) {
-      throw new Error("Diagnostics output was requested but diagnostics were not generated.");
+      throw new Error(
+        "Diagnostics output was requested but diagnostics were not generated.",
+      );
     }
     await writeFile(
       options.diagnosticsOutputPath,
       `${JSON.stringify(generation.diagnostics, null, 2)}\n`,
-      "utf8"
+      "utf8",
     );
   }
 
@@ -120,16 +127,17 @@ function resolveGenerationOptions(options: CliOptions): GenerateSchemaOptions {
     allOptionalProperties: options.allOptionalProperties,
     heuristics: options.heuristics,
     astMergeOptions: {
-      maxTrackedLiteralsPerVariant: options.maxTrackedLiteralsPerVariant
+      maxTrackedLiteralsPerVariant: options.maxTrackedLiteralsPerVariant,
     },
-    includeDiagnostics: options.diagnostics || Boolean(options.diagnosticsOutputPath),
-    diagnosticsMaxFindings: options.diagnosticsMaxFindings
+    includeDiagnostics:
+      options.diagnostics || Boolean(options.diagnosticsOutputPath),
+    diagnosticsMaxFindings: options.diagnosticsMaxFindings,
   };
 }
 
 export function isDirectExecution(
   entry: string | undefined = process.argv[1],
-  moduleUrl: string = import.meta.url
+  moduleUrl: string = import.meta.url,
 ): boolean {
   if (!entry) {
     return false;
@@ -141,7 +149,7 @@ export function isDirectExecution(
 export function launchCliFromProcessArgs(
   argv: string[] = process.argv,
   io: CliIo = DEFAULT_CLI_IO,
-  errorOutput: NodeJS.WritableStream = stderr
+  errorOutput: NodeJS.WritableStream = stderr,
 ): Promise<void> | undefined {
   if (!isDirectExecution(argv[1])) {
     return undefined;

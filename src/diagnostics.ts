@@ -4,7 +4,7 @@ import type {
   ObjectVariant,
   PrimitiveVariant,
   SchemaNode,
-  StringFormatKind
+  StringFormatKind,
 } from "./ast.ts";
 import type { InferenceStats } from "./infer.ts";
 import {
@@ -15,7 +15,7 @@ import {
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions
+  resolveHeuristicOptions,
 } from "./heuristics.ts";
 import type { HeuristicOptions } from "./heuristics.ts";
 
@@ -137,7 +137,7 @@ export interface SchemaDiagnostics {
 
 export function analyzeSchema(
   root: SchemaNode,
-  options: DiagnosticsOptions = {}
+  options: DiagnosticsOptions = {},
 ): SchemaDiagnostics {
   const heuristics = resolveHeuristicOptions(options.heuristics);
   const maxFindingsPerCategory =
@@ -161,14 +161,14 @@ export function analyzeSchema(
       unionOverflowCount: 0,
       literalOverflowCount: 0,
       recordLikeCollapsedCount: 0,
-      thresholdNearMissCount: 0
+      thresholdNearMissCount: 0,
     },
     conflicts: [],
     optionalFields: [],
     enums: [],
     stringFormats: [],
     recordLikeObjects: [],
-    degradations: []
+    degradations: [],
   };
 
   visitNode(
@@ -178,7 +178,7 @@ export function analyzeSchema(
     heuristics,
     options.astMergeOptions,
     maxFindingsPerCategory,
-    diagnostics
+    diagnostics,
   );
 
   return diagnostics;
@@ -186,7 +186,7 @@ export function analyzeSchema(
 
 export function formatDiagnosticsReport(
   diagnostics: SchemaDiagnostics,
-  inferenceStats?: InferenceStats
+  inferenceStats?: InferenceStats,
 ): string {
   const lines: string[] = [];
   lines.push("Diagnostics summary:");
@@ -202,16 +202,26 @@ export function formatDiagnosticsReport(
   lines.push(`  type conflicts: ${diagnostics.summary.typeConflictCount}`);
   lines.push(`  optional fields: ${diagnostics.summary.optionalFieldCount}`);
   lines.push(`  enums inferred: ${diagnostics.summary.enumCount}`);
-  lines.push(`  string formats inferred: ${diagnostics.summary.stringFormatCount}`);
-  lines.push(`  record-like objects: ${diagnostics.summary.recordLikeObjectCount}`);
+  lines.push(
+    `  string formats inferred: ${diagnostics.summary.stringFormatCount}`,
+  );
+  lines.push(
+    `  record-like objects: ${diagnostics.summary.recordLikeObjectCount}`,
+  );
   lines.push(`  unknown nodes: ${diagnostics.summary.unknownNodeCount}`);
   lines.push(`  degradations: ${diagnostics.summary.degradationCount}`);
-  lines.push(`  union overflow degradations: ${diagnostics.summary.unionOverflowCount}`);
-  lines.push(`  literal overflow degradations: ${diagnostics.summary.literalOverflowCount}`);
   lines.push(
-    `  record-like collapsed degradations: ${diagnostics.summary.recordLikeCollapsedCount}`
+    `  union overflow degradations: ${diagnostics.summary.unionOverflowCount}`,
   );
-  lines.push(`  threshold near misses: ${diagnostics.summary.thresholdNearMissCount}`);
+  lines.push(
+    `  literal overflow degradations: ${diagnostics.summary.literalOverflowCount}`,
+  );
+  lines.push(
+    `  record-like collapsed degradations: ${diagnostics.summary.recordLikeCollapsedCount}`,
+  );
+  lines.push(
+    `  threshold near misses: ${diagnostics.summary.thresholdNearMissCount}`,
+  );
 
   if (diagnostics.conflicts.length > 0) {
     lines.push("");
@@ -226,7 +236,7 @@ export function formatDiagnosticsReport(
     lines.push("Top optional fields:");
     for (const optionalField of diagnostics.optionalFields) {
       lines.push(
-        `  ${optionalField.path}: ${(optionalField.presence * 100).toFixed(1)}% presence`
+        `  ${optionalField.path}: ${(optionalField.presence * 100).toFixed(1)}% presence`,
       );
     }
   }
@@ -236,7 +246,7 @@ export function formatDiagnosticsReport(
     lines.push("Top inferred enums:");
     for (const entry of diagnostics.enums) {
       lines.push(
-        `  ${entry.path}: ${entry.type} (${entry.valueCount} values, ratio ${entry.distinctRatio.toFixed(3)})`
+        `  ${entry.path}: ${entry.type} (${entry.valueCount} values, ratio ${entry.distinctRatio.toFixed(3)})`,
       );
     }
   }
@@ -245,7 +255,9 @@ export function formatDiagnosticsReport(
     lines.push("");
     lines.push("Top inferred string formats:");
     for (const entry of diagnostics.stringFormats) {
-      lines.push(`  ${entry.path}: ${entry.format} (${entry.confidence.toFixed(3)})`);
+      lines.push(
+        `  ${entry.path}: ${entry.format} (${entry.confidence.toFixed(3)})`,
+      );
     }
   }
 
@@ -275,7 +287,7 @@ function visitNode(
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   maxFindingsPerCategory: number,
-  diagnostics: SchemaDiagnostics
+  diagnostics: SchemaDiagnostics,
 ): void {
   diagnostics.summary.nodesVisited += 1;
   diagnostics.summary.maxDepth = Math.max(diagnostics.summary.maxDepth, depth);
@@ -290,23 +302,19 @@ function visitNode(
     pushLimited(diagnostics.conflicts, maxFindingsPerCategory, {
       path,
       kinds,
-      occurrences: node.occurrences
+      occurrences: node.occurrences,
     });
   }
 
   const emitterVariantCount = getEmitterVariantCount(node);
   if (!node.variants.unknown && emitterVariantCount > heuristics.maxUnionSize) {
-    pushDegradation(
-      diagnostics,
-      maxFindingsPerCategory,
-      {
-        kind: "union_overflow",
-        path,
-        variantCount: emitterVariantCount,
-        maxUnionSize: heuristics.maxUnionSize,
-        kinds
-      }
-    );
+    pushDegradation(diagnostics, maxFindingsPerCategory, {
+      kind: "union_overflow",
+      path,
+      variantCount: emitterVariantCount,
+      maxUnionSize: heuristics.maxUnionSize,
+      kinds,
+    });
   }
 
   for (const literalOverflow of getLiteralOverflowDegradations(node, path)) {
@@ -321,15 +329,23 @@ function visitNode(
       type: "string",
       valueCount: stringEnum.values.length,
       distinctRatio: stringEnum.distinctRatio,
-      preview: stringEnum.values.slice(0, 5)
+      preview: stringEnum.values.slice(0, 5),
     });
   } else {
-    for (const nearMiss of getStringEnumNearMisses(node.variants.string, path, heuristics)) {
+    for (const nearMiss of getStringEnumNearMisses(
+      node.variants.string,
+      path,
+      heuristics,
+    )) {
       pushDegradation(diagnostics, maxFindingsPerCategory, nearMiss);
     }
   }
 
-  const numberEnum = inferNumberEnum(node.variants.integer, node.variants.number, heuristics);
+  const numberEnum = inferNumberEnum(
+    node.variants.integer,
+    node.variants.number,
+    heuristics,
+  );
   if (numberEnum) {
     diagnostics.summary.enumCount += 1;
     pushLimited(diagnostics.enums, maxFindingsPerCategory, {
@@ -337,14 +353,14 @@ function visitNode(
       type: "number",
       valueCount: numberEnum.values.length,
       distinctRatio: numberEnum.distinctRatio,
-      preview: numberEnum.values.slice(0, 5)
+      preview: numberEnum.values.slice(0, 5),
     });
   } else {
     for (const nearMiss of getNumberEnumNearMisses(
       node.variants.integer,
       node.variants.number,
       path,
-      heuristics
+      heuristics,
     )) {
       pushDegradation(diagnostics, maxFindingsPerCategory, nearMiss);
     }
@@ -356,10 +372,14 @@ function visitNode(
     pushLimited(diagnostics.stringFormats, maxFindingsPerCategory, {
       path,
       format: stringFormat.format,
-      confidence: stringFormat.confidence
+      confidence: stringFormat.confidence,
     });
   } else {
-    for (const nearMiss of getStringFormatNearMisses(node.variants.string, path, heuristics)) {
+    for (const nearMiss of getStringFormatNearMisses(
+      node.variants.string,
+      path,
+      heuristics,
+    )) {
       pushDegradation(diagnostics, maxFindingsPerCategory, nearMiss);
     }
   }
@@ -372,7 +392,7 @@ function visitNode(
       heuristics,
       astMergeOptions,
       maxFindingsPerCategory,
-      diagnostics
+      diagnostics,
     );
   }
 
@@ -385,19 +405,18 @@ function visitNode(
     pushLimited(diagnostics.recordLikeObjects, maxFindingsPerCategory, path);
 
     const presenceStats = getObjectPresenceStats(node.variants.object);
-    pushDegradation(
-      diagnostics,
-      maxFindingsPerCategory,
-      {
-        kind: "record_like_collapsed",
-        path,
-        keyCount: node.variants.object.properties.size,
-        maxPresence: presenceStats.maxPresence,
-        averagePresence: presenceStats.averagePresence
-      }
-    );
+    pushDegradation(diagnostics, maxFindingsPerCategory, {
+      kind: "record_like_collapsed",
+      path,
+      keyCount: node.variants.object.properties.size,
+      maxPresence: presenceStats.maxPresence,
+      averagePresence: presenceStats.averagePresence,
+    });
 
-    const valueNode = buildRecordValueNode(node.variants.object, astMergeOptions);
+    const valueNode = buildRecordValueNode(
+      node.variants.object,
+      astMergeOptions,
+    );
     visitNode(
       valueNode,
       `${path}{*}`,
@@ -405,13 +424,13 @@ function visitNode(
       heuristics,
       astMergeOptions,
       maxFindingsPerCategory,
-      diagnostics
+      diagnostics,
     );
     return;
   }
 
-  const sortedPropertyNames = [...node.variants.object.properties.keys()].sort((left, right) =>
-    left.localeCompare(right)
+  const sortedPropertyNames = [...node.variants.object.properties.keys()].sort(
+    (left, right) => left.localeCompare(right),
   );
 
   for (const propertyName of sortedPropertyNames) {
@@ -423,15 +442,21 @@ function visitNode(
     const propertyPath = `${path}.${formatPathSegment(propertyName)}`;
     const presence = property.seenCount / node.variants.object.count;
 
-    if (!isRequired(property.seenCount, node.variants.object.count, heuristics)) {
+    if (
+      !isRequired(property.seenCount, node.variants.object.count, heuristics)
+    ) {
       diagnostics.summary.optionalFieldCount += 1;
       pushLimited(diagnostics.optionalFields, maxFindingsPerCategory, {
         path: propertyPath,
-        presence
+        presence,
       });
     }
 
-    const requiredNearMiss = getRequiredNearMiss(propertyPath, presence, heuristics.requiredThreshold);
+    const requiredNearMiss = getRequiredNearMiss(
+      propertyPath,
+      presence,
+      heuristics.requiredThreshold,
+    );
     if (requiredNearMiss) {
       pushDegradation(diagnostics, maxFindingsPerCategory, requiredNearMiss);
     }
@@ -443,7 +468,7 @@ function visitNode(
       heuristics,
       astMergeOptions,
       maxFindingsPerCategory,
-      diagnostics
+      diagnostics,
     );
   }
 }
@@ -475,7 +500,7 @@ function getEmitterVariantCount(node: SchemaNode): number {
 
 function getLiteralOverflowDegradations(
   node: SchemaNode,
-  path: string
+  path: string,
 ): LiteralOverflowDegradation[] {
   const degradations: LiteralOverflowDegradation[] = [];
 
@@ -483,7 +508,7 @@ function getLiteralOverflowDegradations(
     node.variants.string,
     node.variants.integer,
     node.variants.number,
-    node.variants.boolean
+    node.variants.boolean,
   ];
 
   for (const variant of candidates) {
@@ -495,7 +520,7 @@ function getLiteralOverflowDegradations(
       kind: "literal_overflow",
       path,
       primitiveKind: variant.kind,
-      observedCount: variant.count
+      observedCount: variant.count,
     });
   }
 
@@ -505,7 +530,7 @@ function getLiteralOverflowDegradations(
 function getRequiredNearMiss(
   path: string,
   presence: number,
-  threshold: number
+  threshold: number,
 ): ThresholdNearMissDegradation | undefined {
   if (presence >= threshold || threshold <= 0) {
     return undefined;
@@ -522,16 +547,21 @@ function getRequiredNearMiss(
     metric: "required_presence",
     value: presence,
     threshold,
-    direction: "below"
+    direction: "below",
   };
 }
 
 function getStringEnumNearMisses(
   variant: PrimitiveVariant | undefined,
   path: string,
-  heuristics: HeuristicOptions
+  heuristics: HeuristicOptions,
 ): ThresholdNearMissDegradation[] {
-  if (!variant || variant.kind !== "string" || variant.literalOverflow || !variant.literals) {
+  if (
+    !variant ||
+    variant.kind !== "string" ||
+    variant.literalOverflow ||
+    !variant.literals
+  ) {
     return [];
   }
 
@@ -549,7 +579,7 @@ function getStringEnumNearMisses(
       value: variant.count,
       threshold: heuristics.minEnumCount,
       direction: "below",
-      context: "string"
+      context: "string",
     });
   }
 
@@ -569,7 +599,7 @@ function getStringEnumNearMisses(
       value: distinctCount,
       threshold: heuristics.maxEnumSize,
       direction: "above",
-      context: "string"
+      context: "string",
     });
   }
 
@@ -577,7 +607,8 @@ function getStringEnumNearMisses(
     const distinctRatio = distinctCount / variant.count;
     if (
       distinctRatio > heuristics.enumThreshold &&
-      distinctRatio - heuristics.enumThreshold <= RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
+      distinctRatio - heuristics.enumThreshold <=
+        RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
     ) {
       nearMisses.push({
         kind: "threshold_near_miss",
@@ -586,7 +617,7 @@ function getStringEnumNearMisses(
         value: distinctRatio,
         threshold: heuristics.enumThreshold,
         direction: "above",
-        context: "string"
+        context: "string",
       });
     }
   }
@@ -598,7 +629,7 @@ function getNumberEnumNearMisses(
   integerVariant: PrimitiveVariant | undefined,
   numberVariant: PrimitiveVariant | undefined,
   path: string,
-  heuristics: HeuristicOptions
+  heuristics: HeuristicOptions,
 ): ThresholdNearMissDegradation[] {
   if (!integerVariant && !numberVariant) {
     return [];
@@ -623,7 +654,7 @@ function getNumberEnumNearMisses(
       value: totalCount,
       threshold: heuristics.minEnumCount,
       direction: "below",
-      context: "number"
+      context: "number",
     });
   }
 
@@ -665,14 +696,15 @@ function getNumberEnumNearMisses(
       value: distinctCount,
       threshold: heuristics.maxEnumSize,
       direction: "above",
-      context: "number"
+      context: "number",
     });
   }
 
   const distinctRatio = distinctCount / totalCount;
   if (
     distinctRatio > heuristics.enumThreshold &&
-    distinctRatio - heuristics.enumThreshold <= RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
+    distinctRatio - heuristics.enumThreshold <=
+      RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
   ) {
     nearMisses.push({
       kind: "threshold_near_miss",
@@ -681,7 +713,7 @@ function getNumberEnumNearMisses(
       value: distinctRatio,
       threshold: heuristics.enumThreshold,
       direction: "above",
-      context: "number"
+      context: "number",
     });
   }
 
@@ -691,9 +723,14 @@ function getNumberEnumNearMisses(
 function getStringFormatNearMisses(
   variant: PrimitiveVariant | undefined,
   path: string,
-  heuristics: HeuristicOptions
+  heuristics: HeuristicOptions,
 ): ThresholdNearMissDegradation[] {
-  if (!variant || variant.kind !== "string" || !variant.formatCounts || variant.count === 0) {
+  if (
+    !variant ||
+    variant.kind !== "string" ||
+    !variant.formatCounts ||
+    variant.count === 0
+  ) {
     return [];
   }
 
@@ -701,7 +738,10 @@ function getStringFormatNearMisses(
   let bestCount = -1;
 
   for (const [format, count] of variant.formatCounts) {
-    if (count > bestCount || (count === bestCount && format < (bestFormat ?? ""))) {
+    if (
+      count > bestCount ||
+      (count === bestCount && format < (bestFormat ?? ""))
+    ) {
       bestFormat = format;
       bestCount = count;
     }
@@ -724,14 +764,15 @@ function getStringFormatNearMisses(
       value: bestCount,
       threshold: heuristics.minFormatCount,
       direction: "below",
-      context: bestFormat
+      context: bestFormat,
     });
   }
 
   const confidence = bestCount / variant.count;
   if (
     confidence < heuristics.stringFormatThreshold &&
-    heuristics.stringFormatThreshold - confidence <= RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
+    heuristics.stringFormatThreshold - confidence <=
+      RATIO_NEAR_MISS_MARGIN + FLOATING_EPSILON
   ) {
     nearMisses.push({
       kind: "threshold_near_miss",
@@ -740,7 +781,7 @@ function getStringFormatNearMisses(
       value: confidence,
       threshold: heuristics.stringFormatThreshold,
       direction: "below",
-      context: bestFormat
+      context: bestFormat,
     });
   }
 
@@ -754,7 +795,7 @@ function getObjectPresenceStats(variant: ObjectVariant): {
   if (variant.count <= 0 || variant.properties.size === 0) {
     return {
       maxPresence: 0,
-      averagePresence: 0
+      averagePresence: 0,
     };
   }
 
@@ -771,7 +812,7 @@ function getObjectPresenceStats(variant: ObjectVariant): {
 
   return {
     maxPresence,
-    averagePresence: totalPresence / variant.properties.size
+    averagePresence: totalPresence / variant.properties.size,
   };
 }
 
@@ -790,7 +831,7 @@ function pushLimited<T>(target: T[], limit: number, value: T): void {
 function pushDegradation(
   diagnostics: SchemaDiagnostics,
   limit: number,
-  degradation: DegradationFinding
+  degradation: DegradationFinding,
 ): void {
   diagnostics.summary.degradationCount += 1;
 

@@ -1,7 +1,4 @@
-export {
-  generateFromFiles,
-  generateFromText
-} from "./public-api.ts";
+export { generateFromFiles, generateFromText } from "./public-api.ts";
 export type {
   GenerateAstMergeOptions,
   GenerateDiagnostics,
@@ -16,5 +13,5 @@ export type {
   GenerateSchemaOptions,
   GenerateSchemaResult,
   GenerateTypeMode,
-  GenerationOutputFormat
+  GenerationOutputFormat,
 } from "./public-api.ts";

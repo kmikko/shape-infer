@@ -108,7 +108,11 @@ describe("real-world golden snapshots", () => {
       const snapshotPayload = {
         fixture: fixture.fileName,
         sampleSummary,
-        strict: await emitFixtureOutputs(values, fixture.typeBaseName, "strict"),
+        strict: await emitFixtureOutputs(
+          values,
+          fixture.typeBaseName,
+          "strict",
+        ),
         loose: await emitFixtureOutputs(values, fixture.typeBaseName, "loose"),
       };
 
@@ -249,7 +253,9 @@ function parseJsonValue(raw: string, fileName: string): unknown {
     return JSON.parse(raw) as unknown;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to parse ${fileName} as JSON: ${message}`);
+    throw new Error(`Failed to parse ${fileName} as JSON: ${message}`, {
+      cause: error,
+    });
   }
 }
 
@@ -269,6 +275,9 @@ function parseJsonlRecords(raw: string, fileName: string): unknown[] {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(
         `Failed to parse ${fileName} JSONL line ${index + 1}: ${message}`,
+        {
+          cause: error,
+        },
       );
     }
   }
@@ -308,23 +317,29 @@ async function emitFixtureOutputs(
 ): Promise<ModeOutputs> {
   const text = JSON.stringify(values);
   return {
-    typescript: (await generateFromText({
-      text,
-      format: "typescript",
-      typeName: typeBaseName,
-      typeMode,
-    })).output,
-    zod: (await generateFromText({
-      text,
-      format: "zod",
-      typeName: typeBaseName,
-      typeMode,
-    })).output,
-    jsonSchema: (await generateFromText({
-      text,
-      format: "json-schema",
-      typeName: typeBaseName,
-      typeMode,
-    })).output,
+    typescript: (
+      await generateFromText({
+        text,
+        format: "typescript",
+        typeName: typeBaseName,
+        typeMode,
+      })
+    ).output,
+    zod: (
+      await generateFromText({
+        text,
+        format: "zod",
+        typeName: typeBaseName,
+        typeMode,
+      })
+    ).output,
+    jsonSchema: (
+      await generateFromText({
+        text,
+        format: "json-schema",
+        typeName: typeBaseName,
+        typeMode,
+      })
+    ).output,
   };
 }

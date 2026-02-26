@@ -8,7 +8,7 @@ import {
   detectInputFormatFromText,
   inferFromFiles,
   inferFromJsonText,
-  inferFromJsonlStream
+  inferFromJsonlStream,
 } from "./infer.ts";
 import type { InferenceFileSummary, InferenceResult } from "./infer.ts";
 import { resolveInputPaths } from "./input-resolver.ts";
@@ -132,35 +132,38 @@ export interface GenerateFromFilesResult extends GenerateSchemaResult {
 }
 
 export async function generateFromFiles(
-  options: GenerateFromFilesOptions
+  options: GenerateFromFilesOptions,
 ): Promise<GenerateFromFilesResult> {
   if (options.inputPatterns.length === 0) {
     throw new Error("No input patterns provided.");
   }
 
-  const resolvedInputPaths = await resolveInputPaths(options.inputPatterns, options.cwd);
+  const resolvedInputPaths = await resolveInputPaths(
+    options.inputPatterns,
+    options.cwd,
+  );
   const inference = await inferFromFiles(resolvedInputPaths, {
     astMergeOptions: options.astMergeOptions,
     inputFormat: options.inputFormat,
-    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines
+    maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
   });
   const result = finalizeGeneration(inference, options);
 
   return {
     ...result,
-    resolvedInputPaths
+    resolvedInputPaths,
   };
 }
 
 export async function generateFromText(
-  options: GenerateFromTextOptions
+  options: GenerateFromTextOptions,
 ): Promise<GenerateSchemaResult> {
   const sourceName = options.sourceName ?? "<text>";
   const inference = await inferFromText(options.text, {
     inputFormat: options.inputFormat,
     astMergeOptions: options.astMergeOptions,
     maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
-    sourceName
+    sourceName,
   });
 
   return finalizeGeneration(inference, options);
@@ -173,12 +176,15 @@ interface InferTextOptions {
   sourceName: string;
 }
 
-async function inferFromText(text: string, options: InferTextOptions): Promise<InferenceResult> {
+async function inferFromText(
+  text: string,
+  options: InferTextOptions,
+): Promise<InferenceResult> {
   if (options.inputFormat === "jsonl") {
     return inferFromJsonlStream(Readable.from([text]), {
       astMergeOptions: options.astMergeOptions,
       maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
-      sourceName: options.sourceName
+      sourceName: options.sourceName,
     });
   }
 
@@ -187,32 +193,40 @@ async function inferFromText(text: string, options: InferTextOptions): Promise<I
     return inferFromJsonText(text, {
       astMergeOptions: options.astMergeOptions,
       maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
-      sourceName: options.sourceName
+      sourceName: options.sourceName,
     });
   }
 
   return inferFromJsonlStream(Readable.from([text]), {
     astMergeOptions: options.astMergeOptions,
     maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
-    sourceName: options.sourceName
+    sourceName: options.sourceName,
   });
 }
 
 function finalizeGeneration(
   inference: InferenceResult,
-  options: GenerateSchemaOptions
+  options: GenerateSchemaOptions,
 ): GenerateSchemaResult {
   const format = options.format ?? "typescript";
   const typeName = options.typeName ?? "Root";
-  const output = emitGenerationOutput(inference.root, format, options, typeName);
+  const output = emitGenerationOutput(
+    inference.root,
+    format,
+    options,
+    typeName,
+  );
   const diagnostics = options.includeDiagnostics
     ? analyzeSchema(inference.root, {
         heuristics: options.heuristics,
         astMergeOptions: options.astMergeOptions,
-        maxFindingsPerCategory: options.diagnosticsMaxFindings
+        maxFindingsPerCategory: options.diagnosticsMaxFindings,
       })
     : undefined;
-  const warnings = buildWarnings(inference.files, inference.stats.recordsMerged);
+  const warnings = buildWarnings(
+    inference.files,
+    inference.stats.recordsMerged,
+  );
 
   return {
     root: inference.root,
@@ -223,7 +237,7 @@ function finalizeGeneration(
     parseErrorLines: inference.parseErrorLines,
     files: inference.files,
     diagnostics,
-    warnings
+    warnings,
   };
 }
 
@@ -231,7 +245,7 @@ function emitGenerationOutput(
   root: SchemaNode,
   format: GenerationOutputFormat,
   options: GenerateSchemaOptions,
-  typeName: string
+  typeName: string,
 ): string {
   switch (format) {
     case "typescript":
@@ -240,7 +254,7 @@ function emitGenerationOutput(
         heuristics: options.heuristics,
         astMergeOptions: options.astMergeOptions,
         typeMode: options.typeMode,
-        allOptionalProperties: options.allOptionalProperties
+        allOptionalProperties: options.allOptionalProperties,
       });
     case "zod":
       return emitZodSchema(root, {
@@ -248,7 +262,7 @@ function emitGenerationOutput(
         heuristics: options.heuristics,
         astMergeOptions: options.astMergeOptions,
         typeMode: options.typeMode,
-        allOptionalProperties: options.allOptionalProperties
+        allOptionalProperties: options.allOptionalProperties,
       });
     case "json-schema":
       return `${JSON.stringify(
@@ -257,17 +271,17 @@ function emitGenerationOutput(
           heuristics: options.heuristics,
           astMergeOptions: options.astMergeOptions,
           typeMode: options.typeMode,
-          allOptionalProperties: options.allOptionalProperties
+          allOptionalProperties: options.allOptionalProperties,
         }),
         null,
-        2
+        2,
       )}\n`;
   }
 }
 
 function buildWarnings(
   fileSummaries: InferenceFileSummary[],
-  recordsMerged: number
+  recordsMerged: number,
 ): string[] {
   const warnings: string[] = [];
 
@@ -278,23 +292,25 @@ function buildWarnings(
 
     if (fileSummary.format === "jsonl") {
       warnings.push(
-        `Warning: ${fileSummary.source}: skipped ${fileSummary.stats.parseErrors} line(s) that were not valid JSON.`
+        `Warning: ${fileSummary.source}: skipped ${fileSummary.stats.parseErrors} line(s) that were not valid JSON.`,
       );
     } else {
       warnings.push(
-        `Warning: ${fileSummary.source}: failed to parse JSON input (${fileSummary.stats.parseErrors} error).`
+        `Warning: ${fileSummary.source}: failed to parse JSON input (${fileSummary.stats.parseErrors} error).`,
       );
     }
 
     if (fileSummary.parseErrorLines.length > 0) {
       warnings.push(
-        `Warning: ${fileSummary.source}: parse errors at lines ${fileSummary.parseErrorLines.join(", ")}.`
+        `Warning: ${fileSummary.source}: parse errors at lines ${fileSummary.parseErrorLines.join(", ")}.`,
       );
     }
   }
 
   if (recordsMerged === 0) {
-    warnings.push("Warning: no JSON records parsed; output schema defaults to unknown.");
+    warnings.push(
+      "Warning: no JSON records parsed; output schema defaults to unknown.",
+    );
   }
 
   return warnings;

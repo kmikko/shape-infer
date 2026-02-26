@@ -3,12 +3,21 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import fc, { type Parameters } from "fast-check";
 import { describe, test } from "vitest";
-import { emitJsonSchema, type JsonSchemaObject } from "../src/emitters/json-schema.ts";
+import {
+  emitJsonSchema,
+  type JsonSchemaObject,
+} from "../src/emitters/json-schema.ts";
 import { emitZodSchema } from "../src/emitters/zod.ts";
 import { inferFromValues } from "../src/infer.ts";
 import { z } from "zod";
 
-type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
+type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
 interface RuntimeZodSchema {
   safeParse(value: unknown): { success: boolean };
@@ -21,10 +30,13 @@ const CORPUS_SCHEMA_NAME = "PropertyCorpusRoot";
 const configuredRuns = resolveRuns();
 const configuredSeed = resolveSeed();
 
-const singleValueParameters = resolveFastCheckParameters(configuredRuns, configuredSeed);
+const singleValueParameters = resolveFastCheckParameters(
+  configuredRuns,
+  configuredSeed,
+);
 const corpusParameters = resolveFastCheckParameters(
   Math.max(100, Math.floor(configuredRuns / 2)),
-  configuredSeed
+  configuredSeed,
 );
 
 const anythingJsonArbitrary = fc
@@ -35,7 +47,7 @@ const anythingJsonArbitrary = fc
     withBigInt: false,
     withTypedArray: false,
     withBoxedValues: false,
-    withObjectString: false
+    withObjectString: false,
   })
   .filter((value): value is JsonValue => isJsonValue(value));
 
@@ -43,7 +55,7 @@ const generatedJsonValueArbitrary = fc
   .oneof(
     fc.jsonValue().map((value) => value as JsonValue),
     fc.json().map((value) => JSON.parse(value) as JsonValue),
-    anythingJsonArbitrary
+    anythingJsonArbitrary,
   )
   .filter((value): value is JsonValue => isJsonValue(value));
 
@@ -51,16 +63,19 @@ describe("property-based inference invariants", () => {
   test("reserved prototype keys validate correctly when optional and when present", () => {
     const values = [
       JSON.parse(
-        '{"toString":[],"constructor":1,"hasOwnProperty":true,"__proto__":"v"}'
+        '{"toString":[],"constructor":1,"hasOwnProperty":true,"__proto__":"v"}',
       ) as JsonValue,
-      {} as JsonValue
+      {} as JsonValue,
     ];
 
     const root = inferFromValues(values);
     const jsonSchema = emitJsonSchema(root, { rootTitle: CORPUS_SCHEMA_NAME });
     const zodSource = emitZodSchema(root, { rootTypeName: CORPUS_SCHEMA_NAME });
     const jsonSchemaValidator = compileAjvValidator(jsonSchema);
-    const zodSchema = compileZodSchemaFromEmitterSource(zodSource, CORPUS_SCHEMA_NAME);
+    const zodSchema = compileZodSchemaFromEmitterSource(
+      zodSource,
+      CORPUS_SCHEMA_NAME,
+    );
 
     values.forEach((value, index) => {
       assertAjvAcceptsValue(jsonSchemaValidator, value, index);
@@ -68,47 +83,43 @@ describe("property-based inference invariants", () => {
     });
   });
 
-  test(
-    "single generated value round-trips through emitted JSON Schema and Zod",
-    () => {
-      fc.assert(
-        fc.property(generatedJsonValueArbitrary, (value) => {
-          assertRoundTripForValue(value, SINGLE_VALUE_SCHEMA_NAME);
-        }),
-        singleValueParameters
-      );
-    },
-    45_000
-  );
+  test("single generated value round-trips through emitted JSON Schema and Zod", () => {
+    fc.assert(
+      fc.property(generatedJsonValueArbitrary, (value) => {
+        assertRoundTripForValue(value, SINGLE_VALUE_SCHEMA_NAME);
+      }),
+      singleValueParameters,
+    );
+  }, 45_000);
 
-  test(
-    "generated value corpora round-trip through emitted JSON Schema and Zod",
-    () => {
-      fc.assert(
-        fc.property(
-          fc.array(generatedJsonValueArbitrary, { minLength: 1, maxLength: 8 }),
-          (values) => {
-            const root = inferFromValues(values);
-            const jsonSchema = emitJsonSchema(root, { rootTitle: CORPUS_SCHEMA_NAME });
-            const zodSource = emitZodSchema(root, { rootTypeName: CORPUS_SCHEMA_NAME });
+  test("generated value corpora round-trip through emitted JSON Schema and Zod", () => {
+    fc.assert(
+      fc.property(
+        fc.array(generatedJsonValueArbitrary, { minLength: 1, maxLength: 8 }),
+        (values) => {
+          const root = inferFromValues(values);
+          const jsonSchema = emitJsonSchema(root, {
+            rootTitle: CORPUS_SCHEMA_NAME,
+          });
+          const zodSource = emitZodSchema(root, {
+            rootTypeName: CORPUS_SCHEMA_NAME,
+          });
 
-            const jsonSchemaValidator = compileAjvValidator(jsonSchema);
-            const zodSchema = compileZodSchemaFromEmitterSource(
-              zodSource,
-              CORPUS_SCHEMA_NAME
-            );
+          const jsonSchemaValidator = compileAjvValidator(jsonSchema);
+          const zodSchema = compileZodSchemaFromEmitterSource(
+            zodSource,
+            CORPUS_SCHEMA_NAME,
+          );
 
-            values.forEach((value, index) => {
-              assertAjvAcceptsValue(jsonSchemaValidator, value, index);
-              assertZodAcceptsValue(zodSchema, value, index);
-            });
-          }
-        ),
-        corpusParameters
-      );
-    },
-    45_000
-  );
+          values.forEach((value, index) => {
+            assertAjvAcceptsValue(jsonSchemaValidator, value, index);
+            assertZodAcceptsValue(zodSchema, value, index);
+          });
+        },
+      ),
+      corpusParameters,
+    );
+  }, 45_000);
 });
 
 function assertRoundTripForValue(value: JsonValue, schemaName: string): void {
@@ -122,10 +133,12 @@ function assertRoundTripForValue(value: JsonValue, schemaName: string): void {
   assertZodAcceptsValue(zodSchema, value);
 }
 
-function compileAjvValidator(schema: JsonSchemaObject): ValidateFunction<unknown> {
+function compileAjvValidator(
+  schema: JsonSchemaObject,
+): ValidateFunction<unknown> {
   const ajv = new Ajv2020({
     allErrors: true,
-    strict: false
+    strict: false,
   });
   addFormats(ajv);
   return ajv.compile(schema);
@@ -133,7 +146,7 @@ function compileAjvValidator(schema: JsonSchemaObject): ValidateFunction<unknown
 
 function compileZodSchemaFromEmitterSource(
   source: string,
-  schemaName: string
+  schemaName: string,
 ): RuntimeZodSchema {
   const schemaIdentifier = `${schemaName}Schema`;
   const runtimeSource = source
@@ -143,28 +156,30 @@ function compileZodSchemaFromEmitterSource(
     .replace(
       new RegExp(
         `^\\s*export\\s+type\\s+${escapeForRegExp(schemaName)}\\s*=\\s*z\\.infer<\\s*typeof\\s+${escapeForRegExp(
-          schemaIdentifier
+          schemaIdentifier,
         )}\\s*>;\\s*$`,
-        "m"
+        "m",
       ),
-      ""
+      "",
     )
     .replace(
       new RegExp(
         `^\\s*export\\s+const\\s+${escapeForRegExp(schemaIdentifier)}\\s*=`,
-        "m"
+        "m",
       ),
-      `const ${schemaIdentifier} =`
+      `const ${schemaIdentifier} =`,
     );
 
   const evaluateSchema = new Function(
     "z",
-    `${runtimeSource}\nreturn ${schemaIdentifier};`
+    `${runtimeSource}\nreturn ${schemaIdentifier};`,
   ) as (zImport: typeof z) => unknown;
 
   const compiled = evaluateSchema(z);
   if (!isRuntimeZodSchema(compiled)) {
-    throw new Error(`Failed to evaluate emitted Zod schema: ${schemaIdentifier}.`);
+    throw new Error(
+      `Failed to evaluate emitted Zod schema: ${schemaIdentifier}.`,
+    );
   }
 
   return compiled;
@@ -173,7 +188,7 @@ function compileZodSchemaFromEmitterSource(
 function assertAjvAcceptsValue(
   validate: ValidateFunction<unknown>,
   value: JsonValue,
-  index?: number
+  index?: number,
 ): void {
   if (validate(value)) {
     return;
@@ -182,14 +197,14 @@ function assertAjvAcceptsValue(
   const location = index === undefined ? "" : ` at index ${index}`;
   throw new Error(
     `AJV rejected generated value${location}: ${previewValue(value)}\n` +
-      formatAjvErrors(validate.errors)
+      formatAjvErrors(validate.errors),
   );
 }
 
 function assertZodAcceptsValue(
   schema: RuntimeZodSchema,
   value: JsonValue,
-  index?: number
+  index?: number,
 ): void {
   const result = schema.safeParse(value);
   if (result.success) {
@@ -197,12 +212,14 @@ function assertZodAcceptsValue(
   }
 
   const location = index === undefined ? "" : ` at index ${index}`;
-  throw new Error(`Zod rejected generated value${location}: ${previewValue(value)}`);
+  throw new Error(
+    `Zod rejected generated value${location}: ${previewValue(value)}`,
+  );
 }
 
 function resolveFastCheckParameters(
   numRuns: number,
-  seed: number | undefined
+  seed: number | undefined,
 ): Parameters<unknown> {
   if (seed === undefined) {
     return { numRuns };
@@ -240,7 +257,7 @@ function resolveSeed(): number | undefined {
 
 function isJsonValue(
   value: unknown,
-  visiting: Set<unknown> = new Set<unknown>()
+  visiting: Set<unknown> = new Set<unknown>(),
 ): value is JsonValue {
   if (value === null) {
     return true;
@@ -252,7 +269,10 @@ function isJsonValue(
   }
 
   if (valueType === "number") {
-    return Number.isFinite(value) && (!Number.isInteger(value) || Number.isSafeInteger(value));
+    return (
+      Number.isFinite(value) &&
+      (!Number.isInteger(value) || Number.isSafeInteger(value))
+    );
   }
 
   if (valueType !== "object") {

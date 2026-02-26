@@ -17,7 +17,7 @@ describe("emitter edge cases", () => {
     expect(zod).toContain("const UnknownRootSchema = z.unknown();");
     expect(schema).toMatchObject({
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      title: "UnknownRoot"
+      title: "UnknownRoot",
     });
     expect(schema).not.toHaveProperty("type");
   });
@@ -25,27 +25,27 @@ describe("emitter edge cases", () => {
   test("falls back to unknown when union variants exceed maxUnionSize", () => {
     const root = inferFromValues([1, "x", true, null, [1], { nested: 1 }]);
     const heuristics = {
-      maxUnionSize: 3
+      maxUnionSize: 3,
     };
 
     const ts = emitTypeScriptType(root, {
       rootTypeName: "OverflowRoot",
-      heuristics
+      heuristics,
     });
     const zod = emitZodSchema(root, {
       rootTypeName: "OverflowRoot",
-      heuristics
+      heuristics,
     });
     const schema = emitJsonSchema(root, {
       rootTitle: "OverflowRoot",
-      heuristics
+      heuristics,
     });
 
     expect(ts).toContain("export type OverflowRoot = unknown;");
     expect(zod).toContain("const OverflowRootSchema = z.unknown();");
     expect(schema).toMatchObject({
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      title: "OverflowRoot"
+      title: "OverflowRoot",
     });
     expect(schema).not.toHaveProperty("type");
     expect(schema).not.toHaveProperty("anyOf");
@@ -55,26 +55,40 @@ describe("emitter edge cases", () => {
     const emptyObjectRoot = inferFromValues([{}]);
     const emptyArrayRoot = inferFromValues([[]]);
 
-    const objectTs = emitTypeScriptType(emptyObjectRoot, { rootTypeName: "EmptyObject" });
-    const objectZod = emitZodSchema(emptyObjectRoot, { rootTypeName: "EmptyObject" });
-    const objectSchema = emitJsonSchema(emptyObjectRoot, { rootTitle: "EmptyObject" });
+    const objectTs = emitTypeScriptType(emptyObjectRoot, {
+      rootTypeName: "EmptyObject",
+    });
+    const objectZod = emitZodSchema(emptyObjectRoot, {
+      rootTypeName: "EmptyObject",
+    });
+    const objectSchema = emitJsonSchema(emptyObjectRoot, {
+      rootTitle: "EmptyObject",
+    });
 
     expect(objectTs).toContain("export type EmptyObject = {};");
     expect(objectZod).toContain("const EmptyObjectSchema = z.object({});");
     expect(objectSchema).toMatchObject({
       type: "object",
-      properties: {}
+      properties: {},
     });
 
-    const arrayTs = emitTypeScriptType(emptyArrayRoot, { rootTypeName: "EmptyArray" });
-    const arrayZod = emitZodSchema(emptyArrayRoot, { rootTypeName: "EmptyArray" });
-    const arraySchema = emitJsonSchema(emptyArrayRoot, { rootTitle: "EmptyArray" });
+    const arrayTs = emitTypeScriptType(emptyArrayRoot, {
+      rootTypeName: "EmptyArray",
+    });
+    const arrayZod = emitZodSchema(emptyArrayRoot, {
+      rootTypeName: "EmptyArray",
+    });
+    const arraySchema = emitJsonSchema(emptyArrayRoot, {
+      rootTitle: "EmptyArray",
+    });
 
     expect(arrayTs).toContain("export type EmptyArray = Array<unknown>;");
-    expect(arrayZod).toContain("const EmptyArraySchema = z.array(z.unknown());");
+    expect(arrayZod).toContain(
+      "const EmptyArraySchema = z.array(z.unknown());",
+    );
     expect(arraySchema).toMatchObject({
       type: "array",
-      items: {}
+      items: {},
     });
   });
 
@@ -83,26 +97,26 @@ describe("emitter edge cases", () => {
       {
         name: "date",
         values: ["2025-01-01", "2025-01-02"],
-        expectedFragment: ".date()"
+        expectedFragment: ".date()",
       },
       {
         name: "email",
         values: ["alpha@example.com", "beta@example.com"],
-        expectedFragment: ".email()"
+        expectedFragment: ".email()",
       },
       {
         name: "uuid",
         values: [
           "550e8400-e29b-41d4-a716-446655440000",
-          "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+          "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
         ],
-        expectedFragment: ".uuid()"
+        expectedFragment: ".uuid()",
       },
       {
         name: "uri",
         values: ["https://example.com/a", "https://example.com/b"],
-        expectedFragment: ".url()"
-      }
+        expectedFragment: ".url()",
+      },
     ] as const;
 
     for (const fixture of cases) {
@@ -111,8 +125,8 @@ describe("emitter edge cases", () => {
         rootTypeName: `Format${fixture.name}`,
         heuristics: {
           minFormatCount: 2,
-          stringFormatThreshold: 1
-        }
+          stringFormatThreshold: 1,
+        },
       });
 
       expect(zod).toContain(fixture.expectedFragment);
@@ -134,7 +148,7 @@ describe("emitter edge cases", () => {
     expect(ts).toContain("unknown");
 
     // Zod: the property schema falls back to z.unknown()
-    expect(zod).toContain("\"score\"");
+    expect(zod).toContain('"score"');
     expect(zod).toContain("z.unknown()");
 
     // JSON Schema: the property schema is {}
@@ -172,7 +186,7 @@ describe("emitter edge cases", () => {
     // → enum IS inferred. Number("-0") is -0 → Object.is(-0, -0) is true → "-0" literal.
     const zod = emitZodSchema(node, {
       rootTypeName: "NegZero",
-      heuristics: { minEnumCount: 2, enumThreshold: 0.5 }
+      heuristics: { minEnumCount: 2, enumThreshold: 0.5 },
     });
 
     // The emitted schema is a union of number literals
@@ -191,7 +205,7 @@ describe("emitter edge cases", () => {
     const root = inferFromValues([null, null, null]);
     const zod = emitZodSchema(root, {
       rootTypeName: "NullOnly",
-      typeMode: "loose"
+      typeMode: "loose",
     });
 
     // Single null variant → resolvedVariants.length===1 → returns "z.null()" directly
@@ -213,8 +227,8 @@ describe("emitter edge cases", () => {
 
     expect(ts).toContain("present");
     expect(ts).not.toContain("ghost");
-    expect(zod).toContain("\"present\"");
-    expect(zod).not.toContain("\"ghost\"");
+    expect(zod).toContain('"present"');
+    expect(zod).not.toContain('"ghost"');
     expect(schema).toHaveProperty("properties");
     const properties = schema.properties as Record<string, unknown>;
     expect(properties).toHaveProperty("present");
@@ -237,7 +251,7 @@ describe("emitter edge cases", () => {
 
     const zodNoExport = emitZodSchema(root, {
       exportSchema: false,
-      exportType: false
+      exportType: false,
     });
     expect(zodNoExport).toContain("const RootSchema =");
     expect(zodNoExport).toContain("type Root =");

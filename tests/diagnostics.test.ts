@@ -3,21 +3,20 @@ import { analyzeSchema, formatDiagnosticsReport } from "../src/diagnostics.ts";
 import { createNode, mergeValue } from "../src/ast.ts";
 import { inferFromValues } from "../src/infer.ts";
 
-
 describe("diagnostics degradations", () => {
   test("captures union_overflow degradation when union variants exceed maxUnionSize", () => {
     const root = inferFromValues([1, "x", true, null, [1], { nested: 1 }]);
 
     const diagnostics = analyzeSchema(root, {
       heuristics: {
-        maxUnionSize: 3
-      }
+        maxUnionSize: 3,
+      },
     });
 
     expect(diagnostics.summary.unionOverflowCount).toBeGreaterThan(0);
 
     const overflow = diagnostics.degradations.find(
-      (entry) => entry.kind === "union_overflow" && entry.path === "$"
+      (entry) => entry.kind === "union_overflow" && entry.path === "$",
     );
 
     expect(overflow).toBeDefined();
@@ -31,8 +30,8 @@ describe("diagnostics degradations", () => {
   test("captures literal_overflow degradation when literal tracking overflows", () => {
     const root = inferFromValues(["A", "B", "C"], {
       astMergeOptions: {
-        maxTrackedLiteralsPerVariant: 2
-      }
+        maxTrackedLiteralsPerVariant: 2,
+      },
     });
 
     const diagnostics = analyzeSchema(root);
@@ -42,7 +41,7 @@ describe("diagnostics degradations", () => {
       kind: "literal_overflow",
       path: "$",
       primitiveKind: "string",
-      observedCount: 3
+      observedCount: 3,
     });
   });
 
@@ -50,20 +49,21 @@ describe("diagnostics degradations", () => {
     const root = inferFromValues([
       { id: "A", attributes: { a: "x", b: "y", c: "z", d: "w" } },
       { id: "B", attributes: { e: "x", f: "y", g: "z", h: "w" } },
-      { id: "C", attributes: { i: "x", j: "y", k: "z", l: "w" } }
+      { id: "C", attributes: { i: "x", j: "y", k: "z", l: "w" } },
     ]);
 
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         recordMinKeys: 4,
-        recordMaxPresence: 0.4
-      }
+        recordMaxPresence: 0.4,
+      },
     });
 
     expect(diagnostics.summary.recordLikeCollapsedCount).toBeGreaterThan(0);
 
     const collapsed = diagnostics.degradations.find(
-      (entry) => entry.kind === "record_like_collapsed" && entry.path === "$.attributes"
+      (entry) =>
+        entry.kind === "record_like_collapsed" && entry.path === "$.attributes",
     );
 
     expect(collapsed).toBeDefined();
@@ -87,11 +87,11 @@ describe("diagnostics degradations", () => {
     const rows = [
       makeRow(columns.slice(0, 14)),
       makeRow(columns.slice(14, 28)),
-      makeRow(columns.slice(28, 42))
+      makeRow(columns.slice(28, 42)),
     ];
     const root = inferFromValues(rows);
     const diagnostics = analyzeSchema(root, {
-      heuristics: { recordMinKeys: 40, recordMaxPresence: 0.4 }
+      heuristics: { recordMinKeys: 40, recordMaxPresence: 0.4 },
     });
 
     expect(diagnostics.summary.recordLikeObjectCount).toBeGreaterThan(0);
@@ -104,8 +104,8 @@ describe("diagnostics degradations", () => {
     const requiredRoot = inferFromValues([{ a: 1 }, { a: 2 }, {}]);
     const requiredDiagnostics = analyzeSchema(requiredRoot, {
       heuristics: {
-        requiredThreshold: 0.7
-      }
+        requiredThreshold: 0.7,
+      },
     });
 
     expect(requiredDiagnostics.degradations).toContainEqual({
@@ -114,15 +114,15 @@ describe("diagnostics degradations", () => {
       metric: "required_presence",
       value: 2 / 3,
       threshold: 0.7,
-      direction: "below"
+      direction: "below",
     });
 
     const enumRoot = inferFromValues(["A", "B", "C", "A"]);
     const enumDiagnostics = analyzeSchema(enumRoot, {
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 0.7
-      }
+        enumThreshold: 0.7,
+      },
     });
 
     expect(
@@ -130,16 +130,16 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_distinct_ratio" &&
-          entry.path === "$"
-      )
+          entry.path === "$",
+      ),
     ).toBe(true);
 
     const numberEnumRoot = inferFromValues([1, 2, 3, 1]);
     const numberEnumDiagnostics = analyzeSchema(numberEnumRoot, {
       heuristics: {
         minEnumCount: 2,
-        enumThreshold: 0.7
-      }
+        enumThreshold: 0.7,
+      },
     });
 
     expect(
@@ -148,8 +148,8 @@ describe("diagnostics degradations", () => {
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_distinct_ratio" &&
           entry.path === "$" &&
-          entry.context === "number"
-      )
+          entry.context === "number",
+      ),
     ).toBe(true);
 
     const numberEnumCountRoot = inferFromValues([1, 2, 3, 1, 2, 3]);
@@ -157,8 +157,8 @@ describe("diagnostics degradations", () => {
       heuristics: {
         minEnumCount: 2,
         maxEnumSize: 2,
-        enumThreshold: 1
-      }
+        enumThreshold: 1,
+      },
     });
 
     expect(
@@ -167,22 +167,22 @@ describe("diagnostics degradations", () => {
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_distinct_count" &&
           entry.path === "$" &&
-          entry.context === "number"
-      )
+          entry.context === "number",
+      ),
     ).toBe(true);
 
     const formatRoot = inferFromValues([
       "foo@example.com",
       "bar@example.com",
       "not-an-email",
-      "also-not-an-email"
+      "also-not-an-email",
     ]);
 
     const formatDiagnostics = analyzeSchema(formatRoot, {
       heuristics: {
         minFormatCount: 2,
-        stringFormatThreshold: 0.55
-      }
+        stringFormatThreshold: 0.55,
+      },
     });
 
     expect(
@@ -190,8 +190,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "format_confidence" &&
-          entry.path === "$"
-      )
+          entry.path === "$",
+      ),
     ).toBe(true);
 
     const formatCountRoot = inferFromValues([
@@ -200,14 +200,14 @@ describe("diagnostics degradations", () => {
       "baz@example.com",
       "qux@example.com",
       "not-an-email",
-      "also-not-an-email"
+      "also-not-an-email",
     ]);
 
     const formatCountDiagnostics = analyzeSchema(formatCountRoot, {
       heuristics: {
         minFormatCount: 5,
-        stringFormatThreshold: 0.1
-      }
+        stringFormatThreshold: 0.1,
+      },
     });
 
     expect(
@@ -215,8 +215,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "format_sample_count" &&
-          entry.path === "$"
-      )
+          entry.path === "$",
+      ),
     ).toBe(true);
   });
 
@@ -224,15 +224,15 @@ describe("diagnostics degradations", () => {
     const root = inferFromValues([1, "x", true, null, [1], { nested: 1 }]);
     const diagnostics = analyzeSchema(root, {
       heuristics: {
-        maxUnionSize: 3
-      }
+        maxUnionSize: 3,
+      },
     });
 
     const report = formatDiagnosticsReport(diagnostics, {
       linesRead: 6,
       recordsMerged: 6,
       parseErrors: 0,
-      skippedEmptyLines: 0
+      skippedEmptyLines: 0,
     });
 
     expect(report).toContain("degradations:");
@@ -243,48 +243,48 @@ describe("diagnostics degradations", () => {
   test("formatDiagnosticsReport renders non-union degradation details", () => {
     const literalRoot = inferFromValues(["A", "B", "C"], {
       astMergeOptions: {
-        maxTrackedLiteralsPerVariant: 2
-      }
+        maxTrackedLiteralsPerVariant: 2,
+      },
     });
     const literalDiagnostics = analyzeSchema(literalRoot);
     const literalReport = formatDiagnosticsReport(literalDiagnostics, {
       linesRead: 3,
       recordsMerged: 3,
       parseErrors: 0,
-      skippedEmptyLines: 0
+      skippedEmptyLines: 0,
     });
     expect(literalReport).toContain("literal_overflow");
 
     const recordRoot = inferFromValues([
       { id: "A", attributes: { a: "x", b: "y", c: "z", d: "w" } },
       { id: "B", attributes: { e: "x", f: "y", g: "z", h: "w" } },
-      { id: "C", attributes: { i: "x", j: "y", k: "z", l: "w" } }
+      { id: "C", attributes: { i: "x", j: "y", k: "z", l: "w" } },
     ]);
     const recordDiagnostics = analyzeSchema(recordRoot, {
       heuristics: {
         recordMinKeys: 4,
-        recordMaxPresence: 0.4
-      }
+        recordMaxPresence: 0.4,
+      },
     });
     const recordReport = formatDiagnosticsReport(recordDiagnostics, {
       linesRead: 3,
       recordsMerged: 3,
       parseErrors: 0,
-      skippedEmptyLines: 0
+      skippedEmptyLines: 0,
     });
     expect(recordReport).toContain("record_like_collapsed");
 
     const thresholdRoot = inferFromValues([{ a: 1 }, { a: 2 }, {}]);
     const thresholdDiagnostics = analyzeSchema(thresholdRoot, {
       heuristics: {
-        requiredThreshold: 0.7
-      }
+        requiredThreshold: 0.7,
+      },
     });
     const thresholdReport = formatDiagnosticsReport(thresholdDiagnostics, {
       linesRead: 3,
       recordsMerged: 3,
       parseErrors: 0,
-      skippedEmptyLines: 0
+      skippedEmptyLines: 0,
     });
     expect(thresholdReport).toContain("threshold_near_miss");
   });
@@ -293,10 +293,10 @@ describe("diagnostics degradations", () => {
     const root = inferFromValues([{ a: 1 }]);
 
     expect(() => analyzeSchema(root, { maxFindingsPerCategory: 0 })).toThrow(
-      /maxFindingsPerCategory must be an integer >= 1/
+      /maxFindingsPerCategory must be an integer >= 1/,
     );
     expect(() => analyzeSchema(root, { maxFindingsPerCategory: 0.5 })).toThrow(
-      /maxFindingsPerCategory must be an integer >= 1/
+      /maxFindingsPerCategory must be an integer >= 1/,
     );
   });
 
@@ -325,9 +325,9 @@ describe("diagnostics degradations", () => {
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         minEnumCount: 2, // totalCount=10 >= minEnumCount, no sample_count near-miss
-        maxEnumSize: 2,  // distinctCount=3 > maxEnumSize=2, triggers enum candidate
-        enumThreshold: 1.0
-      }
+        maxEnumSize: 2, // distinctCount=3 > maxEnumSize=2, triggers enum candidate
+        enumThreshold: 1.0,
+      },
     });
 
     // Should have enum near-miss for distinct_count (3 > 2), not crash
@@ -336,8 +336,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_distinct_count" &&
-          entry.context === "number"
-      )
+          entry.context === "number",
+      ),
     ).toBe(true);
   });
 
@@ -347,13 +347,15 @@ describe("diagnostics degradations", () => {
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         minFormatCount: 2,
-        stringFormatThreshold: 0.5
-      }
+        stringFormatThreshold: 0.5,
+      },
     });
 
     // No format near-miss should be emitted since none of the strings match any format
     const formatNearMisses = diagnostics.degradations.filter(
-      (entry) => entry.kind === "threshold_near_miss" && entry.metric === "format_confidence"
+      (entry) =>
+        entry.kind === "threshold_near_miss" &&
+        entry.metric === "format_confidence",
     );
     expect(formatNearMisses).toHaveLength(0);
   });
@@ -363,11 +365,11 @@ describe("diagnostics degradations", () => {
     // RATIO_NEAR_MISS_MARGIN = 0.05, so delta <= margin → degradation IS pushed (line 436).
     const objects = [
       ...Array.from({ length: 19 }, () => ({ a: 1 })),
-      {} // missing 'a' once
+      {}, // missing 'a' once
     ];
     const root = inferFromValues(objects);
     const diagnostics = analyzeSchema(root, {
-      heuristics: { requiredThreshold: 1.0 }
+      heuristics: { requiredThreshold: 1.0 },
     });
 
     expect(
@@ -375,8 +377,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "required_presence" &&
-          entry.path === "$.a"
-      )
+          entry.path === "$.a",
+      ),
     ).toBe(true);
     expect(diagnostics.summary.thresholdNearMissCount).toBeGreaterThan(0);
   });
@@ -403,14 +405,15 @@ describe("diagnostics degradations", () => {
       heuristics: {
         minEnumCount: 3,
         maxEnumSize: 20,
-        enumThreshold: 0.5
-      }
+        enumThreshold: 0.5,
+      },
     });
 
     // The function returns early without emitting enum_distinct_ratio near-miss
     const ratioNearMisses = diagnostics.degradations.filter(
       (entry) =>
-        entry.kind === "threshold_near_miss" && entry.metric === "enum_distinct_ratio"
+        entry.kind === "threshold_near_miss" &&
+        entry.metric === "enum_distinct_ratio",
     );
     expect(ratioNearMisses).toHaveLength(0);
   });
@@ -436,13 +439,14 @@ describe("diagnostics degradations", () => {
       heuristics: {
         minEnumCount: 3,
         maxEnumSize: 20,
-        enumThreshold: 0.5
-      }
+        enumThreshold: 0.5,
+      },
     });
 
     const ratioNearMisses = diagnostics.degradations.filter(
       (entry) =>
-        entry.kind === "threshold_near_miss" && entry.metric === "enum_distinct_ratio"
+        entry.kind === "threshold_near_miss" &&
+        entry.metric === "enum_distinct_ratio",
     );
     expect(ratioNearMisses).toHaveLength(0);
   });
@@ -453,8 +457,8 @@ describe("diagnostics degradations", () => {
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         minEnumCount: 4, // totalCount=3 is 1 below → qualifies for sample_count near-miss
-        enumThreshold: 0.9
-      }
+        enumThreshold: 0.9,
+      },
     });
 
     expect(
@@ -462,8 +466,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_sample_count" &&
-          entry.context === "number"
-      )
+          entry.context === "number",
+      ),
     ).toBe(true);
   });
 
@@ -486,14 +490,14 @@ describe("diagnostics degradations", () => {
       "bar@example.com",
       "foo@example.com",
       "bar@example.com",
-      "foo@example.com"
+      "foo@example.com",
     ]);
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         enumThreshold: 0.5,
         minFormatCount: 2,
-        stringFormatThreshold: 1
-      }
+        stringFormatThreshold: 1,
+      },
     });
     const report = formatDiagnosticsReport(diagnostics);
 
@@ -518,19 +522,21 @@ describe("diagnostics degradations", () => {
 
     const diagnostics = analyzeSchema(root);
     expect(diagnostics.summary.nodesVisited).toBeGreaterThan(1);
-    expect(diagnostics.optionalFields.some((entry) => entry.path.includes("ghost"))).toBe(false);
+    expect(
+      diagnostics.optionalFields.some((entry) => entry.path.includes("ghost")),
+    ).toBe(false);
   });
 
   test("number near misses return early when literal tracking overflow is set", () => {
     const root = inferFromValues([1, 2, 3], {
       astMergeOptions: {
-        maxTrackedLiteralsPerVariant: 1
-      }
+        maxTrackedLiteralsPerVariant: 1,
+      },
     });
     const diagnostics = analyzeSchema(root, {
       heuristics: {
-        minEnumCount: 4
-      }
+        minEnumCount: 4,
+      },
     });
 
     expect(
@@ -538,8 +544,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "enum_sample_count" &&
-          entry.context === "number"
-      )
+          entry.context === "number",
+      ),
     ).toBe(false);
   });
 
@@ -548,13 +554,13 @@ describe("diagnostics degradations", () => {
       "https://example.com/a",
       "https://example.com/b",
       "alpha@example.com",
-      "beta@example.com"
+      "beta@example.com",
     ]);
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         minFormatCount: 2,
-        stringFormatThreshold: 0.55
-      }
+        stringFormatThreshold: 0.55,
+      },
     });
 
     expect(
@@ -562,8 +568,8 @@ describe("diagnostics degradations", () => {
         (entry) =>
           entry.kind === "threshold_near_miss" &&
           entry.metric === "format_confidence" &&
-          entry.context === "email"
-      )
+          entry.context === "email",
+      ),
     ).toBe(true);
   });
 
@@ -580,8 +586,8 @@ describe("diagnostics degradations", () => {
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         minFormatCount: 1,
-        stringFormatThreshold: 0.5
-      }
+        stringFormatThreshold: 0.5,
+      },
     });
 
     expect(diagnostics.summary.stringFormatCount).toBe(0);
@@ -589,15 +595,18 @@ describe("diagnostics degradations", () => {
       diagnostics.degradations.some(
         (entry) =>
           entry.kind === "threshold_near_miss" &&
-          (entry.metric === "format_confidence" || entry.metric === "format_sample_count")
-      )
+          (entry.metric === "format_confidence" ||
+            entry.metric === "format_sample_count"),
+      ),
     ).toBe(false);
   });
 
   test("optional-field paths quote non-identifier property names", () => {
     const root = inferFromValues([{ "bad-key": 1 }, {}]);
     const diagnostics = analyzeSchema(root);
-    expect(diagnostics.optionalFields.some((entry) => entry.path === '$."bad-key"')).toBe(true);
+    expect(
+      diagnostics.optionalFields.some((entry) => entry.path === '$."bad-key"'),
+    ).toBe(true);
   });
 
   test("record-like diagnostics guard handles variants that become empty at stats time", () => {
@@ -615,21 +624,24 @@ describe("diagnostics degradations", () => {
           "value",
           {
             seenCount: 1,
-            node: propertyNode
-          }
-        ]
-      ])
+            node: propertyNode,
+          },
+        ],
+      ]),
     } as {
       kind: "object";
       count: number;
-      properties: Map<string, { seenCount: number; node: ReturnType<typeof createNode> }>;
+      properties: Map<
+        string,
+        { seenCount: number; node: ReturnType<typeof createNode> }
+      >;
     };
 
     Object.defineProperty(unstableObjectVariant, "count", {
       get() {
         countReads += 1;
         return countReads <= 2 ? 1 : 0;
-      }
+      },
     });
 
     root.variants.object = unstableObjectVariant;
@@ -637,12 +649,12 @@ describe("diagnostics degradations", () => {
     const diagnostics = analyzeSchema(root, {
       heuristics: {
         recordMinKeys: 1,
-        recordMaxPresence: 1
-      }
+        recordMaxPresence: 1,
+      },
     });
 
     const collapsed = diagnostics.degradations.find(
-      (entry) => entry.kind === "record_like_collapsed" && entry.path === "$"
+      (entry) => entry.kind === "record_like_collapsed" && entry.path === "$",
     );
     expect(collapsed).toBeDefined();
     if (!collapsed || collapsed.kind !== "record_like_collapsed") {

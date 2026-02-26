@@ -11,7 +11,7 @@ export interface ResolvedEmissionStyleOptions {
 }
 
 export function resolveEmissionStyleOptions(
-  options: EmissionStyleOptions = {}
+  options: EmissionStyleOptions = {},
 ): ResolvedEmissionStyleOptions {
   const typeMode = options.typeMode ?? "strict";
   if (typeMode !== "strict" && typeMode !== "loose") {
@@ -20,6 +20,6 @@ export function resolveEmissionStyleOptions(
 
   return {
     typeMode,
-    allOptionalProperties: options.allOptionalProperties ?? false
+    allOptionalProperties: options.allOptionalProperties ?? false,
   };
 }

@@ -268,7 +268,6 @@ describe("infer", () => {
 
     try {
       JSON.parse = (() => {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error
         // Throw a plain non-Error value with no position info — exercises the String(error) branch
         throw "unexpected character";
       }) as typeof JSON.parse;

@@ -12,7 +12,7 @@ export interface CliRunResult {
 
 export async function withTempDir<T>(
   prefix: string,
-  run: (directory: string) => Promise<T> | T
+  run: (directory: string) => Promise<T> | T,
 ): Promise<T> {
   const directory = await mkdtemp(path.join(os.tmpdir(), prefix));
 
@@ -23,15 +23,14 @@ export async function withTempDir<T>(
   }
 }
 
-export function runCli(args: string[], stdinText?: string): Promise<CliRunResult> {
+export function runCli(
+  args: string[],
+  stdinText?: string,
+): Promise<CliRunResult> {
   return new Promise((resolve, reject) => {
-    const child = spawn(
-      process.execPath,
-      [cliPath, ...args],
-      {
-        stdio: ["pipe", "pipe", "pipe"]
-      }
-    );
+    const child = spawn(process.execPath, [cliPath, ...args], {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
 
     let stdout = "";
     let stderr = "";
@@ -49,7 +48,9 @@ export function runCli(args: string[], stdinText?: string): Promise<CliRunResult
     child.on("close", (code: number | null) => {
       if (code !== 0) {
         reject(
-          new Error(`CLI exited with code ${code}\nstdout:\n${stdout}\nstderr:\n${stderr}`)
+          new Error(
+            `CLI exited with code ${code}\nstdout:\n${stdout}\nstderr:\n${stderr}`,
+          ),
         );
         return;
       }

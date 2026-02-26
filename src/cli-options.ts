@@ -31,11 +31,12 @@ export function parseCliArgs(argv: string[]): CliOptions {
     typeMode: "strict",
     allOptionalProperties: false,
     heuristics: {},
-    maxTrackedLiteralsPerVariant: DEFAULT_AST_MERGE_OPTIONS.maxTrackedLiteralsPerVariant,
+    maxTrackedLiteralsPerVariant:
+      DEFAULT_AST_MERGE_OPTIONS.maxTrackedLiteralsPerVariant,
     maxCapturedParseErrorLines: 20,
     diagnostics: false,
     diagnosticsMaxFindings: 25,
-    help: false
+    help: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -63,7 +64,9 @@ export function parseCliArgs(argv: string[]): CliOptions {
         break;
       case "--format":
       case "-f":
-        options.outputFormat = parseOutputFormat(readArgValue(argv, index, arg));
+        options.outputFormat = parseOutputFormat(
+          readArgValue(argv, index, arg),
+        );
         index += 1;
         break;
       case "--type-mode":
@@ -78,7 +81,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
           readArgValue(argv, index, arg),
           0,
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
@@ -87,16 +90,24 @@ export function parseCliArgs(argv: string[]): CliOptions {
           readArgValue(argv, index, arg),
           0,
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
       case "--max-enum-size":
-        options.heuristics.maxEnumSize = parseIntegerMin(readArgValue(argv, index, arg), 2, arg);
+        options.heuristics.maxEnumSize = parseIntegerMin(
+          readArgValue(argv, index, arg),
+          2,
+          arg,
+        );
         index += 1;
         break;
       case "--min-enum-count":
-        options.heuristics.minEnumCount = parseIntegerMin(readArgValue(argv, index, arg), 1, arg);
+        options.heuristics.minEnumCount = parseIntegerMin(
+          readArgValue(argv, index, arg),
+          1,
+          arg,
+        );
         index += 1;
         break;
       case "--string-format-threshold":
@@ -104,16 +115,24 @@ export function parseCliArgs(argv: string[]): CliOptions {
           readArgValue(argv, index, arg),
           0,
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
       case "--min-format-count":
-        options.heuristics.minFormatCount = parseIntegerMin(readArgValue(argv, index, arg), 1, arg);
+        options.heuristics.minFormatCount = parseIntegerMin(
+          readArgValue(argv, index, arg),
+          1,
+          arg,
+        );
         index += 1;
         break;
       case "--record-min-keys":
-        options.heuristics.recordMinKeys = parseIntegerMin(readArgValue(argv, index, arg), 1, arg);
+        options.heuristics.recordMinKeys = parseIntegerMin(
+          readArgValue(argv, index, arg),
+          1,
+          arg,
+        );
         index += 1;
         break;
       case "--record-max-presence":
@@ -121,19 +140,23 @@ export function parseCliArgs(argv: string[]): CliOptions {
           readArgValue(argv, index, arg),
           0,
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
       case "--max-union-size":
-        options.heuristics.maxUnionSize = parseIntegerMin(readArgValue(argv, index, arg), 1, arg);
+        options.heuristics.maxUnionSize = parseIntegerMin(
+          readArgValue(argv, index, arg),
+          1,
+          arg,
+        );
         index += 1;
         break;
       case "--max-tracked-literals":
         options.maxTrackedLiteralsPerVariant = parseIntegerMin(
           readArgValue(argv, index, arg),
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
@@ -141,7 +164,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
         options.maxCapturedParseErrorLines = parseIntegerMin(
           readArgValue(argv, index, arg),
           0,
-          arg
+          arg,
         );
         index += 1;
         break;
@@ -156,7 +179,7 @@ export function parseCliArgs(argv: string[]): CliOptions {
         options.diagnosticsMaxFindings = parseIntegerMin(
           readArgValue(argv, index, arg),
           1,
-          arg
+          arg,
         );
         index += 1;
         break;
@@ -199,7 +222,7 @@ export function buildUsage(): string {
     "  --diagnostics             Print diagnostics summary to stderr.",
     "  --diagnostics-output      Write diagnostics JSON report to file.",
     "  --diagnostics-max-findings Max entries per diagnostics category. Defaults to 25.",
-    "  -h, --help       Show usage."
+    "  -h, --help       Show usage.",
   ].join("\n");
 }
 
@@ -211,7 +234,11 @@ function readArgValue(argv: string[], index: number, argName: string): string {
   return value;
 }
 
-function parseIntegerMin(value: string, minimum: number, argName: string): number {
+function parseIntegerMin(
+  value: string,
+  minimum: number,
+  argName: string,
+): number {
   if (!/^-?\d+$/.test(value)) {
     throw new Error(`${argName} must be an integer >= ${minimum}.`);
   }
@@ -223,10 +250,17 @@ function parseIntegerMin(value: string, minimum: number, argName: string): numbe
   return parsed;
 }
 
-function parseBoundedNumber(value: string, min: number, max: number, argName: string): number {
+function parseBoundedNumber(
+  value: string,
+  min: number,
+  max: number,
+  argName: string,
+): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
-    throw new Error(`${argName} must be a finite number between ${min} and ${max}.`);
+    throw new Error(
+      `${argName} must be a finite number between ${min} and ${max}.`,
+    );
   }
   return parsed;
 }
@@ -241,7 +275,9 @@ function parseInputFormat(value: string): InputFormat {
     case "json":
       return "json";
     default:
-      throw new Error(`Unsupported input format: ${value}. Use one of: auto, jsonl, json.`);
+      throw new Error(
+        `Unsupported input format: ${value}. Use one of: auto, jsonl, json.`,
+      );
   }
 }
 
@@ -258,7 +294,7 @@ function parseOutputFormat(value: string): OutputFormat {
       return "json-schema";
     default:
       throw new Error(
-        `Unsupported format: ${value}. Use one of: typescript, zod, json-schema.`
+        `Unsupported format: ${value}. Use one of: typescript, zod, json-schema.`,
       );
   }
 }
@@ -270,6 +306,8 @@ function parseTypeMode(value: string): TypeMode {
     case "loose":
       return "loose";
     default:
-      throw new Error(`Unsupported type mode: ${value}. Use one of: strict, loose.`);
+      throw new Error(
+        `Unsupported type mode: ${value}. Use one of: strict, loose.`,
+      );
   }
 }

@@ -11,9 +11,9 @@ const COMPLEX_DATASET = [
     meta: {
       login_count: 42,
       last_seen: "2023-01-01T12:00:00Z",
-      preferences: { theme: "dark" }
+      preferences: { theme: "dark" },
     },
-    flags: { valid: true }
+    flags: { valid: true },
   },
   {
     id: "2",
@@ -23,9 +23,9 @@ const COMPLEX_DATASET = [
     meta: {
       login_count: 0,
       last_seen: null,
-      preferences: {}
+      preferences: {},
     },
-    flags: { verified: false }
+    flags: { verified: false },
   },
   {
     id: 3,
@@ -33,10 +33,10 @@ const COMPLEX_DATASET = [
     roles: [],
     meta: {
       // missing login_count
-      extra: "field"
-    }
+      extra: "field",
+    },
     // missing flags
-  }
+  },
 ];
 
 describe("public api golden snapshots", () => {
@@ -46,7 +46,7 @@ describe("public api golden snapshots", () => {
       format: "typescript",
       typeName: "UserRecord",
       typeMode: "strict",
-      includeDiagnostics: true
+      includeDiagnostics: true,
     });
     expect(result.output).toMatchSnapshot();
     expect(result.diagnostics).toMatchSnapshot();
@@ -57,7 +57,7 @@ describe("public api golden snapshots", () => {
       text: JSON.stringify(COMPLEX_DATASET),
       format: "zod",
       typeName: "UserSchema",
-      typeMode: "strict"
+      typeMode: "strict",
     });
     expect(result.output).toMatchSnapshot();
   });
@@ -66,7 +66,7 @@ describe("public api golden snapshots", () => {
     const result = await generateFromText({
       text: JSON.stringify(COMPLEX_DATASET),
       format: "json-schema",
-      typeName: "User"
+      typeName: "User",
     });
     expect(result.output).toMatchSnapshot();
   });

@@ -7,7 +7,7 @@
  * 3. CLI bin (`shape-infer --help`) works
  */
 
-import { execSync, spawnSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";

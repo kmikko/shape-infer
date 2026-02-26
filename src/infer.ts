@@ -2,7 +2,12 @@ import { createReadStream } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { extname } from "node:path";
 import { createInterface } from "node:readline";
-import { createNode, mergeNodes, mergeValue, resolveAstMergeOptions } from "./ast.ts";
+import {
+  createNode,
+  mergeNodes,
+  mergeValue,
+  resolveAstMergeOptions,
+} from "./ast.ts";
 import type { AstMergeOptions, SchemaNode } from "./ast.ts";
 
 const DEFAULT_MAX_CAPTURED_PARSE_ERROR_LINES = 20;
@@ -42,38 +47,38 @@ export interface InferOptions {
 
 export async function inferFromJsonlFile(
   filePath: string,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): Promise<InferenceResult> {
   const sourceName = options.sourceName ?? filePath;
   const stream = createReadStream(filePath, { encoding: "utf8" });
   return inferFromJsonlStream(stream, {
     ...options,
-    sourceName
+    sourceName,
   });
 }
 
 export async function inferFromJsonlStream(
   input: NodeJS.ReadableStream,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): Promise<InferenceResult> {
   const root = createNode();
   const sourceName = options.sourceName ?? "<stream>";
   const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
   const maxCapturedParseErrorLines = resolveMaxCapturedParseErrorLines(
-    options.maxCapturedParseErrorLines
+    options.maxCapturedParseErrorLines,
   );
 
   const stats: InferenceStats = {
     linesRead: 0,
     recordsMerged: 0,
     parseErrors: 0,
-    skippedEmptyLines: 0
+    skippedEmptyLines: 0,
   };
   const parseErrorLines: number[] = [];
 
   const lineReader = createInterface({
     input,
-    crlfDelay: Number.POSITIVE_INFINITY
+    crlfDelay: Number.POSITIVE_INFINITY,
   });
 
   try {
@@ -110,41 +115,41 @@ export async function inferFromJsonlStream(
         source: sourceName,
         format: "jsonl",
         stats: { ...stats },
-        parseErrorLines: [...parseErrorLines]
-      }
-    ]
+        parseErrorLines: [...parseErrorLines],
+      },
+    ],
   };
 }
 
 export async function inferFromJsonFile(
   filePath: string,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): Promise<InferenceResult> {
   const sourceName = options.sourceName ?? filePath;
   const fileText = await readFile(filePath, "utf8");
 
   return inferFromJsonText(fileText, {
     ...options,
-    sourceName
+    sourceName,
   });
 }
 
 export function inferFromJsonText(
   jsonText: string,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): InferenceResult {
   const root = createNode();
   const sourceName = options.sourceName ?? "<json>";
   const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
   const maxCapturedParseErrorLines = resolveMaxCapturedParseErrorLines(
-    options.maxCapturedParseErrorLines
+    options.maxCapturedParseErrorLines,
   );
 
   const stats: InferenceStats = {
     linesRead: countLines(jsonText),
     recordsMerged: 0,
     parseErrors: 0,
-    skippedEmptyLines: 0
+    skippedEmptyLines: 0,
   };
   const parseErrorLines: number[] = [];
 
@@ -176,15 +181,15 @@ export function inferFromJsonText(
         source: sourceName,
         format: "json",
         stats: { ...stats },
-        parseErrorLines: [...parseErrorLines]
-      }
-    ]
+        parseErrorLines: [...parseErrorLines],
+      },
+    ],
   };
 }
 
 export async function inferFromFile(
   filePath: string,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): Promise<InferenceResult> {
   const inputFormat = options.inputFormat ?? "auto";
   const resolvedFormat = await resolveInputFormatForFile(filePath, inputFormat);
@@ -198,7 +203,7 @@ export async function inferFromFile(
 
 export async function inferFromFiles(
   filePaths: string[],
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): Promise<InferenceResult> {
   if (filePaths.length === 0) {
     throw new Error("No input files provided.");
@@ -211,14 +216,14 @@ export async function inferFromFiles(
     linesRead: 0,
     recordsMerged: 0,
     parseErrors: 0,
-    skippedEmptyLines: 0
+    skippedEmptyLines: 0,
   };
   const parseErrorLines: number[] = [];
 
   for (const filePath of filePaths) {
     const result = await inferFromFile(filePath, {
       ...options,
-      sourceName: filePath
+      sourceName: filePath,
     });
     mergeNodes(root, result.root, astMergeOptions);
     stats.linesRead += result.stats.linesRead;
@@ -233,13 +238,13 @@ export async function inferFromFiles(
     root,
     stats,
     parseErrorLines,
-    files
+    files,
   };
 }
 
 export async function resolveInputFormatForFile(
   filePath: string,
-  requestedFormat: InputFormat = "auto"
+  requestedFormat: InputFormat = "auto",
 ): Promise<ResolvedInputFormat> {
   if (requestedFormat !== "auto") {
     return requestedFormat;
@@ -260,7 +265,7 @@ export async function resolveInputFormatForFile(
 
 export function detectInputFormatFromText(
   text: string,
-  requestedFormat: InputFormat = "auto"
+  requestedFormat: InputFormat = "auto",
 ): ResolvedInputFormat {
   if (requestedFormat !== "auto") {
     return requestedFormat;
@@ -285,7 +290,7 @@ export function detectInputFormatFromText(
 
 export function inferFromValues(
   values: Iterable<unknown>,
-  options: InferOptions = {}
+  options: InferOptions = {},
 ): SchemaNode {
   const root = createNode();
   const astMergeOptions = resolveAstMergeOptions(options.astMergeOptions);
@@ -325,7 +330,10 @@ function firstNonWhitespaceCharacter(text: string): string | undefined {
   return text[match.index];
 }
 
-function extractJsonParseErrorLine(error: unknown, text: string): number | undefined {
+function extractJsonParseErrorLine(
+  error: unknown,
+  text: string,
+): number | undefined {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const positionMatch = errorMessage.match(/position\s+(\d+)/i);
   if (!positionMatch) {

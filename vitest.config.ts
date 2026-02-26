@@ -6,7 +6,7 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
     typecheck: {
       tsconfig: "./tsconfig.vitest.json",
-      include: ["tests/**/*.test-d.ts"]
+      include: ["tests/**/*.test-d.ts"],
     },
     coverage: {
       provider: "v8",
@@ -16,8 +16,8 @@ export default defineConfig({
         statements: 90,
         branches: 85,
         functions: 100,
-        lines: 90
-      }
-    }
-  }
+        lines: 90,
+      },
+    },
+  },
 });

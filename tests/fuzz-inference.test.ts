@@ -58,7 +58,10 @@ function randomValue(random: () => number, depth: number): unknown {
   }
 }
 
-function randomObject(random: () => number, depth: number): Record<string, unknown> {
+function randomObject(
+  random: () => number,
+  depth: number,
+): Record<string, unknown> {
   const keyCount = randomInt(random, 1, 5);
   const record: Record<string, unknown> = {};
 
@@ -70,7 +73,10 @@ function randomObject(random: () => number, depth: number): Record<string, unkno
   return record;
 }
 
-function generateDataset(seed: number, size: number): Array<Record<string, unknown>> {
+function generateDataset(
+  seed: number,
+  size: number,
+): Array<Record<string, unknown>> {
   const random = mulberry32(seed);
   const values: Array<Record<string, unknown>> = [];
 
@@ -89,24 +95,28 @@ function emitAll(values: unknown[]) {
     tsLoose: emitTypeScriptType(root, {
       rootTypeName: "FuzzRoot",
       typeMode: "loose",
-      allOptionalProperties: true
+      allOptionalProperties: true,
     }),
     zodStrict: emitZodSchema(root, { rootTypeName: "FuzzRoot" }),
     zodLoose: emitZodSchema(root, {
       rootTypeName: "FuzzRoot",
       typeMode: "loose",
-      allOptionalProperties: true
+      allOptionalProperties: true,
     }),
-    jsonSchemaStrict: JSON.stringify(emitJsonSchema(root, { rootTitle: "FuzzRoot" }), null, 2),
+    jsonSchemaStrict: JSON.stringify(
+      emitJsonSchema(root, { rootTitle: "FuzzRoot" }),
+      null,
+      2,
+    ),
     jsonSchemaLoose: JSON.stringify(
       emitJsonSchema(root, {
         rootTitle: "FuzzRoot",
         typeMode: "loose",
-        allOptionalProperties: true
+        allOptionalProperties: true,
       }),
       null,
-      2
-    )
+      2,
+    ),
   };
 }
 

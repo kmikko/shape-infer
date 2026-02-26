@@ -1,4 +1,9 @@
-import type { ArrayVariant, AstMergeOptions, ObjectVariant, SchemaNode } from "../ast.ts";
+import type {
+  ArrayVariant,
+  AstMergeOptions,
+  ObjectVariant,
+  SchemaNode,
+} from "../ast.ts";
 import {
   buildRecordValueNode,
   inferNumberEnum,
@@ -6,13 +11,14 @@ import {
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions
+  resolveHeuristicOptions,
 } from "../heuristics.ts";
 import type { HeuristicOptions } from "../heuristics.ts";
-import {
-  resolveEmissionStyleOptions
+import { resolveEmissionStyleOptions } from "./style.ts";
+import type {
+  EmissionStyleOptions,
+  ResolvedEmissionStyleOptions,
 } from "./style.ts";
-import type { EmissionStyleOptions, ResolvedEmissionStyleOptions } from "./style.ts";
 import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 const INDENT = "  ";
@@ -31,7 +37,7 @@ interface EmitContext {
 
 export function emitZodSchema(
   node: SchemaNode,
-  options: ZodEmitterOptions = {}
+  options: ZodEmitterOptions = {},
 ): string {
   const rootTypeName = options.rootTypeName ?? "Root";
   const schemaName = `${rootTypeName}Schema`;
@@ -42,9 +48,16 @@ export function emitZodSchema(
   const heuristics = resolveHeuristicOptions(options.heuristics);
   const style = resolveEmissionStyleOptions(options);
   const context: EmitContext = {
-    needsPrototypePropertyGuard: false
+    needsPrototypePropertyGuard: false,
   };
-  const schemaText = emitNodeSchema(node, 0, heuristics, options.astMergeOptions, style, context);
+  const schemaText = emitNodeSchema(
+    node,
+    0,
+    heuristics,
+    options.astMergeOptions,
+    style,
+    context,
+  );
 
   const helperLines = context.needsPrototypePropertyGuard
     ? [emitStripPrototypePropertiesHelper(), ""]
@@ -57,7 +70,7 @@ export function emitZodSchema(
     `${schemaKeyword}const ${schemaName} = ${schemaText};`,
     "",
     `${typeKeyword}type ${rootTypeName} = z.infer<typeof ${schemaName}>;`,
-    ""
+    "",
   ].join("\n");
 }
 
@@ -67,7 +80,7 @@ function emitNodeSchema(
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
-  context: EmitContext
+  context: EmitContext,
 ): string {
   if (node.variants.unknown) {
     return "z.unknown()";
@@ -83,14 +96,21 @@ function emitNodeSchema(
         heuristics,
         astMergeOptions,
         style,
-        context
-      )
+        context,
+      ),
     );
   }
 
   if (node.variants.array) {
     variants.add(
-      emitArraySchema(node.variants.array, indentLevel, heuristics, astMergeOptions, style, context)
+      emitArraySchema(
+        node.variants.array,
+        indentLevel,
+        heuristics,
+        astMergeOptions,
+        style,
+        context,
+      ),
     );
   }
 
@@ -102,7 +122,7 @@ function emitNodeSchema(
       const enumCandidate = inferStringEnum(node.variants.string, heuristics);
       if (enumCandidate) {
         variants.add(
-          `z.enum([${enumCandidate.values.map((value) => JSON.stringify(value)).join(", ")}])`
+          `z.enum([${enumCandidate.values.map((value) => JSON.stringify(value)).join(", ")}])`,
         );
       } else {
         variants.add(applyStringFormat("z.string()", formatCandidate?.format));
@@ -117,13 +137,13 @@ function emitNodeSchema(
       const enumCandidate = inferNumberEnum(
         node.variants.integer,
         node.variants.number,
-        heuristics
+        heuristics,
       );
       if (enumCandidate) {
         variants.add(
           `z.union([${enumCandidate.values
             .map((value) => `z.literal(${formatNumberLiteral(value)})`)
-            .join(", ")}])`
+            .join(", ")}])`,
         );
       } else {
         variants.add(node.variants.number ? "z.number()" : "z.number().int()");
@@ -166,7 +186,7 @@ function emitObjectSchema(
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
-  context: EmitContext
+  context: EmitContext,
 ): string {
   if (isRecordLikeObject(variant, heuristics)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
@@ -176,13 +196,13 @@ function emitObjectSchema(
       heuristics,
       astMergeOptions,
       style,
-      context
+      context,
     );
     return `z.record(z.string(), ${valueSchema})`;
   }
 
   const propertyNames = [...variant.properties.keys()].sort((left, right) =>
-    left.localeCompare(right)
+    left.localeCompare(right),
   );
 
   if (propertyNames.length === 0) {
@@ -213,12 +233,12 @@ function emitObjectSchema(
       heuristics,
       astMergeOptions,
       style,
-      context
+      context,
     );
     propertyEntries.push({
       name: propertyName,
       schema,
-      optional
+      optional,
     });
     if (isPrototypeUnsafePropertyName(propertyName)) {
       hasUnsafePropertyName = true;
@@ -251,7 +271,7 @@ function emitArraySchema(
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
-  context: EmitContext
+  context: EmitContext,
 ): string {
   if (variant.elementCount === 0) {
     return "z.array(z.unknown())";
@@ -263,7 +283,7 @@ function emitArraySchema(
     heuristics,
     astMergeOptions,
     style,
-    context
+    context,
   );
   return `z.array(${elementSchema})`;
 }
@@ -322,6 +342,6 @@ function emitStripPrototypePropertiesHelper(): string {
     "    copy[key] = value;",
     "  }",
     "  return copy;",
-    "};"
+    "};",
   ].join("\n");
 }

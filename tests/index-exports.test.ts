@@ -5,10 +5,9 @@ describe("index exports", () => {
   test("re-exports facade-only runtime APIs", () => {
     expect(typeof api.generateFromText).toBe("function");
     expect(typeof api.generateFromFiles).toBe("function");
-    expect(Object.keys(api).sort((left, right) => left.localeCompare(right))).toEqual([
-      "generateFromFiles",
-      "generateFromText"
-    ]);
+    expect(
+      Object.keys(api).sort((left, right) => left.localeCompare(right)),
+    ).toEqual(["generateFromFiles", "generateFromText"]);
   });
 
   test("supports end-to-end generation via barrel imports", async () => {
@@ -16,7 +15,7 @@ describe("index exports", () => {
       text: '[{"id":1},{"id":"2"}]',
       inputFormat: "json",
       format: "typescript",
-      typeName: "BarrelRecord"
+      typeName: "BarrelRecord",
     });
 
     expect(result.output).toContain("export type BarrelRecord =");

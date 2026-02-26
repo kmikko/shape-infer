@@ -5,7 +5,7 @@ import type {
   ObjectVariant,
   PrimitiveVariant,
   SchemaNode,
-  StringFormatKind
+  StringFormatKind,
 } from "./ast.ts";
 
 export interface HeuristicOptions {
@@ -29,7 +29,7 @@ export const DEFAULT_HEURISTIC_OPTIONS: HeuristicOptions = {
   minFormatCount: 5,
   recordMinKeys: 40,
   recordMaxPresence: 0.35,
-  maxUnionSize: 6
+  maxUnionSize: 6,
 };
 
 export interface EnumCandidate<T extends string | number> {
@@ -43,19 +43,27 @@ export interface StringFormatCandidate {
 }
 
 export function resolveHeuristicOptions(
-  options: Partial<HeuristicOptions> = {}
+  options: Partial<HeuristicOptions> = {},
 ): HeuristicOptions {
   const resolved: HeuristicOptions = {
-    requiredThreshold: options.requiredThreshold ?? DEFAULT_HEURISTIC_OPTIONS.requiredThreshold,
-    enumThreshold: options.enumThreshold ?? DEFAULT_HEURISTIC_OPTIONS.enumThreshold,
+    requiredThreshold:
+      options.requiredThreshold ?? DEFAULT_HEURISTIC_OPTIONS.requiredThreshold,
+    enumThreshold:
+      options.enumThreshold ?? DEFAULT_HEURISTIC_OPTIONS.enumThreshold,
     maxEnumSize: options.maxEnumSize ?? DEFAULT_HEURISTIC_OPTIONS.maxEnumSize,
-    minEnumCount: options.minEnumCount ?? DEFAULT_HEURISTIC_OPTIONS.minEnumCount,
+    minEnumCount:
+      options.minEnumCount ?? DEFAULT_HEURISTIC_OPTIONS.minEnumCount,
     stringFormatThreshold:
-      options.stringFormatThreshold ?? DEFAULT_HEURISTIC_OPTIONS.stringFormatThreshold,
-    minFormatCount: options.minFormatCount ?? DEFAULT_HEURISTIC_OPTIONS.minFormatCount,
-    recordMinKeys: options.recordMinKeys ?? DEFAULT_HEURISTIC_OPTIONS.recordMinKeys,
-    recordMaxPresence: options.recordMaxPresence ?? DEFAULT_HEURISTIC_OPTIONS.recordMaxPresence,
-    maxUnionSize: options.maxUnionSize ?? DEFAULT_HEURISTIC_OPTIONS.maxUnionSize
+      options.stringFormatThreshold ??
+      DEFAULT_HEURISTIC_OPTIONS.stringFormatThreshold,
+    minFormatCount:
+      options.minFormatCount ?? DEFAULT_HEURISTIC_OPTIONS.minFormatCount,
+    recordMinKeys:
+      options.recordMinKeys ?? DEFAULT_HEURISTIC_OPTIONS.recordMinKeys,
+    recordMaxPresence:
+      options.recordMaxPresence ?? DEFAULT_HEURISTIC_OPTIONS.recordMaxPresence,
+    maxUnionSize:
+      options.maxUnionSize ?? DEFAULT_HEURISTIC_OPTIONS.maxUnionSize,
   };
 
   assertRange(resolved.requiredThreshold, 0, 1, "requiredThreshold");
@@ -75,7 +83,7 @@ export function resolveHeuristicOptions(
 export function isRequired(
   seenCount: number,
   parentCount: number,
-  options: HeuristicOptions
+  options: HeuristicOptions,
 ): boolean {
   if (parentCount <= 0) {
     return false;
@@ -86,21 +94,24 @@ export function isRequired(
 
 export function inferStringEnum(
   variant: PrimitiveVariant | undefined,
-  options: HeuristicOptions
+  options: HeuristicOptions,
 ): EnumCandidate<string> | undefined {
   if (!variant || variant.kind !== "string") {
     return undefined;
   }
 
-  return inferLiteralEnum(variant, options, (value) => value, (left, right) =>
-    left.localeCompare(right)
+  return inferLiteralEnum(
+    variant,
+    options,
+    (value) => value,
+    (left, right) => left.localeCompare(right),
   );
 }
 
 export function inferNumberEnum(
   integerVariant: PrimitiveVariant | undefined,
   numberVariant: PrimitiveVariant | undefined,
-  options: HeuristicOptions
+  options: HeuristicOptions,
 ): EnumCandidate<number> | undefined {
   if (!integerVariant && !numberVariant) {
     return undefined;
@@ -148,22 +159,30 @@ export function inferNumberEnum(
   const values = [...merged.keys()].sort((left, right) => left - right);
   return {
     values,
-    distinctRatio
+    distinctRatio,
   };
 }
 
 export function inferStringFormat(
   variant: PrimitiveVariant | undefined,
-  options: HeuristicOptions
+  options: HeuristicOptions,
 ): StringFormatCandidate | undefined {
-  if (!variant || variant.kind !== "string" || !variant.formatCounts || variant.count === 0) {
+  if (
+    !variant ||
+    variant.kind !== "string" ||
+    !variant.formatCounts ||
+    variant.count === 0
+  ) {
     return undefined;
   }
 
   let bestFormat: StringFormatKind | undefined;
   let bestCount = -1;
   for (const [format, count] of variant.formatCounts) {
-    if (count > bestCount || (count === bestCount && format < (bestFormat ?? ""))) {
+    if (
+      count > bestCount ||
+      (count === bestCount && format < (bestFormat ?? ""))
+    ) {
       bestFormat = format;
       bestCount = count;
     }
@@ -180,13 +199,13 @@ export function inferStringFormat(
 
   return {
     format: bestFormat,
-    confidence
+    confidence,
   };
 }
 
 export function isRecordLikeObject(
   variant: ObjectVariant,
-  options: HeuristicOptions
+  options: HeuristicOptions,
 ): boolean {
   if (variant.count === 0) {
     return false;
@@ -208,12 +227,15 @@ export function isRecordLikeObject(
   }
 
   const averagePresence = totalPresence / variant.properties.size;
-  return maxPresence <= options.recordMaxPresence && averagePresence <= options.recordMaxPresence;
+  return (
+    maxPresence <= options.recordMaxPresence &&
+    averagePresence <= options.recordMaxPresence
+  );
 }
 
 export function buildRecordValueNode(
   variant: ObjectVariant,
-  astMergeOptions: Partial<AstMergeOptions> = {}
+  astMergeOptions: Partial<AstMergeOptions> = {},
 ): SchemaNode {
   const valueNode = createNode();
   for (const property of variant.properties.values()) {
@@ -255,7 +277,7 @@ function inferLiteralEnum<T extends string | number>(
   variant: PrimitiveVariant,
   options: HeuristicOptions,
   parseValue: (rawValue: string) => T,
-  compareValues: (left: T, right: T) => number
+  compareValues: (left: T, right: T) => number,
 ): EnumCandidate<T> | undefined {
   if (!variant.literals || variant.literalOverflow) {
     return undefined;
@@ -275,16 +297,25 @@ function inferLiteralEnum<T extends string | number>(
     return undefined;
   }
 
-  const values = [...variant.literals.keys()].map(parseValue).sort(compareValues);
+  const values = [...variant.literals.keys()]
+    .map(parseValue)
+    .sort(compareValues);
   return {
     values,
-    distinctRatio
+    distinctRatio,
   };
 }
 
-function assertRange(value: number, min: number, max: number, name: string): void {
+function assertRange(
+  value: number,
+  min: number,
+  max: number,
+  name: string,
+): void {
   if (!Number.isFinite(value) || value < min || value > max) {
-    throw new Error(`${name} must be a finite number between ${min} and ${max}.`);
+    throw new Error(
+      `${name} must be a finite number between ${min} and ${max}.`,
+    );
   }
 }
 

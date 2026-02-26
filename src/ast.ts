@@ -57,36 +57,41 @@ export interface AstMergeOptions {
 }
 
 export const DEFAULT_AST_MERGE_OPTIONS: AstMergeOptions = {
-  maxTrackedLiteralsPerVariant: 200
+  maxTrackedLiteralsPerVariant: 200,
 };
 
 export function createNode(): SchemaNode {
   return {
     occurrences: 0,
-    variants: {}
+    variants: {},
   };
 }
 
 export function resolveAstMergeOptions(
-  options: Partial<AstMergeOptions> = {}
+  options: Partial<AstMergeOptions> = {},
 ): AstMergeOptions {
   const maxTrackedLiteralsPerVariant =
     options.maxTrackedLiteralsPerVariant ??
     DEFAULT_AST_MERGE_OPTIONS.maxTrackedLiteralsPerVariant;
 
-  if (!Number.isFinite(maxTrackedLiteralsPerVariant) || maxTrackedLiteralsPerVariant < 1) {
-    throw new Error("maxTrackedLiteralsPerVariant must be a finite number >= 1.");
+  if (
+    !Number.isFinite(maxTrackedLiteralsPerVariant) ||
+    maxTrackedLiteralsPerVariant < 1
+  ) {
+    throw new Error(
+      "maxTrackedLiteralsPerVariant must be a finite number >= 1.",
+    );
   }
 
   return {
-    maxTrackedLiteralsPerVariant: Math.floor(maxTrackedLiteralsPerVariant)
+    maxTrackedLiteralsPerVariant: Math.floor(maxTrackedLiteralsPerVariant),
   };
 }
 
 export function mergeValue(
   node: SchemaNode,
   value: unknown,
-  options: Partial<AstMergeOptions> = {}
+  options: Partial<AstMergeOptions> = {},
 ): void {
   const resolvedOptions = resolveAstMergeOptions(options);
   mergeValueInternal(node, value, resolvedOptions);
@@ -95,7 +100,7 @@ export function mergeValue(
 export function mergeNodes(
   target: SchemaNode,
   source: SchemaNode,
-  options: Partial<AstMergeOptions> = {}
+  options: Partial<AstMergeOptions> = {},
 ): void {
   const resolvedOptions = resolveAstMergeOptions(options);
   mergeNodesInternal(target, source, resolvedOptions);
@@ -104,7 +109,7 @@ export function mergeNodes(
 function mergeValueInternal(
   node: SchemaNode,
   value: unknown,
-  options: AstMergeOptions
+  options: AstMergeOptions,
 ): void {
   node.occurrences += 1;
 
@@ -135,13 +140,13 @@ function mergeValueInternal(
       const objectVariant = ensureObjectVariant(node);
       objectVariant.count += 1;
       for (const [propertyName, propertyValue] of Object.entries(
-        value as Record<string, unknown>
+        value as Record<string, unknown>,
       )) {
         let property = objectVariant.properties.get(propertyName);
         if (!property) {
           property = {
             seenCount: 0,
-            node: createNode()
+            node: createNode(),
           };
           objectVariant.properties.set(propertyName, property);
         }
@@ -156,7 +161,7 @@ function mergeValueInternal(
 function mergeNodesInternal(
   target: SchemaNode,
   source: SchemaNode,
-  options: AstMergeOptions
+  options: AstMergeOptions,
 ): void {
   target.occurrences += source.occurrences;
 
@@ -171,18 +176,23 @@ function mergeNodesInternal(
     const targetArray = ensureArrayVariant(target);
     targetArray.count += source.variants.array.count;
     targetArray.elementCount += source.variants.array.elementCount;
-    mergeNodesInternal(targetArray.element, source.variants.array.element, options);
+    mergeNodesInternal(
+      targetArray.element,
+      source.variants.array.element,
+      options,
+    );
   }
 
   if (source.variants.object) {
     const targetObject = ensureObjectVariant(target);
     targetObject.count += source.variants.object.count;
-    for (const [propertyName, sourceProperty] of source.variants.object.properties) {
+    for (const [propertyName, sourceProperty] of source.variants.object
+      .properties) {
       let targetProperty = targetObject.properties.get(propertyName);
       if (!targetProperty) {
         targetProperty = {
           seenCount: 0,
-          node: createNode()
+          node: createNode(),
         };
         targetObject.properties.set(propertyName, targetProperty);
       }
@@ -221,7 +231,7 @@ function detectKind(value: unknown): NodeKind {
 
 function ensurePrimitiveVariant(
   node: SchemaNode,
-  kind: PrimitiveVariant["kind"]
+  kind: PrimitiveVariant["kind"],
 ): PrimitiveVariant {
   const existing = node.variants[kind];
   if (existing) {
@@ -230,7 +240,7 @@ function ensurePrimitiveVariant(
 
   const created: PrimitiveVariant = {
     kind,
-    count: 0
+    count: 0,
   };
   node.variants[kind] = created;
   return created;
@@ -240,7 +250,7 @@ function mergePrimitiveVariant(
   targetNode: SchemaNode,
   sourceNode: SchemaNode,
   kind: PrimitiveVariant["kind"],
-  options: AstMergeOptions
+  options: AstMergeOptions,
 ): void {
   const sourceVariant = sourceNode.variants[kind];
   if (!sourceVariant) {
@@ -277,7 +287,7 @@ function ensureArrayVariant(node: SchemaNode): ArrayVariant {
     kind: "array",
     count: 0,
     elementCount: 0,
-    element: createNode()
+    element: createNode(),
   };
   node.variants.array = created;
   return created;
@@ -292,7 +302,7 @@ function ensureObjectVariant(node: SchemaNode): ObjectVariant {
   const created: ObjectVariant = {
     kind: "object",
     count: 0,
-    properties: new Map<string, ObjectProperty>()
+    properties: new Map<string, ObjectProperty>(),
   };
   node.variants.object = created;
   return created;
@@ -301,7 +311,7 @@ function ensureObjectVariant(node: SchemaNode): ObjectVariant {
 function recordPrimitiveObservation(
   variant: PrimitiveVariant,
   value: unknown,
-  options: AstMergeOptions
+  options: AstMergeOptions,
 ): void {
   switch (variant.kind) {
     case "string": {
@@ -326,7 +336,7 @@ function addLiteralObservation(
   variant: PrimitiveVariant,
   literalValue: string,
   incrementBy: number,
-  options: AstMergeOptions
+  options: AstMergeOptions,
 ): void {
   if (variant.literalOverflow) {
     return;
@@ -354,7 +364,7 @@ function addLiteralObservation(
 function addFormatObservation(
   variant: PrimitiveVariant,
   format: StringFormatKind,
-  incrementBy: number
+  incrementBy: number,
 ): void {
   if (!variant.formatCounts) {
     variant.formatCounts = new Map<StringFormatKind, number>();
@@ -390,7 +400,7 @@ function detectStringFormat(value: string): StringFormatKind | undefined {
 
 function isDateTime(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
-    value
+    value,
   );
 }
 
@@ -404,7 +414,7 @@ function isEmail(value: string): boolean {
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value
+    value,
   );
 }
 

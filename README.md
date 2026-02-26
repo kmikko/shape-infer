@@ -202,7 +202,7 @@ const result = await generateFromText({
   inputFormat: "json",
   format: "zod",
   typeName: "Record",
-  includeDiagnostics: true
+  includeDiagnostics: true,
 });
 
 console.log(result.output);
