@@ -11,6 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release of schema-generator.
 - CLI with support for JSON/JSONL input and TypeScript/Zod/JSON-Schema output.
-- Programmatic API with `generateFromValues`, `generateFromText`, `generateFromFiles`.
+- Programmatic API with `generateFromText` and `generateFromFiles`.
 - Type inference heuristics for enums, string formats (date, email, uuid, uri), and record-like objects.
 - Github Actions CI workflow for verification.

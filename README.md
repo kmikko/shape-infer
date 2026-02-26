@@ -184,11 +184,8 @@ node src/cli.ts \
 
 ## Programmatic API
 
-The package exposes a stable high-level facade from the published entrypoints:
+The package exposes a facade-only API from the published entrypoints:
 
-> **Note:** The `public-api` exports (`generateFrom*`) are considered stable. Deep imports or other root exports (AST, heuristics) are considered advanced/experimental and may change in minor releases.
-
-- `generateFromValues(...)`
 - `generateFromText(...)`
 - `generateFromFiles(...)`
 
@@ -197,13 +194,12 @@ Import from either:
 - `"schema-generator"` (root export)
 - `"schema-generator/public-api"` (facade-only subpath export)
 
-Lower-level AST/inference/heuristics/emitter APIs are also available from the root export for advanced usage.
-
 ```ts
-import { generateFromValues } from "schema-generator";
+import { generateFromText } from "schema-generator";
 
-const result = generateFromValues({
-  values: [{ id: 1 }, { id: "2" }],
+const result = await generateFromText({
+  text: '[{"id":1},{"id":"2"}]',
+  inputFormat: "json",
   format: "zod",
   typeName: "Record",
   includeDiagnostics: true

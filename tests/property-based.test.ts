@@ -48,6 +48,26 @@ const generatedJsonValueArbitrary = fc
   .filter((value): value is JsonValue => isJsonValue(value));
 
 describe("property-based inference invariants", () => {
+  test("reserved prototype keys validate correctly when optional and when present", () => {
+    const values = [
+      JSON.parse(
+        '{"toString":[],"constructor":1,"hasOwnProperty":true,"__proto__":"v"}'
+      ) as JsonValue,
+      {} as JsonValue
+    ];
+
+    const root = inferFromValues(values);
+    const jsonSchema = emitJsonSchema(root, { rootTitle: CORPUS_SCHEMA_NAME });
+    const zodSource = emitZodSchema(root, { rootTypeName: CORPUS_SCHEMA_NAME });
+    const jsonSchemaValidator = compileAjvValidator(jsonSchema);
+    const zodSchema = compileZodSchemaFromEmitterSource(zodSource, CORPUS_SCHEMA_NAME);
+
+    values.forEach((value, index) => {
+      assertAjvAcceptsValue(jsonSchemaValidator, value, index);
+      assertZodAcceptsValue(zodSchema, value, index);
+    });
+  });
+
   test(
     "single generated value round-trips through emitted JSON Schema and Zod",
     () => {
@@ -118,6 +138,8 @@ function compileZodSchemaFromEmitterSource(
   const schemaIdentifier = `${schemaName}Schema`;
   const runtimeSource = source
     .replace(/^\s*import\s+\{\s*z\s*\}\s+from\s+"zod";\s*$/m, "")
+    .replace(/\(input:\s*unknown\):\s*unknown/g, "(input)")
+    .replace(/\s+as\s+Record<string,\s*unknown>/g, "")
     .replace(
       new RegExp(
         `^\\s*export\\s+type\\s+${escapeForRegExp(schemaName)}\\s*=\\s*z\\.infer<\\s*typeof\\s+${escapeForRegExp(

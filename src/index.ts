@@ -1,10 +1,12 @@
-export * from "./ast.ts";
-export * from "./heuristics.ts";
-export * from "./infer.ts";
-export * from "./input-resolver.ts";
-export * from "./diagnostics.ts";
-export * from "./public-api.ts";
-export * from "./emitters/style.ts";
-export * from "./emitters/typescript.ts";
-export * from "./emitters/zod.ts";
-export * from "./emitters/json-schema.ts";
+export {
+  generateFromFiles,
+  generateFromText
+} from "./public-api.ts";
+export type {
+  GenerateFromFilesOptions,
+  GenerateFromFilesResult,
+  GenerateFromTextOptions,
+  GenerateSchemaOptions,
+  GenerateSchemaResult,
+  GenerationOutputFormat
+} from "./public-api.ts";

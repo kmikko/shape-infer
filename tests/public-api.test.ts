@@ -3,30 +3,29 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 import {
   generateFromFiles,
-  generateFromText,
-  generateFromValues
+  generateFromText
 } from "../src/public-api.ts";
 import { withTempDir } from "./helpers.ts";
 
 describe("public api facade", () => {
-  test("generateFromValues emits output and diagnostics", () => {
-    const result = generateFromValues({
-      values: [{ id: 1 }, { id: "2" }],
+  test("generateFromText emits output and diagnostics", async () => {
+    const result = await generateFromText({
+      text: '[{"id":1},{"id":"2"}]',
       format: "zod",
-      typeName: "FromValues",
+      typeName: "FromText",
       includeDiagnostics: true
     });
 
-    expect(result.output).toContain("export const FromValuesSchema");
+    expect(result.output).toContain("export const FromTextSchema");
     expect(result.stats.recordsMerged).toBe(2);
     expect(result.warnings).toEqual([]);
-    expect(result.files).toEqual([]);
+    expect(result.files).toHaveLength(1);
     expect(result.diagnostics?.summary.nodesVisited).toBeGreaterThan(0);
   });
 
-  test("generateFromValues reports no-record warning for empty iterables", () => {
-    const result = generateFromValues({
-      values: [],
+  test("generateFromText reports no-record warning when parsing fails", async () => {
+    const result = await generateFromText({
+      text: "",
       format: "typescript"
     });
 

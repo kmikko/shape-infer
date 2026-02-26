@@ -3,7 +3,7 @@
 /**
  * Pack smoke test — simulates installing the published tarball and verifies:
  * 1. Runtime imports from "schema-generator" (root) and "schema-generator/public-api"
- * 2. generateFromValues facade returns expected output shape
+ * 2. generateFromText facade returns expected output shape
  * 3. CLI bin (`schema-gen --help`) works
  */
 
@@ -42,9 +42,9 @@ execSync(`npm install "${tarball}"`, { cwd: tmpDir, stdio: "pipe" });
 // ---------------------------------------------------------------------------
 console.log("[pack-smoke] Verifying root import…");
 const rootImportScript = `
-  import { generateFromValues } from "schema-generator";
-  if (typeof generateFromValues !== "function") {
-    throw new Error("generateFromValues is not a function on root import");
+  import { generateFromText } from "schema-generator";
+  if (typeof generateFromText !== "function") {
+    throw new Error("generateFromText is not a function on root import");
   }
   console.log("[pack-smoke]   ✓ root import OK");
 `;
@@ -58,8 +58,8 @@ execSync(`node --input-type=module -e '${rootImportScript.replace(/'/g, "'\\''")
 // ---------------------------------------------------------------------------
 console.log("[pack-smoke] Verifying public-api subpath import…");
 const subpathScript = `
-  import { generateFromValues, generateFromText, generateFromFiles } from "schema-generator/public-api";
-  for (const [name, fn] of [["generateFromValues", generateFromValues], ["generateFromText", generateFromText], ["generateFromFiles", generateFromFiles]]) {
+  import { generateFromText, generateFromFiles } from "schema-generator/public-api";
+  for (const [name, fn] of [["generateFromText", generateFromText], ["generateFromFiles", generateFromFiles]]) {
     if (typeof fn !== "function") throw new Error(name + " is not a function on subpath import");
   }
   console.log("[pack-smoke]   ✓ public-api subpath import OK");
@@ -70,13 +70,14 @@ execSync(`node --input-type=module -e '${subpathScript.replace(/'/g, "'\\''")}'`
 });
 
 // ---------------------------------------------------------------------------
-// 5. Verify generateFromValues output shape
+// 5. Verify generateFromText output shape
 // ---------------------------------------------------------------------------
-console.log("[pack-smoke] Verifying generateFromValues output shape…");
+console.log("[pack-smoke] Verifying generateFromText output shape…");
 const shapeScript = `
-  import { generateFromValues } from "schema-generator";
-  const result = generateFromValues({
-    values: [{ id: 1, name: "a" }, { id: 2, name: "b" }],
+  import { generateFromText } from "schema-generator";
+  const result = await generateFromText({
+    text: '[{"id":1,"name":"a"},{"id":2,"name":"b"}]',
+    inputFormat: "json",
     format: "typescript",
     typeName: "TestRecord"
   });
@@ -92,7 +93,7 @@ const shapeScript = `
   if (typeof result.stats.recordsMerged !== "number" || result.stats.recordsMerged !== 2) {
     throw new Error("stats.recordsMerged should be 2, got " + result.stats.recordsMerged);
   }
-  console.log("[pack-smoke]   ✓ generateFromValues output shape OK");
+  console.log("[pack-smoke]   ✓ generateFromText output shape OK");
 `;
 execSync(`node --input-type=module -e '${shapeScript.replace(/'/g, "'\\''")}'`, {
   cwd: tmpDir,

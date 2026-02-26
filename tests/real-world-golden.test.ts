@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
-import { generateFromValues } from "../src/public-api.ts";
+import { generateFromText } from "../src/public-api.ts";
 
 type FixtureInputFormat = "json" | "jsonl";
 type SampleMode = "json-array" | "jsonl-lines" | "json-map-keys";
@@ -96,7 +96,7 @@ describe("real-world golden snapshots", () => {
   });
 
   for (const fixture of FIXTURE_CASES) {
-    test(`fixture: ${fixture.fileName}`, () => {
+    test(`fixture: ${fixture.fileName}`, async () => {
       const fixturePath = path.join(FIXTURES_DIR, fixture.fileName);
       const { values, sampleSummary } = loadAndSampleFixture(
         fixturePath,
@@ -108,8 +108,8 @@ describe("real-world golden snapshots", () => {
       const snapshotPayload = {
         fixture: fixture.fileName,
         sampleSummary,
-        strict: emitFixtureOutputs(values, fixture.typeBaseName, "strict"),
-        loose: emitFixtureOutputs(values, fixture.typeBaseName, "loose"),
+        strict: await emitFixtureOutputs(values, fixture.typeBaseName, "strict"),
+        loose: await emitFixtureOutputs(values, fixture.typeBaseName, "loose"),
       };
 
       expect(snapshotPayload).toMatchSnapshot();
@@ -301,29 +301,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function emitFixtureOutputs(
+async function emitFixtureOutputs(
   values: unknown[],
   typeBaseName: string,
   typeMode: "strict" | "loose",
-): ModeOutputs {
+): Promise<ModeOutputs> {
+  const text = JSON.stringify(values);
   return {
-    typescript: generateFromValues({
-      values,
+    typescript: (await generateFromText({
+      text,
       format: "typescript",
       typeName: typeBaseName,
       typeMode,
-    }).output,
-    zod: generateFromValues({
-      values,
+    })).output,
+    zod: (await generateFromText({
+      text,
       format: "zod",
       typeName: typeBaseName,
       typeMode,
-    }).output,
-    jsonSchema: generateFromValues({
-      values,
+    })).output,
+    jsonSchema: (await generateFromText({
+      text,
       format: "json-schema",
       typeName: typeBaseName,
       typeMode,
-    }).output,
+    })).output,
   };
 }

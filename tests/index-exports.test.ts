@@ -2,28 +2,24 @@ import { describe, expect, test } from "vitest";
 import * as api from "../src/index.ts";
 
 describe("index exports", () => {
-  test("re-exports public runtime APIs", () => {
-    expect(typeof api.createNode).toBe("function");
-    expect(typeof api.mergeValue).toBe("function");
-    expect(typeof api.inferFromValues).toBe("function");
-    expect(typeof api.analyzeSchema).toBe("function");
-    expect(typeof api.emitTypeScriptType).toBe("function");
-    expect(typeof api.emitZodSchema).toBe("function");
-    expect(typeof api.emitJsonSchema).toBe("function");
-    expect(typeof api.resolveInputPaths).toBe("function");
-    expect(typeof api.generateFromValues).toBe("function");
+  test("re-exports facade-only runtime APIs", () => {
     expect(typeof api.generateFromText).toBe("function");
     expect(typeof api.generateFromFiles).toBe("function");
+    expect(Object.keys(api).sort((left, right) => left.localeCompare(right))).toEqual([
+      "generateFromFiles",
+      "generateFromText"
+    ]);
   });
 
-  test("supports end-to-end inference and emission via barrel imports", () => {
-    const root = api.inferFromValues([{ id: 1 }, { id: "2" }]);
-
-    const tsOutput = api.emitTypeScriptType(root, {
-      rootTypeName: "BarrelRecord"
+  test("supports end-to-end generation via barrel imports", async () => {
+    const result = await api.generateFromText({
+      text: '[{"id":1},{"id":"2"}]',
+      inputFormat: "json",
+      format: "typescript",
+      typeName: "BarrelRecord"
     });
 
-    expect(tsOutput).toContain("export type BarrelRecord =");
-    expect(tsOutput).toContain("id: string | number;");
+    expect(result.output).toContain("export type BarrelRecord =");
+    expect(result.output).toContain("id: string | number;");
   });
 });

@@ -13,6 +13,7 @@ import {
   resolveEmissionStyleOptions
 } from "./style.ts";
 import type { EmissionStyleOptions, ResolvedEmissionStyleOptions } from "./style.ts";
+import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 const INDENT = "  ";
 
@@ -22,6 +23,10 @@ export interface ZodEmitterOptions extends EmissionStyleOptions {
   exportType?: boolean;
   heuristics?: Partial<HeuristicOptions>;
   astMergeOptions?: Partial<AstMergeOptions>;
+}
+
+interface EmitContext {
+  needsPrototypePropertyGuard: boolean;
 }
 
 export function emitZodSchema(
@@ -36,11 +41,19 @@ export function emitZodSchema(
   const typeKeyword = exportType ? "export " : "";
   const heuristics = resolveHeuristicOptions(options.heuristics);
   const style = resolveEmissionStyleOptions(options);
-  const schemaText = emitNodeSchema(node, 0, heuristics, options.astMergeOptions, style);
+  const context: EmitContext = {
+    needsPrototypePropertyGuard: false
+  };
+  const schemaText = emitNodeSchema(node, 0, heuristics, options.astMergeOptions, style, context);
+
+  const helperLines = context.needsPrototypePropertyGuard
+    ? [emitStripPrototypePropertiesHelper(), ""]
+    : [];
 
   return [
     'import { z } from "zod";',
     "",
+    ...helperLines,
     `${schemaKeyword}const ${schemaName} = ${schemaText};`,
     "",
     `${typeKeyword}type ${rootTypeName} = z.infer<typeof ${schemaName}>;`,
@@ -53,7 +66,8 @@ function emitNodeSchema(
   indentLevel: number,
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
-  style: ResolvedEmissionStyleOptions
+  style: ResolvedEmissionStyleOptions,
+  context: EmitContext
 ): string {
   if (node.variants.unknown) {
     return "z.unknown()";
@@ -63,13 +77,20 @@ function emitNodeSchema(
 
   if (node.variants.object) {
     variants.add(
-      emitObjectSchema(node.variants.object, indentLevel, heuristics, astMergeOptions, style)
+      emitObjectSchema(
+        node.variants.object,
+        indentLevel,
+        heuristics,
+        astMergeOptions,
+        style,
+        context
+      )
     );
   }
 
   if (node.variants.array) {
     variants.add(
-      emitArraySchema(node.variants.array, indentLevel, heuristics, astMergeOptions, style)
+      emitArraySchema(node.variants.array, indentLevel, heuristics, astMergeOptions, style, context)
     );
   }
 
@@ -144,7 +165,8 @@ function emitObjectSchema(
   indentLevel: number,
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
-  style: ResolvedEmissionStyleOptions
+  style: ResolvedEmissionStyleOptions,
+  context: EmitContext
 ): string {
   if (isRecordLikeObject(variant, heuristics)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
@@ -153,7 +175,8 @@ function emitObjectSchema(
       indentLevel + 1,
       heuristics,
       astMergeOptions,
-      style
+      style,
+      context
     );
     return `z.record(z.string(), ${valueSchema})`;
   }
@@ -168,7 +191,12 @@ function emitObjectSchema(
 
   const baseIndent = INDENT.repeat(indentLevel);
   const propertyIndent = INDENT.repeat(indentLevel + 1);
-  const lines: string[] = [];
+  const propertyEntries: Array<{
+    name: string;
+    schema: string;
+    optional: boolean;
+  }> = [];
+  let hasUnsafePropertyName = false;
 
   for (const propertyName of propertyNames) {
     const property = variant.properties.get(propertyName);
@@ -184,13 +212,37 @@ function emitObjectSchema(
       indentLevel + 1,
       heuristics,
       astMergeOptions,
-      style
+      style,
+      context
     );
-    const propertySchema = optional ? `${schema}.optional()` : schema;
-    lines.push(`${propertyIndent}${JSON.stringify(propertyName)}: ${propertySchema},`);
+    propertyEntries.push({
+      name: propertyName,
+      schema,
+      optional
+    });
+    if (isPrototypeUnsafePropertyName(propertyName)) {
+      hasUnsafePropertyName = true;
+    }
   }
 
-  return `z.object({\n${lines.join("\n")}\n${baseIndent}})`;
+  if (propertyEntries.length === 0) {
+    return "z.object({})";
+  }
+
+  if (!hasUnsafePropertyName) {
+    const lines = propertyEntries.map(({ name, schema, optional }) => {
+      const propertySchema = optional ? `${schema}.optional()` : schema;
+      return `${propertyIndent}${JSON.stringify(name)}: ${propertySchema},`;
+    });
+    return `z.object({\n${lines.join("\n")}\n${baseIndent}})`;
+  }
+
+  context.needsPrototypePropertyGuard = true;
+  const lines = propertyEntries.map(({ name, schema, optional }) => {
+    const propertySchema = optional ? `${schema}.optional()` : schema;
+    return `${propertyIndent}[${JSON.stringify(name)}, ${propertySchema}],`;
+  });
+  return `z.preprocess(stripPrototypeProperties, z.object(Object.fromEntries([\n${lines.join("\n")}\n${baseIndent}])))`;
 }
 
 function emitArraySchema(
@@ -198,7 +250,8 @@ function emitArraySchema(
   indentLevel: number,
   heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
-  style: ResolvedEmissionStyleOptions
+  style: ResolvedEmissionStyleOptions,
+  context: EmitContext
 ): string {
   if (variant.elementCount === 0) {
     return "z.array(z.unknown())";
@@ -209,7 +262,8 @@ function emitArraySchema(
     indentLevel + 1,
     heuristics,
     astMergeOptions,
-    style
+    style,
+    context
   );
   return `z.array(${elementSchema})`;
 }
@@ -255,4 +309,19 @@ function formatNumberLiteral(value: number): string {
     return "-0";
   }
   return Number.isInteger(value) ? String(value) : String(value);
+}
+
+function emitStripPrototypePropertiesHelper(): string {
+  return [
+    "const stripPrototypeProperties = (input: unknown): unknown => {",
+    '  if (!input || typeof input !== "object" || Array.isArray(input)) {',
+    "    return input;",
+    "  }",
+    "  const copy = Object.create(null) as Record<string, unknown>;",
+    "  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {",
+    "    copy[key] = value;",
+    "  }",
+    "  return copy;",
+    "};"
+  ].join("\n");
 }

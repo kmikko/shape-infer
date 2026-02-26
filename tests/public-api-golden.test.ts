@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { generateFromValues } from "../src/public-api.ts";
+import { generateFromText } from "../src/public-api.ts";
 
 // Complex dataset to exercise various inference paths
 const COMPLEX_DATASET = [
@@ -40,9 +40,9 @@ const COMPLEX_DATASET = [
 ];
 
 describe("public api golden snapshots", () => {
-  test("matches typescript output snapshot", () => {
-    const result = generateFromValues({
-      values: COMPLEX_DATASET,
+  test("matches typescript output snapshot", async () => {
+    const result = await generateFromText({
+      text: JSON.stringify(COMPLEX_DATASET),
       format: "typescript",
       typeName: "UserRecord",
       typeMode: "strict",
@@ -52,9 +52,9 @@ describe("public api golden snapshots", () => {
     expect(result.diagnostics).toMatchSnapshot();
   });
 
-  test("matches zod output snapshot", () => {
-    const result = generateFromValues({
-      values: COMPLEX_DATASET,
+  test("matches zod output snapshot", async () => {
+    const result = await generateFromText({
+      text: JSON.stringify(COMPLEX_DATASET),
       format: "zod",
       typeName: "UserSchema",
       typeMode: "strict"
@@ -62,9 +62,9 @@ describe("public api golden snapshots", () => {
     expect(result.output).toMatchSnapshot();
   });
 
-  test("matches json-schema output snapshot", () => {
-    const result = generateFromValues({
-      values: COMPLEX_DATASET,
+  test("matches json-schema output snapshot", async () => {
+    const result = await generateFromText({
+      text: JSON.stringify(COMPLEX_DATASET),
       format: "json-schema",
       typeName: "User"
     });

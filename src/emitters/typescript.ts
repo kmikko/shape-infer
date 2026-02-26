@@ -12,6 +12,7 @@ import {
   resolveEmissionStyleOptions
 } from "./style.ts";
 import type { EmissionStyleOptions, ResolvedEmissionStyleOptions } from "./style.ts";
+import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 const INDENT = "  ";
 
@@ -154,7 +155,9 @@ function emitObjectType(
       astMergeOptions,
       style
     );
-    lines.push(`${propertyIndent}${tsName}${optional ? "?" : ""}: ${tsType};`);
+    const emittedType =
+      optional && isPrototypeUnsafePropertyName(propertyName) ? "unknown" : tsType;
+    lines.push(`${propertyIndent}${tsName}${optional ? "?" : ""}: ${emittedType};`);
   }
 
   return `{\n${lines.join("\n")}\n${baseIndent}}`;

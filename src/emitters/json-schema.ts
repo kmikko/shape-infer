@@ -13,6 +13,7 @@ import {
   resolveEmissionStyleOptions
 } from "./style.ts";
 import type { EmissionStyleOptions, ResolvedEmissionStyleOptions } from "./style.ts";
+import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 export type JsonSchemaValue = null | boolean | number | string | JsonSchemaValue[] | JsonSchemaObject;
 
@@ -157,6 +158,7 @@ function emitObjectSchema(
   }
 
   const properties: JsonSchemaObject = {};
+  const guardedPatternProperties: JsonSchemaObject = {};
   const required: string[] = [];
 
   const propertyNames = [...variant.properties.keys()].sort((left, right) =>
@@ -169,15 +171,21 @@ function emitObjectSchema(
       continue;
     }
 
-    properties[propertyName] = emitNodeSchema(
+    const propertySchema = emitNodeSchema(
       property.node,
       heuristics,
       astMergeOptions,
       style
     );
+    if (isPrototypeUnsafePropertyName(propertyName)) {
+      guardedPatternProperties[`^${escapeRegExp(propertyName)}$`] = propertySchema;
+    } else {
+      properties[propertyName] = propertySchema;
+    }
     if (
       !style.allOptionalProperties &&
-      isRequired(property.seenCount, variant.count, heuristics)
+      isRequired(property.seenCount, variant.count, heuristics) &&
+      !isPrototypeUnsafePropertyName(propertyName)
     ) {
       required.push(propertyName);
     }
@@ -190,6 +198,10 @@ function emitObjectSchema(
 
   if (required.length > 0) {
     schema.required = required;
+  }
+
+  if (Object.keys(guardedPatternProperties).length > 0) {
+    schema.patternProperties = guardedPatternProperties;
   }
 
   return schema;
@@ -212,4 +224,8 @@ function emitArraySchema(
     type: "array",
     items: emitNodeSchema(variant.element, heuristics, astMergeOptions, style)
   };
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

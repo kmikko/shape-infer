@@ -1,65 +1,38 @@
 import { expectTypeOf } from "vitest";
 import {
-  emitJsonSchema,
-  emitTypeScriptType,
-  emitZodSchema,
   generateFromFiles,
-  generateFromText,
-  generateFromValues,
-  inferFromValues,
-  resolveHeuristicOptions
+  generateFromText
 } from "../src/index.ts";
 import type {
   GenerateFromFilesResult,
+  GenerateFromTextOptions,
   GenerateSchemaResult,
-  HeuristicOptions,
-  JsonSchemaObject,
-  SchemaNode,
-  TypeMode
+  GenerateSchemaOptions,
+  GenerationOutputFormat
 } from "../src/index.ts";
 
-const rootNode = inferFromValues([{ id: 1 }, { id: "2" }]);
-expectTypeOf(rootNode).toEqualTypeOf<SchemaNode>();
+const format: GenerationOutputFormat = "json-schema";
+expectTypeOf(format).toMatchTypeOf<"typescript" | "zod" | "json-schema">();
 
-const tsOutput = emitTypeScriptType(rootNode, {
-  rootTypeName: "Product",
-  typeMode: "loose",
-  allOptionalProperties: true
-});
-expectTypeOf(tsOutput).toEqualTypeOf<string>();
-
-const zodOutput = emitZodSchema(rootNode, {
-  rootTypeName: "Product",
-  typeMode: "strict"
-});
-expectTypeOf(zodOutput).toEqualTypeOf<string>();
-
-const jsonSchemaOutput = emitJsonSchema(rootNode, {
-  rootTitle: "Product"
-});
-expectTypeOf(jsonSchemaOutput).toEqualTypeOf<JsonSchemaObject>();
-
-const heuristics = resolveHeuristicOptions({
-  requiredThreshold: 0.5,
-  enumThreshold: 0.25
-});
-expectTypeOf(heuristics).toEqualTypeOf<HeuristicOptions>();
-
-const mode: TypeMode = "loose";
-expectTypeOf(mode).toMatchTypeOf<"strict" | "loose">();
-
-const generatedFromValues = generateFromValues({
-  values: [{ id: 1 }, { id: "2" }],
-  format: "typescript",
+const sharedOptions: GenerateSchemaOptions = {
+  format: "zod",
+  typeName: "Product",
   includeDiagnostics: true
-});
-expectTypeOf(generatedFromValues).toEqualTypeOf<GenerateSchemaResult>();
+};
+expectTypeOf(sharedOptions).toMatchTypeOf<GenerateSchemaOptions>();
 
 const generatedFromText = generateFromText({
+  ...sharedOptions,
   text: '{"id":1}\n{"id":"2"}\n',
   inputFormat: "jsonl"
 });
 expectTypeOf(generatedFromText).toEqualTypeOf<Promise<GenerateSchemaResult>>();
+
+const textOptions: GenerateFromTextOptions = {
+  text: '{"id":1}',
+  inputFormat: "json"
+};
+expectTypeOf(textOptions).toMatchTypeOf<GenerateFromTextOptions>();
 
 const generatedFromFiles = generateFromFiles({
   inputPatterns: ["fixtures/*.json*"],

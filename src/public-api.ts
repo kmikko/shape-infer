@@ -1,5 +1,4 @@
 import { Readable } from "node:stream";
-import { createNode, mergeValue } from "./ast.ts";
 import type { AstMergeOptions, SchemaNode } from "./ast.ts";
 import { analyzeSchema } from "./diagnostics.ts";
 import type { SchemaDiagnostics } from "./diagnostics.ts";
@@ -49,10 +48,6 @@ export interface GenerateFromTextOptions extends GenerateSchemaOptions {
   sourceName?: string;
 }
 
-export interface GenerateFromValuesOptions extends GenerateSchemaOptions {
-  values: Iterable<unknown>;
-}
-
 export interface GenerateSchemaResult {
   root: SchemaNode;
   output: string;
@@ -100,30 +95,6 @@ export async function generateFromText(
     maxCapturedParseErrorLines: options.maxCapturedParseErrorLines,
     sourceName
   });
-
-  return finalizeGeneration(inference, options);
-}
-
-export function generateFromValues(options: GenerateFromValuesOptions): GenerateSchemaResult {
-  const root = createNode();
-  let recordCount = 0;
-
-  for (const value of options.values) {
-    mergeValue(root, value, options.astMergeOptions);
-    recordCount += 1;
-  }
-
-  const inference: InferenceResult = {
-    root,
-    stats: {
-      linesRead: 0,
-      recordsMerged: recordCount,
-      parseErrors: 0,
-      skippedEmptyLines: 0
-    },
-    parseErrorLines: [],
-    files: []
-  };
 
   return finalizeGeneration(inference, options);
 }
