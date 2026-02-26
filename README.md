@@ -217,6 +217,8 @@ console.log(result.diagnostics?.summary);
 - `pnpm run start -- --help`: Run CLI from `dist/`.
 - `pnpm run build`: Compile `src` to `dist`.
 - `pnpm run typecheck`: Typecheck source and scripts.
+- `pnpm run api:check`: Validate published API reports for root and `public-api` entrypoints.
+- `pnpm run api:update`: Refresh API report baselines after intentional public API changes.
 - `pnpm test`: Run Vitest tests.
 - `pnpm run test:watch`: Run tests in watch mode.
 - `pnpm run test:update`: Update snapshot files.

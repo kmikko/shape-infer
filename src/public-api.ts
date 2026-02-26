@@ -1,62 +1,129 @@
 import { Readable } from "node:stream";
-import type { AstMergeOptions, SchemaNode } from "./ast.ts";
+import type { SchemaNode } from "./ast.ts";
 import { analyzeSchema } from "./diagnostics.ts";
-import type { SchemaDiagnostics } from "./diagnostics.ts";
 import { emitJsonSchema } from "./emitters/json-schema.ts";
 import { emitTypeScriptType } from "./emitters/typescript.ts";
 import { emitZodSchema } from "./emitters/zod.ts";
-import type { TypeMode } from "./emitters/style.ts";
 import {
   detectInputFormatFromText,
   inferFromFiles,
   inferFromJsonText,
   inferFromJsonlStream
 } from "./infer.ts";
-import type {
-  InferenceFileSummary,
-  InferenceResult,
-  InferenceStats,
-  InputFormat
-} from "./infer.ts";
-import type { HeuristicOptions } from "./heuristics.ts";
+import type { InferenceFileSummary, InferenceResult } from "./infer.ts";
 import { resolveInputPaths } from "./input-resolver.ts";
 
 export type GenerationOutputFormat = "typescript" | "zod" | "json-schema";
+export type GenerateInputFormat = "auto" | "jsonl" | "json";
+export type GenerateTypeMode = "strict" | "loose";
+
+export interface GenerateHeuristicOptions {
+  requiredThreshold?: number;
+  enumThreshold?: number;
+  maxEnumSize?: number;
+  minEnumCount?: number;
+  stringFormatThreshold?: number;
+  minFormatCount?: number;
+  recordMinKeys?: number;
+  recordMaxPresence?: number;
+  maxUnionSize?: number;
+}
+
+export interface GenerateAstMergeOptions {
+  maxTrackedLiteralsPerVariant?: number;
+}
+
+export interface GenerateInferenceStats {
+  linesRead: number;
+  recordsMerged: number;
+  parseErrors: number;
+  skippedEmptyLines: number;
+}
+
+export interface GenerateInferenceFileSummary {
+  source: string;
+  format: "jsonl" | "json";
+  stats: GenerateInferenceStats;
+  parseErrorLines: number[];
+}
+
+export interface GenerateDiagnosticsSummary {
+  nodesVisited: number;
+  maxDepth: number;
+  typeConflictCount: number;
+  optionalFieldCount: number;
+  enumCount: number;
+  stringFormatCount: number;
+  recordLikeObjectCount: number;
+  unknownNodeCount: number;
+  degradationCount: number;
+  unionOverflowCount: number;
+  literalOverflowCount: number;
+  recordLikeCollapsedCount: number;
+  thresholdNearMissCount: number;
+}
+
+export interface GenerateDiagnostics {
+  summary: GenerateDiagnosticsSummary;
+  conflicts: Array<{
+    path: string;
+    kinds: string[];
+    occurrences: number;
+  }>;
+  optionalFields: Array<{
+    path: string;
+    presence: number;
+  }>;
+  enums: Array<{
+    path: string;
+    type: "string" | "number";
+    valueCount: number;
+    distinctRatio: number;
+    preview: Array<string | number>;
+  }>;
+  stringFormats: Array<{
+    path: string;
+    format: string;
+    confidence: number;
+  }>;
+  recordLikeObjects: string[];
+  degradations: unknown[];
+}
 
 export interface GenerateSchemaOptions {
   format?: GenerationOutputFormat;
   typeName?: string;
-  typeMode?: TypeMode;
+  typeMode?: GenerateTypeMode;
   allOptionalProperties?: boolean;
-  heuristics?: Partial<HeuristicOptions>;
-  astMergeOptions?: Partial<AstMergeOptions>;
+  heuristics?: GenerateHeuristicOptions;
+  astMergeOptions?: GenerateAstMergeOptions;
   includeDiagnostics?: boolean;
   diagnosticsMaxFindings?: number;
 }
 
 export interface GenerateFromFilesOptions extends GenerateSchemaOptions {
   inputPatterns: string[];
-  inputFormat?: InputFormat;
+  inputFormat?: GenerateInputFormat;
   maxCapturedParseErrorLines?: number;
   cwd?: string;
 }
 
 export interface GenerateFromTextOptions extends GenerateSchemaOptions {
   text: string;
-  inputFormat?: InputFormat;
+  inputFormat?: GenerateInputFormat;
   maxCapturedParseErrorLines?: number;
   sourceName?: string;
 }
 
 export interface GenerateSchemaResult {
-  root: SchemaNode;
+  root: unknown;
   output: string;
   format: GenerationOutputFormat;
   typeName: string;
-  stats: InferenceStats;
+  stats: GenerateInferenceStats;
   parseErrorLines: number[];
-  files: InferenceFileSummary[];
-  diagnostics?: SchemaDiagnostics;
+  files: GenerateInferenceFileSummary[];
+  diagnostics?: GenerateDiagnostics;
   warnings: string[];
 }
 
@@ -100,8 +167,8 @@ export async function generateFromText(
 }
 
 interface InferTextOptions {
-  inputFormat?: InputFormat;
-  astMergeOptions?: Partial<AstMergeOptions>;
+  inputFormat?: GenerateInputFormat;
+  astMergeOptions?: GenerateAstMergeOptions;
   maxCapturedParseErrorLines?: number;
   sourceName: string;
 }

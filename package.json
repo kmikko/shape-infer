@@ -53,6 +53,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
+    "api:check": "pnpm run build && api-extractor run -c api-extractor.index.json && api-extractor run -c api-extractor.public-api.json",
+    "api:update": "pnpm run build && api-extractor run --local -c api-extractor.index.json && api-extractor run --local -c api-extractor.public-api.json",
     "dev": "node src/cli.ts",
     "start": "node dist/cli.js",
     "test": "vitest run",
@@ -65,13 +67,14 @@
     "pack:check": "npm pack --dry-run",
     "pack:smoke": "node scripts/pack-smoke.ts",
     "check": "pnpm run test && pnpm run test:type && pnpm run smoke",
-    "verify": "pnpm run typecheck && pnpm run check && pnpm run build && pnpm run smoke:dist && pnpm run pack:check && pnpm run pack:smoke",
+    "verify": "pnpm run typecheck && pnpm run check && pnpm run api:check && pnpm run smoke:dist && pnpm run pack:check && pnpm run pack:smoke",
     "test:ci": "pnpm run verify"
   },
   "dependencies": {
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.57.6",
     "@types/node": "^22.13.10",
     "@vitest/coverage-v8": "^4.0.18",
     "ajv": "^8.18.0",

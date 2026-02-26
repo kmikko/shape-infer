@@ -64,7 +64,12 @@ export async function runCli(argv: string[], io: CliIo = DEFAULT_CLI_IO): Promis
       throw new Error("Diagnostics were requested but were not generated.");
     }
 
-    io.stderr.write(formatDiagnosticsReport(generation.diagnostics, generation.stats));
+    io.stderr.write(
+      formatDiagnosticsReport(
+        generation.diagnostics as unknown as Parameters<typeof formatDiagnosticsReport>[0],
+        generation.stats
+      )
+    );
     if (options.typeMode === "loose") {
       io.stderr.write(
         "Diagnostics note: loose type mode collapses inferred literal enums to primitive base types.\n"
