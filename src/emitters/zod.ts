@@ -11,9 +11,7 @@ import {
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions,
 } from "../heuristics.ts";
-import type { HeuristicOptions } from "../heuristics.ts";
 import { resolveEmissionStyleOptions } from "./style.ts";
 import type {
   EmissionStyleOptions,
@@ -27,7 +25,6 @@ export interface ZodEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportSchema?: boolean;
   exportType?: boolean;
-  heuristics?: Partial<HeuristicOptions>;
   astMergeOptions?: Partial<AstMergeOptions>;
 }
 
@@ -45,7 +42,6 @@ export function emitZodSchema(
   const exportType = options.exportType ?? true;
   const schemaKeyword = exportSchema ? "export " : "";
   const typeKeyword = exportType ? "export " : "";
-  const heuristics = resolveHeuristicOptions(options.heuristics);
   const style = resolveEmissionStyleOptions(options);
   const context: EmitContext = {
     needsPrototypePropertyGuard: false,
@@ -53,7 +49,6 @@ export function emitZodSchema(
   const schemaText = emitNodeSchema(
     node,
     0,
-    heuristics,
     options.astMergeOptions,
     style,
     context,
@@ -77,7 +72,6 @@ export function emitZodSchema(
 function emitNodeSchema(
   node: SchemaNode,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
   context: EmitContext,
@@ -93,7 +87,6 @@ function emitNodeSchema(
       emitObjectSchema(
         node.variants.object,
         indentLevel,
-        heuristics,
         astMergeOptions,
         style,
         context,
@@ -106,7 +99,6 @@ function emitNodeSchema(
       emitArraySchema(
         node.variants.array,
         indentLevel,
-        heuristics,
         astMergeOptions,
         style,
         context,
@@ -115,11 +107,11 @@ function emitNodeSchema(
   }
 
   if (node.variants.string) {
-    const formatCandidate = inferStringFormat(node.variants.string, heuristics);
+    const formatCandidate = inferStringFormat(node.variants.string);
     if (style.typeMode === "loose") {
       variants.add(applyStringFormat("z.string()", formatCandidate?.format));
     } else {
-      const enumCandidate = inferStringEnum(node.variants.string, heuristics);
+      const enumCandidate = inferStringEnum(node.variants.string);
       if (enumCandidate) {
         variants.add(
           `z.enum([${enumCandidate.values.map((value) => JSON.stringify(value)).join(", ")}])`,
@@ -137,7 +129,6 @@ function emitNodeSchema(
       const enumCandidate = inferNumberEnum(
         node.variants.integer,
         node.variants.number,
-        heuristics,
       );
       if (enumCandidate) {
         variants.add(
@@ -165,10 +156,6 @@ function emitNodeSchema(
     return "z.unknown()";
   }
 
-  if (resolvedVariants.length > heuristics.maxUnionSize) {
-    return "z.unknown()";
-  }
-
   if (resolvedVariants.length === 1) {
     return resolvedVariants[0];
   }
@@ -183,17 +170,15 @@ function emitNodeSchema(
 function emitObjectSchema(
   variant: ObjectVariant,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
   context: EmitContext,
 ): string {
-  if (isRecordLikeObject(variant, heuristics)) {
+  if (isRecordLikeObject(variant)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
     const valueSchema = emitNodeSchema(
       valueNode,
       indentLevel + 1,
-      heuristics,
       astMergeOptions,
       style,
       context,
@@ -226,11 +211,10 @@ function emitObjectSchema(
 
     const optional =
       style.allOptionalProperties ||
-      !isRequired(property.seenCount, variant.count, heuristics);
+      !isRequired(property.seenCount, variant.count);
     const schema = emitNodeSchema(
       property.node,
       indentLevel + 1,
-      heuristics,
       astMergeOptions,
       style,
       context,
@@ -268,7 +252,6 @@ function emitObjectSchema(
 function emitArraySchema(
   variant: ArrayVariant,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
   context: EmitContext,
@@ -280,7 +263,6 @@ function emitArraySchema(
   const elementSchema = emitNodeSchema(
     variant.element,
     indentLevel + 1,
-    heuristics,
     astMergeOptions,
     style,
     context,

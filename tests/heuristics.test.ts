@@ -1,63 +1,80 @@
 import { describe, expect, test } from "vitest";
 import {
   buildRecordValueNode,
-  getNodeKinds,
   inferNumberEnum,
   inferStringEnum,
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions,
 } from "../src/heuristics.ts";
+import type { NodeKind, SchemaNode } from "../src/ast.ts";
 import { inferFromValues } from "../src/infer.ts";
 
+function getNodeKinds(node: SchemaNode): NodeKind[] {
+  const kinds: NodeKind[] = [];
+  if (node.variants.unknown) {
+    kinds.push("unknown");
+  }
+  if (node.variants.object) {
+    kinds.push("object");
+  }
+  if (node.variants.array) {
+    kinds.push("array");
+  }
+  if (node.variants.string) {
+    kinds.push("string");
+  }
+  if (node.variants.integer) {
+    kinds.push("integer");
+  }
+  if (node.variants.number) {
+    kinds.push("number");
+  }
+  if (node.variants.boolean) {
+    kinds.push("boolean");
+  }
+  if (node.variants.null) {
+    kinds.push("null");
+  }
+  return kinds;
+}
+
 describe("heuristics", () => {
-  test("resolveHeuristicOptions validates bounds", () => {
-    expect(() => resolveHeuristicOptions({ requiredThreshold: -0.1 })).toThrow(
-      /requiredThreshold/,
-    );
-    expect(() => resolveHeuristicOptions({ maxEnumSize: 1 })).toThrow(
-      /maxEnumSize/,
-    );
+  test("isRequired uses strict default threshold", () => {
+    expect(isRequired(4, 4)).toBe(true);
+    expect(isRequired(3, 4)).toBe(false);
+    expect(isRequired(1, 0)).toBe(false);
   });
 
-  test("isRequired honors configured threshold", () => {
-    const options = resolveHeuristicOptions({ requiredThreshold: 0.75 });
+  test("inferStringEnum returns enum candidate when default thresholds are met", () => {
+    const root = inferFromValues([
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "A",
+      "B",
+      "B",
+    ]);
 
-    expect(isRequired(3, 4, options)).toBe(true);
-    expect(isRequired(2, 4, options)).toBe(false);
-    expect(isRequired(1, 0, options)).toBe(false);
-  });
-
-  test("inferStringEnum returns enum candidate when ratio is below threshold", () => {
-    const root = inferFromValues(["A", "B", "A", "B"]);
-    const options = resolveHeuristicOptions({
-      minEnumCount: 2,
-      enumThreshold: 1,
-      maxEnumSize: 10,
-    });
-
-    const candidate = inferStringEnum(root.variants.string, options);
+    const candidate = inferStringEnum(root.variants.string);
     expect(candidate).toEqual({
       values: ["A", "B"],
-      distinctRatio: 0.5,
+      distinctRatio: 0.2,
     });
   });
 
   test("inferNumberEnum merges integer and number literals", () => {
-    const root = inferFromValues([1, 2, 1.5, 2, 1]);
-    const options = resolveHeuristicOptions({
-      minEnumCount: 2,
-      enumThreshold: 1,
-      maxEnumSize: 10,
-    });
+    const root = inferFromValues([1, 1, 1, 1, 1, 1, 1, 1, 1.5, 1.5]);
 
     const candidate = inferNumberEnum(
       root.variants.integer,
       root.variants.number,
-      options,
     );
-    expect(candidate?.values).toEqual([1, 1.5, 2]);
+    expect(candidate?.values).toEqual([1, 1.5]);
   });
 
   test("inferStringFormat promotes best format candidate by confidence", () => {
@@ -65,44 +82,51 @@ describe("heuristics", () => {
       "foo@example.com",
       "bar@example.com",
       "baz@example.com",
+      "qux@example.com",
+      "quux@example.com",
+      "corge@example.com",
+      "grault@example.com",
+      "garply@example.com",
+      "waldo@example.com",
       "not-an-email",
     ]);
 
-    const options = resolveHeuristicOptions({
-      minFormatCount: 2,
-      stringFormatThreshold: 0.7,
-    });
-
-    const candidate = inferStringFormat(root.variants.string, options);
+    const candidate = inferStringFormat(root.variants.string);
     expect(candidate).toEqual({
       format: "email",
-      confidence: 0.75,
+      confidence: 0.9,
     });
   });
 
-  test("isRecordLikeObject uses key-count and presence thresholds", () => {
-    const root = inferFromValues([
-      { a: 1, b: 1, c: 1, d: 1 },
-      { e: 2, f: 2, g: 2, h: 2 },
-      { i: 3, j: 3, k: 3, l: 3 },
-    ]);
+  test("isRecordLikeObject uses strict default key-count and presence thresholds", () => {
+    const sparseRecords = Array.from({ length: 3 }, (_, recordIndex) => {
+      return Object.fromEntries(
+        Array.from({ length: 15 }, (_, keyIndex) => {
+          const key = `k${recordIndex * 15 + keyIndex}`;
+          return [key, keyIndex];
+        }),
+      );
+    });
+
+    const root = inferFromValues(sparseRecords);
 
     const objectVariant = root.variants.object;
     if (!objectVariant) {
       throw new Error("Expected object variant.");
     }
 
-    const positive = resolveHeuristicOptions({
-      recordMinKeys: 4,
-      recordMaxPresence: 0.5,
-    });
-    const negative = resolveHeuristicOptions({
-      recordMinKeys: 4,
-      recordMaxPresence: 0.3,
-    });
+    const denseRecords = sparseRecords.map((record) => ({
+      common: 1,
+      ...record,
+    }));
+    const denseRoot = inferFromValues(denseRecords);
+    const denseObjectVariant = denseRoot.variants.object;
+    if (!denseObjectVariant) {
+      throw new Error("Expected dense object variant.");
+    }
 
-    expect(isRecordLikeObject(objectVariant, positive)).toBe(true);
-    expect(isRecordLikeObject(objectVariant, negative)).toBe(false);
+    expect(isRecordLikeObject(objectVariant)).toBe(true);
+    expect(isRecordLikeObject(denseObjectVariant)).toBe(false);
   });
 
   test("buildRecordValueNode merges all record value nodes", () => {

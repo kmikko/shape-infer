@@ -31,8 +31,7 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
       ]
     },
     "launchedAt": {
-      "type": "string",
-      "format": "date-time"
+      "type": "string"
     },
     "price": {
       "anyOf": [
@@ -58,20 +57,12 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
   "type": "object",
   "properties": {
     "category": {
-      "type": "string",
-      "enum": [
-        "Beer",
-        "Wine"
-      ]
+      "type": "string"
     },
     "certification": {
       "anyOf": [
         {
-          "type": "string",
-          "enum": [
-            "Fair for Life",
-            "Fairtrade"
-          ]
+          "type": "string"
         },
         {
           "type": "null"
@@ -84,31 +75,17 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
           "type": "string"
         },
         {
-          "type": "integer",
-          "enum": [
-            1,
-            2
-          ]
+          "type": "integer"
         }
       ]
     },
     "launchedAt": {
-      "type": "string",
-      "format": "date-time",
-      "enum": [
-        "2024-01-02T12:00:00Z",
-        "2024-01-03T12:00:00Z",
-        "not-a-date"
-      ]
+      "type": "string"
     },
     "price": {
       "anyOf": [
         {
-          "type": "number",
-          "enum": [
-            10.5,
-            12
-          ]
+          "type": "number"
         },
         {
           "type": "null"
@@ -118,12 +95,7 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
     "tags": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "europe",
-          "local",
-          "sale"
-        ]
+        "type": "string"
       }
     }
   },
@@ -146,12 +118,12 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
 };
 ",
   "typescriptStrict": "export type SnapshotType = {
-  category: "Beer" | "Wine";
-  certification: "Fair for Life" | "Fairtrade" | null;
-  id: string | 1 | 2;
-  launchedAt: "2024-01-02T12:00:00Z" | "2024-01-03T12:00:00Z" | "not-a-date";
-  price: 10.5 | 12 | null;
-  tags: Array<"europe" | "local" | "sale">;
+  category: string;
+  certification: string | null;
+  id: string | number;
+  launchedAt: string;
+  price: number | null;
+  tags: Array<string>;
 };
 ",
   "zodLooseOptional": "import { z } from "zod";
@@ -160,7 +132,7 @@ export const SnapshotTypeSchema = z.object({
   "category": z.string().optional(),
   "certification": z.string().nullable().optional(),
   "id": z.union([z.string(), z.number().int()]).optional(),
-  "launchedAt": z.string().datetime().optional(),
+  "launchedAt": z.string().optional(),
   "price": z.number().nullable().optional(),
   "tags": z.array(z.string()).optional(),
 });
@@ -170,12 +142,12 @@ export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
   "zodStrict": "import { z } from "zod";
 
 export const SnapshotTypeSchema = z.object({
-  "category": z.enum(["Beer", "Wine"]),
-  "certification": z.union([z.enum(["Fair for Life", "Fairtrade"]), z.null()]),
-  "id": z.union([z.string(), z.union([z.literal(1), z.literal(2)])]),
-  "launchedAt": z.enum(["2024-01-02T12:00:00Z", "2024-01-03T12:00:00Z", "not-a-date"]),
-  "price": z.union([z.union([z.literal(10.5), z.literal(12)]), z.null()]),
-  "tags": z.array(z.enum(["europe", "local", "sale"])),
+  "category": z.string(),
+  "certification": z.union([z.string(), z.null()]),
+  "id": z.union([z.string(), z.number().int()]),
+  "launchedAt": z.string(),
+  "price": z.union([z.number(), z.null()]),
+  "tags": z.array(z.string()),
 });
 
 export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
@@ -192,15 +164,43 @@ exports[`emitter golden snapshots > record-like-attributes 1`] = `
   "properties": {
     "attributes": {
       "type": "object",
-      "additionalProperties": {
-        "anyOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "null"
-          }
-        ]
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string"
+        },
+        "c": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "f": {
+          "type": "string"
+        },
+        "g": {
+          "type": "string"
+        },
+        "h": {
+          "type": "string"
+        },
+        "i": {
+          "type": "string"
+        },
+        "j": {
+          "type": "string"
+        },
+        "k": {
+          "type": "string"
+        },
+        "l": {
+          "type": "null"
+        }
       }
     },
     "sku": {
@@ -215,36 +215,47 @@ exports[`emitter golden snapshots > record-like-attributes 1`] = `
   "properties": {
     "attributes": {
       "type": "object",
-      "additionalProperties": {
-        "anyOf": [
-          {
-            "type": "string",
-            "enum": [
-              "aged",
-              "dry",
-              "fresh",
-              "no",
-              "red",
-              "sparkling",
-              "sweet",
-              "white",
-              "yes",
-              "young"
-            ]
-          },
-          {
-            "type": "null"
-          }
-        ]
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string"
+        },
+        "c": {
+          "type": "string"
+        },
+        "d": {
+          "type": "string"
+        },
+        "e": {
+          "type": "string"
+        },
+        "f": {
+          "type": "string"
+        },
+        "g": {
+          "type": "string"
+        },
+        "h": {
+          "type": "string"
+        },
+        "i": {
+          "type": "string"
+        },
+        "j": {
+          "type": "string"
+        },
+        "k": {
+          "type": "string"
+        },
+        "l": {
+          "type": "null"
+        }
       }
     },
     "sku": {
-      "type": "string",
-      "enum": [
-        "A-1",
-        "A-2",
-        "A-3"
-      ]
+      "type": "string"
     }
   },
   "required": [
@@ -253,19 +264,58 @@ exports[`emitter golden snapshots > record-like-attributes 1`] = `
   ]
 }",
   "typescriptLooseOptional": "export type SnapshotType = {
-  attributes?: Record<string, string | null>;
+  attributes?: {
+    a?: string;
+    b?: string;
+    c?: string;
+    d?: string;
+    e?: string;
+    f?: string;
+    g?: string;
+    h?: string;
+    i?: string;
+    j?: string;
+    k?: string;
+    l?: null;
+  };
   sku?: string;
 };
 ",
   "typescriptStrict": "export type SnapshotType = {
-  attributes: Record<string, "aged" | "dry" | "fresh" | "no" | "red" | "sparkling" | "sweet" | "white" | "yes" | "young" | null>;
-  sku: "A-1" | "A-2" | "A-3";
+  attributes: {
+    a?: string;
+    b?: string;
+    c?: string;
+    d?: string;
+    e?: string;
+    f?: string;
+    g?: string;
+    h?: string;
+    i?: string;
+    j?: string;
+    k?: string;
+    l?: null;
+  };
+  sku: string;
 };
 ",
   "zodLooseOptional": "import { z } from "zod";
 
 export const SnapshotTypeSchema = z.object({
-  "attributes": z.record(z.string(), z.string().nullable()).optional(),
+  "attributes": z.object({
+    "a": z.string().optional(),
+    "b": z.string().optional(),
+    "c": z.string().optional(),
+    "d": z.string().optional(),
+    "e": z.string().optional(),
+    "f": z.string().optional(),
+    "g": z.string().optional(),
+    "h": z.string().optional(),
+    "i": z.string().optional(),
+    "j": z.string().optional(),
+    "k": z.string().optional(),
+    "l": z.null().optional(),
+  }).optional(),
   "sku": z.string().optional(),
 });
 
@@ -274,8 +324,21 @@ export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
   "zodStrict": "import { z } from "zod";
 
 export const SnapshotTypeSchema = z.object({
-  "attributes": z.record(z.string(), z.union([z.enum(["aged", "dry", "fresh", "no", "red", "sparkling", "sweet", "white", "yes", "young"]), z.null()])),
-  "sku": z.enum(["A-1", "A-2", "A-3"]),
+  "attributes": z.object({
+    "a": z.string().optional(),
+    "b": z.string().optional(),
+    "c": z.string().optional(),
+    "d": z.string().optional(),
+    "e": z.string().optional(),
+    "f": z.string().optional(),
+    "g": z.string().optional(),
+    "h": z.string().optional(),
+    "i": z.string().optional(),
+    "j": z.string().optional(),
+    "k": z.string().optional(),
+    "l": z.null().optional(),
+  }),
+  "sku": z.string(),
 });
 
 export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;

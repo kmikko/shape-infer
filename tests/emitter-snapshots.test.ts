@@ -3,12 +3,10 @@ import { emitJsonSchema } from "../src/emitters/json-schema.ts";
 import { emitTypeScriptType } from "../src/emitters/typescript.ts";
 import { emitZodSchema } from "../src/emitters/zod.ts";
 import { inferFromValues } from "../src/infer.ts";
-import type { HeuristicOptions } from "../src/heuristics.ts";
 
 interface SnapshotCase {
   name: string;
   values: unknown[];
-  heuristics?: Partial<HeuristicOptions>;
 }
 
 const SNAPSHOT_CASES: SnapshotCase[] = [
@@ -40,12 +38,6 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
         launchedAt: "not-a-date",
       },
     ],
-    heuristics: {
-      minEnumCount: 2,
-      enumThreshold: 1,
-      minFormatCount: 2,
-      stringFormatThreshold: 0.6,
-    },
   },
   {
     name: "record-like-attributes",
@@ -78,12 +70,6 @@ const SNAPSHOT_CASES: SnapshotCase[] = [
         },
       },
     ],
-    heuristics: {
-      minEnumCount: 2,
-      enumThreshold: 1,
-      recordMinKeys: 4,
-      recordMaxPresence: 0.4,
-    },
   },
 ];
 
@@ -95,28 +81,23 @@ describe("emitter golden snapshots", () => {
       const snapshot = {
         typescriptStrict: emitTypeScriptType(root, {
           rootTypeName: "SnapshotType",
-          heuristics: fixture.heuristics,
         }),
         typescriptLooseOptional: emitTypeScriptType(root, {
           rootTypeName: "SnapshotType",
           typeMode: "loose",
           allOptionalProperties: true,
-          heuristics: fixture.heuristics,
         }),
         zodStrict: emitZodSchema(root, {
           rootTypeName: "SnapshotType",
-          heuristics: fixture.heuristics,
         }),
         zodLooseOptional: emitZodSchema(root, {
           rootTypeName: "SnapshotType",
           typeMode: "loose",
           allOptionalProperties: true,
-          heuristics: fixture.heuristics,
         }),
         jsonSchemaStrict: JSON.stringify(
           emitJsonSchema(root, {
             rootTitle: "SnapshotType",
-            heuristics: fixture.heuristics,
           }),
           null,
           2,
@@ -126,7 +107,6 @@ describe("emitter golden snapshots", () => {
             rootTitle: "SnapshotType",
             typeMode: "loose",
             allOptionalProperties: true,
-            heuristics: fixture.heuristics,
           }),
           null,
           2,

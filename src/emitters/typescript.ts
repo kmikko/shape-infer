@@ -10,9 +10,7 @@ import {
   inferStringEnum,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions,
 } from "../heuristics.ts";
-import type { HeuristicOptions } from "../heuristics.ts";
 import { resolveEmissionStyleOptions } from "./style.ts";
 import type {
   EmissionStyleOptions,
@@ -25,7 +23,6 @@ const INDENT = "  ";
 export interface TypeScriptEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportType?: boolean;
-  heuristics?: Partial<HeuristicOptions>;
   astMergeOptions?: Partial<AstMergeOptions>;
 }
 
@@ -36,15 +33,8 @@ export function emitTypeScriptType(
   const rootTypeName = options.rootTypeName ?? "Root";
   const exportType = options.exportType ?? true;
   const keyword = exportType ? "export " : "";
-  const heuristics = resolveHeuristicOptions(options.heuristics);
   const style = resolveEmissionStyleOptions(options);
-  const typeText = emitNodeType(
-    node,
-    0,
-    heuristics,
-    options.astMergeOptions,
-    style,
-  );
+  const typeText = emitNodeType(node, 0, options.astMergeOptions, style);
 
   return `${keyword}type ${rootTypeName} = ${typeText};\n`;
 }
@@ -52,7 +42,6 @@ export function emitTypeScriptType(
 function emitNodeType(
   node: SchemaNode,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): string {
@@ -64,25 +53,13 @@ function emitNodeType(
 
   if (node.variants.object) {
     variants.add(
-      emitObjectType(
-        node.variants.object,
-        indentLevel,
-        heuristics,
-        astMergeOptions,
-        style,
-      ),
+      emitObjectType(node.variants.object, indentLevel, astMergeOptions, style),
     );
   }
 
   if (node.variants.array) {
     variants.add(
-      emitArrayType(
-        node.variants.array,
-        indentLevel,
-        heuristics,
-        astMergeOptions,
-        style,
-      ),
+      emitArrayType(node.variants.array, indentLevel, astMergeOptions, style),
     );
   }
 
@@ -90,7 +67,7 @@ function emitNodeType(
     if (style.typeMode === "loose") {
       variants.add("string");
     } else {
-      const stringEnum = inferStringEnum(node.variants.string, heuristics);
+      const stringEnum = inferStringEnum(node.variants.string);
       if (stringEnum) {
         variants.add(
           stringEnum.values.map((value) => JSON.stringify(value)).join(" | "),
@@ -108,7 +85,6 @@ function emitNodeType(
       const numberEnum = inferNumberEnum(
         node.variants.integer,
         node.variants.number,
-        heuristics,
       );
       if (numberEnum) {
         variants.add(numberEnum.values.join(" | "));
@@ -132,10 +108,6 @@ function emitNodeType(
     return "unknown";
   }
 
-  if (resolvedVariants.length > heuristics.maxUnionSize) {
-    return "unknown";
-  }
-
   if (resolvedVariants.length === 1) {
     return resolvedVariants[0];
   }
@@ -146,16 +118,14 @@ function emitNodeType(
 function emitObjectType(
   variant: ObjectVariant,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): string {
-  if (isRecordLikeObject(variant, heuristics)) {
+  if (isRecordLikeObject(variant)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
     const valueType = emitNodeType(
       valueNode,
       indentLevel + 1,
-      heuristics,
       astMergeOptions,
       style,
     );
@@ -182,12 +152,11 @@ function emitObjectType(
 
     const optional =
       style.allOptionalProperties ||
-      !isRequired(property.seenCount, variant.count, heuristics);
+      !isRequired(property.seenCount, variant.count);
     const tsName = formatPropertyName(propertyName);
     const tsType = emitNodeType(
       property.node,
       indentLevel + 1,
-      heuristics,
       astMergeOptions,
       style,
     );
@@ -206,7 +175,6 @@ function emitObjectType(
 function emitArrayType(
   variant: ArrayVariant,
   indentLevel: number,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): string {
@@ -216,7 +184,6 @@ function emitArrayType(
   const elementType = emitNodeType(
     variant.element,
     indentLevel + 1,
-    heuristics,
     astMergeOptions,
     style,
   );

@@ -22,33 +22,19 @@ describe("emitter edge cases", () => {
     expect(schema).not.toHaveProperty("type");
   });
 
-  test("falls back to unknown when union variants exceed maxUnionSize", () => {
+  test("preserves mixed unions without truncating by union size", () => {
     const root = inferFromValues([1, "x", true, null, [1], { nested: 1 }]);
-    const heuristics = {
-      maxUnionSize: 3,
-    };
+    const ts = emitTypeScriptType(root, { rootTypeName: "OverflowRoot" });
+    const zod = emitZodSchema(root, { rootTypeName: "OverflowRoot" });
+    const schema = emitJsonSchema(root, { rootTitle: "OverflowRoot" });
 
-    const ts = emitTypeScriptType(root, {
-      rootTypeName: "OverflowRoot",
-      heuristics,
-    });
-    const zod = emitZodSchema(root, {
-      rootTypeName: "OverflowRoot",
-      heuristics,
-    });
-    const schema = emitJsonSchema(root, {
-      rootTitle: "OverflowRoot",
-      heuristics,
-    });
-
-    expect(ts).toContain("export type OverflowRoot = unknown;");
-    expect(zod).toContain("const OverflowRootSchema = z.unknown();");
-    expect(schema).toMatchObject({
-      $schema: "https://json-schema.org/draft/2020-12/schema",
-      title: "OverflowRoot",
-    });
-    expect(schema).not.toHaveProperty("type");
-    expect(schema).not.toHaveProperty("anyOf");
+    expect(ts).not.toContain("export type OverflowRoot = unknown;");
+    expect(ts).toContain("string");
+    expect(ts).toContain("number");
+    expect(zod).toContain("const OverflowRootSchema = z.union([");
+    expect(schema).toHaveProperty("anyOf");
+    expect(Array.isArray(schema.anyOf)).toBe(true);
+    expect((schema.anyOf as unknown[]).length).toBeGreaterThan(1);
   });
 
   test("emits empty object and empty array defaults", () => {
@@ -96,12 +82,24 @@ describe("emitter edge cases", () => {
     const cases = [
       {
         name: "date",
-        values: ["2025-01-01", "2025-01-02"],
+        values: [
+          "2025-01-01",
+          "2025-01-02",
+          "2025-01-03",
+          "2025-01-04",
+          "2025-01-05",
+        ],
         expectedFragment: ".date()",
       },
       {
         name: "email",
-        values: ["alpha@example.com", "beta@example.com"],
+        values: [
+          "alpha@example.com",
+          "beta@example.com",
+          "gamma@example.com",
+          "delta@example.com",
+          "epsilon@example.com",
+        ],
         expectedFragment: ".email()",
       },
       {
@@ -109,12 +107,21 @@ describe("emitter edge cases", () => {
         values: [
           "550e8400-e29b-41d4-a716-446655440000",
           "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+          "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+          "9a52d6e2-0386-4e22-8f7a-2f87f6a8a9fb",
+          "123e4567-e89b-12d3-a456-426614174000",
         ],
         expectedFragment: ".uuid()",
       },
       {
         name: "uri",
-        values: ["https://example.com/a", "https://example.com/b"],
+        values: [
+          "https://example.com/a",
+          "https://example.com/b",
+          "https://example.com/c",
+          "https://example.com/d",
+          "https://example.com/e",
+        ],
         expectedFragment: ".url()",
       },
     ] as const;
@@ -123,10 +130,6 @@ describe("emitter edge cases", () => {
       const root = inferFromValues(fixture.values);
       const zod = emitZodSchema(root, {
         rootTypeName: `Format${fixture.name}`,
-        heuristics: {
-          minFormatCount: 2,
-          stringFormatThreshold: 1,
-        },
       });
 
       expect(zod).toContain(fixture.expectedFragment);
@@ -182,12 +185,9 @@ describe("emitter edge cases", () => {
       intVariant.count += 5; // 10 total observations
     }
 
-    // With minEnumCount=2 and enumThreshold=0.5, distinctCount=2, ratio=2/10=0.2 ≤ 0.5
-    // → enum IS inferred. Number("-0") is -0 → Object.is(-0, -0) is true → "-0" literal.
-    const zod = emitZodSchema(node, {
-      rootTypeName: "NegZero",
-      heuristics: { minEnumCount: 2, enumThreshold: 0.5 },
-    });
+    // With default thresholds, distinctCount=2 and ratio=2/10=0.2 still qualifies.
+    // Number("-0") is -0 → Object.is(-0, -0) is true → "-0" literal formatting path.
+    const zod = emitZodSchema(node, { rootTypeName: "NegZero" });
 
     // The emitted schema is a union of number literals
     expect(zod).toContain("NegZeroSchema");

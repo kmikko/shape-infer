@@ -11,9 +11,7 @@ import {
   inferStringFormat,
   isRecordLikeObject,
   isRequired,
-  resolveHeuristicOptions,
 } from "../heuristics.ts";
-import type { HeuristicOptions } from "../heuristics.ts";
 import { resolveEmissionStyleOptions } from "./style.ts";
 import type {
   EmissionStyleOptions,
@@ -36,7 +34,6 @@ export interface JsonSchemaObject {
 export interface JsonSchemaEmitterOptions extends EmissionStyleOptions {
   rootTitle?: string;
   includeSchemaDialect?: boolean;
-  heuristics?: Partial<HeuristicOptions>;
   astMergeOptions?: Partial<AstMergeOptions>;
 }
 
@@ -44,14 +41,8 @@ export function emitJsonSchema(
   node: SchemaNode,
   options: JsonSchemaEmitterOptions = {},
 ): JsonSchemaObject {
-  const heuristics = resolveHeuristicOptions(options.heuristics);
   const style = resolveEmissionStyleOptions(options);
-  const schema = emitNodeSchema(
-    node,
-    heuristics,
-    options.astMergeOptions,
-    style,
-  );
+  const schema = emitNodeSchema(node, options.astMergeOptions, style);
 
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error("Invalid schema root generated.");
@@ -74,7 +65,6 @@ export function emitJsonSchema(
 
 function emitNodeSchema(
   node: SchemaNode,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): JsonSchemaObject {
@@ -86,30 +76,23 @@ function emitNodeSchema(
 
   if (node.variants.object) {
     variants.push(
-      emitObjectSchema(
-        node.variants.object,
-        heuristics,
-        astMergeOptions,
-        style,
-      ),
+      emitObjectSchema(node.variants.object, astMergeOptions, style),
     );
   }
 
   if (node.variants.array) {
-    variants.push(
-      emitArraySchema(node.variants.array, heuristics, astMergeOptions, style),
-    );
+    variants.push(emitArraySchema(node.variants.array, astMergeOptions, style));
   }
 
   if (node.variants.string) {
     const stringSchema: JsonSchemaObject = { type: "string" };
-    const formatCandidate = inferStringFormat(node.variants.string, heuristics);
+    const formatCandidate = inferStringFormat(node.variants.string);
     if (formatCandidate) {
       stringSchema.format = formatCandidate.format;
     }
 
     if (style.typeMode === "strict") {
-      const enumCandidate = inferStringEnum(node.variants.string, heuristics);
+      const enumCandidate = inferStringEnum(node.variants.string);
       if (enumCandidate) {
         variants.push({
           ...stringSchema,
@@ -129,7 +112,6 @@ function emitNodeSchema(
       const enumCandidate = inferNumberEnum(
         node.variants.integer,
         node.variants.number,
-        heuristics,
       );
       if (enumCandidate) {
         variants.push({
@@ -156,10 +138,6 @@ function emitNodeSchema(
     return {};
   }
 
-  if (variants.length > heuristics.maxUnionSize) {
-    return {};
-  }
-
   if (variants.length === 1) {
     return variants[0];
   }
@@ -171,20 +149,14 @@ function emitNodeSchema(
 
 function emitObjectSchema(
   variant: ObjectVariant,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): JsonSchemaObject {
-  if (isRecordLikeObject(variant, heuristics)) {
+  if (isRecordLikeObject(variant)) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
     return {
       type: "object",
-      additionalProperties: emitNodeSchema(
-        valueNode,
-        heuristics,
-        astMergeOptions,
-        style,
-      ),
+      additionalProperties: emitNodeSchema(valueNode, astMergeOptions, style),
     };
   }
 
@@ -204,7 +176,6 @@ function emitObjectSchema(
 
     const propertySchema = emitNodeSchema(
       property.node,
-      heuristics,
       astMergeOptions,
       style,
     );
@@ -216,7 +187,7 @@ function emitObjectSchema(
     }
     if (
       !style.allOptionalProperties &&
-      isRequired(property.seenCount, variant.count, heuristics) &&
+      isRequired(property.seenCount, variant.count) &&
       !isPrototypeUnsafePropertyName(propertyName)
     ) {
       required.push(propertyName);
@@ -241,7 +212,6 @@ function emitObjectSchema(
 
 function emitArraySchema(
   variant: ArrayVariant,
-  heuristics: HeuristicOptions,
   astMergeOptions: Partial<AstMergeOptions> | undefined,
   style: ResolvedEmissionStyleOptions,
 ): JsonSchemaObject {
@@ -254,7 +224,7 @@ function emitArraySchema(
 
   return {
     type: "array",
-    items: emitNodeSchema(variant.element, heuristics, astMergeOptions, style),
+    items: emitNodeSchema(variant.element, astMergeOptions, style),
   };
 }
 

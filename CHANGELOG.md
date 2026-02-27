@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - removed: heuristic tuning flags, diagnostics flags, and legacy aliases (`--type-mode`, `--optional-fields`, `--all-optional-properties`)
 - Simplified programmatic API by removing advanced tuning and diagnostics options from `generateFromText`/`generateFromFiles`.
 - Simplified generation result shape by removing diagnostics payloads from public API results.
+- Simplified emitter internals by removing runtime heuristic tuning options and using fixed internal heuristic defaults.
+- Removed union-size truncation fallback; emitters now preserve inferred unions in both `strict` and `loose` modes.
 
 ## [0.1.0] - 2026-02-16
 

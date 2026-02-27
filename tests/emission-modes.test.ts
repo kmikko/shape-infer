@@ -22,24 +22,16 @@ describe("emission modes", () => {
 
   test("loose type mode collapses zod enum+null union to nullable primitive", () => {
     const inference = inferFromJsonText(
-      '[{"label":"Fairtrade"},{"label":"Fair for Life"},{"label":null}]',
+      '[{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fairtrade"},{"label":"Fair for Life"},{"label":"Fair for Life"},{"label":null},{"label":null}]',
     );
 
     const strictOutput = emitZodSchema(inference.root, {
       rootTypeName: "StrictSchema",
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
     });
 
     const looseOutput = emitZodSchema(inference.root, {
       rootTypeName: "LooseSchema",
       typeMode: "loose",
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
     });
 
     expect(strictOutput).toMatch(
@@ -50,24 +42,16 @@ describe("emission modes", () => {
 
   test("loose type mode collapses zod array enum elements to primitive", () => {
     const inference = inferFromJsonText(
-      '[{"tags":["A","B"]},{"tags":["B","A"]}]',
+      '[{"tags":["A","A","A","A","B"]},{"tags":["A","A","A","A","B"]}]',
     );
 
     const strictOutput = emitZodSchema(inference.root, {
       rootTypeName: "StrictArray",
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
     });
 
     const looseOutput = emitZodSchema(inference.root, {
       rootTypeName: "LooseArray",
       typeMode: "loose",
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
     });
 
     expect(strictOutput).toMatch(/"tags": z\.array\(z\.enum\(\["A", "B"\]\)\)/);
@@ -90,20 +74,13 @@ describe("emission modes", () => {
   });
 
   test("loose type mode removes JSON schema enum keywords", () => {
-    const inference = inferFromJsonText('[{"kind":"A"},{"kind":"B"}]');
+    const inference = inferFromJsonText(
+      '[{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"A"},{"kind":"B"},{"kind":"B"}]',
+    );
 
-    const strictSchema = emitJsonSchema(inference.root, {
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
-    });
+    const strictSchema = emitJsonSchema(inference.root);
     const looseSchema = emitJsonSchema(inference.root, {
       typeMode: "loose",
-      heuristics: {
-        minEnumCount: 2,
-        enumThreshold: 1,
-      },
     });
 
     expect(strictSchema.properties.kind.enum).toEqual(["A", "B"]);

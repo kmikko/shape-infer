@@ -107,6 +107,7 @@ Loose mode behavior:
 
 - literal enums collapse to base primitives
 - nullable unions are normalized in Zod (`x | null` -> `.nullable()`)
+- unions are preserved (no union-size truncation)
 
 ## Parse Warnings
 
