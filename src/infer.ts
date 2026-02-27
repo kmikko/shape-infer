@@ -270,9 +270,7 @@ export function detectInputFormatFromText(
   return "jsonl";
 }
 
-export function inferFromValues(
-  values: Iterable<unknown>,
-): SchemaNode {
+export function inferFromValues(values: Iterable<unknown>): SchemaNode {
   const root = createNode();
   for (const value of values) {
     mergeValue(root, value);

@@ -44,14 +44,14 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "sideEffects": false,
   "bin": {
     "shape-infer": "dist/cli.js"
   },
   "scripts": {
-    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+    "build": "tsup",
     "check:type": "tsc -p tsconfig.json",
     "check:lint": "eslint . --ext .ts",
     "check:pack": "npm pack --dry-run",
@@ -78,7 +78,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@microsoft/api-extractor": "^7.57.6",
-    "@types/node": "^22.13.10",
+    "@types/node": "^24.10.15",
     "@vitest/coverage-v8": "^4.0.18",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
@@ -87,6 +87,7 @@
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
     "prettier": "3.8.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.56.1",
     "vitest": "^4.0.18",

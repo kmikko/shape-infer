@@ -10,7 +10,7 @@ The tool merges many records into one representative schema and handles missing 
 
 ## Requirements
 
-- Node.js `>=22` (project uses direct `.ts` execution in dev scripts)
+- Node.js `>=24`
 - pnpm
 
 ## Install
@@ -171,7 +171,7 @@ console.log(result.warnings);
 
 - `pnpm run dev -- --help`: Run CLI from `src/`.
 - `pnpm run start -- --help`: Run CLI from `dist/`.
-- `pnpm run build`: Compile `src` to `dist`.
+- `pnpm run build`: Bundle `src` to `dist` with tsup (ESM, with declarations and sourcemaps).
 - `pnpm run check:type`: Typecheck source and scripts.
 - `pnpm run api:check`: Validate published API reports for root and `public-api` entrypoints.
 - `pnpm run api:update`: Refresh API report baselines after intentional public API changes.
