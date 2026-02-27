@@ -31,7 +31,7 @@ export interface JsonSchemaObject {
   [key: string]: JsonSchemaValue;
 }
 
-export interface JsonSchemaEmitterOptions extends EmissionStyleOptions {
+interface JsonSchemaEmitterOptions extends EmissionStyleOptions {
   rootTitle?: string;
   includeSchemaDialect?: boolean;
   astMergeOptions?: Partial<AstMergeOptions>;

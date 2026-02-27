@@ -33,7 +33,7 @@ export interface InferenceResult {
   files: InferenceFileSummary[];
 }
 
-export interface InferOptions {
+interface InferOptions {
   inputFormat?: InputFormat;
   sourceName?: string;
 }

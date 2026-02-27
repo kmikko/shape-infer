@@ -21,7 +21,7 @@ import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 const INDENT = "  ";
 
-export interface ZodEmitterOptions extends EmissionStyleOptions {
+interface ZodEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportSchema?: boolean;
   exportType?: boolean;

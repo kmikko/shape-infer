@@ -56,7 +56,7 @@ export interface AstMergeOptions {
   maxTrackedLiteralsPerVariant: number;
 }
 
-export const DEFAULT_AST_MERGE_OPTIONS: AstMergeOptions = {
+const DEFAULT_AST_MERGE_OPTIONS: AstMergeOptions = {
   maxTrackedLiteralsPerVariant: 200,
 };
 

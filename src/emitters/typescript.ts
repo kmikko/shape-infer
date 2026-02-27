@@ -20,7 +20,7 @@ import { isPrototypeUnsafePropertyName } from "./property-name-safety.ts";
 
 const INDENT = "  ";
 
-export interface TypeScriptEmitterOptions extends EmissionStyleOptions {
+interface TypeScriptEmitterOptions extends EmissionStyleOptions {
   rootTypeName?: string;
   exportType?: boolean;
   astMergeOptions?: Partial<AstMergeOptions>;

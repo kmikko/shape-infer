@@ -5,7 +5,7 @@ import path from "node:path";
 
 const cliPath = path.resolve(process.cwd(), "src/cli.ts");
 
-export interface CliRunResult {
+interface CliRunResult {
   stdout: string;
   stderr: string;
 }
