@@ -46,6 +46,6 @@ jobs:
           # When the version PR is merged and the version isn't on npm yet:
           # publishes automatically.
           version: pnpm changeset version
-          publish: npm publish --no-git-checks
+          publish: bash scripts/ci-publish.sh
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
