@@ -5,7 +5,7 @@
 ```ts
 
 // @public (undocumented)
-export function generateFromFiles(options: GenerateFromFilesOptions): Promise<GenerateFromFilesResult>;
+export function generateFromFiles(options: GenerateFromFilesOptions): Promise<GenerateResult>;
 
 // @public (undocumented)
 export interface GenerateFromFilesOptions extends GenerateSchemaOptions {
@@ -18,13 +18,7 @@ export interface GenerateFromFilesOptions extends GenerateSchemaOptions {
 }
 
 // @public (undocumented)
-export interface GenerateFromFilesResult extends GenerateSchemaResult {
-    // (undocumented)
-    resolvedInputPaths: string[];
-}
-
-// @public (undocumented)
-export function generateFromText(options: GenerateFromTextOptions): Promise<GenerateSchemaResult>;
+export function generateFromText(options: GenerateFromTextOptions): Promise<GenerateResult>;
 
 // @public (undocumented)
 export interface GenerateFromTextOptions extends GenerateSchemaOptions {
@@ -37,31 +31,15 @@ export interface GenerateFromTextOptions extends GenerateSchemaOptions {
 }
 
 // @public (undocumented)
-export interface GenerateInferenceFileSummary {
-    // (undocumented)
-    format: "jsonl" | "json";
-    // (undocumented)
-    parseErrorLines: number[];
-    // (undocumented)
-    source: string;
-    // (undocumented)
-    stats: GenerateInferenceStats;
-}
-
-// @public (undocumented)
-export interface GenerateInferenceStats {
-    // (undocumented)
-    linesRead: number;
-    // (undocumented)
-    parseErrors: number;
-    // (undocumented)
-    recordsMerged: number;
-    // (undocumented)
-    skippedEmptyLines: number;
-}
-
-// @public (undocumented)
 export type GenerateInputFormat = "auto" | "jsonl" | "json";
+
+// @public (undocumented)
+export interface GenerateResult {
+    // (undocumented)
+    output: string;
+    // (undocumented)
+    warnings: string[];
+}
 
 // @public (undocumented)
 export interface GenerateSchemaOptions {
@@ -73,26 +51,6 @@ export interface GenerateSchemaOptions {
     typeMode?: GenerateTypeMode;
     // (undocumented)
     typeName?: string;
-}
-
-// @public (undocumented)
-export interface GenerateSchemaResult {
-    // (undocumented)
-    files: GenerateInferenceFileSummary[];
-    // (undocumented)
-    format: GenerationOutputFormat;
-    // (undocumented)
-    output: string;
-    // (undocumented)
-    parseErrorLines: number[];
-    // (undocumented)
-    root: unknown;
-    // (undocumented)
-    stats: GenerateInferenceStats;
-    // (undocumented)
-    typeName: string;
-    // (undocumented)
-    warnings: string[];
 }
 
 // @public (undocumented)

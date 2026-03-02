@@ -94,17 +94,12 @@ const shapeScript = `
     format: "typescript",
     typeName: "TestRecord"
   });
-  const requiredKeys = ["root", "output", "format", "typeName", "stats", "parseErrorLines", "files", "warnings"];
+  const requiredKeys = ["output", "warnings"];
   for (const key of requiredKeys) {
     if (!(key in result)) throw new Error("Missing key in result: " + key);
   }
   if (typeof result.output !== "string" || result.output.length === 0) {
     throw new Error("output should be a non-empty string");
-  }
-  if (result.format !== "typescript") throw new Error("format mismatch");
-  if (result.typeName !== "TestRecord") throw new Error("typeName mismatch");
-  if (typeof result.stats.recordsMerged !== "number" || result.stats.recordsMerged !== 2) {
-    throw new Error("stats.recordsMerged should be 2, got " + result.stats.recordsMerged);
   }
   console.log("[pack-smoke]   ✓ generateFromText output shape OK");
 `;

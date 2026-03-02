@@ -13,9 +13,7 @@ describe("public api facade", () => {
     });
 
     expect(result.output).toContain("export const FromTextSchema");
-    expect(result.stats.recordsMerged).toBe(2);
     expect(result.warnings).toEqual([]);
-    expect(result.files).toHaveLength(1);
   });
 
   test("generateFromText reports no-record warning when parsing fails", async () => {
@@ -37,8 +35,6 @@ describe("public api facade", () => {
       format: "typescript",
     });
 
-    expect(result.stats.recordsMerged).toBe(2);
-    expect(result.stats.parseErrors).toBe(1);
     expect(result.warnings).toContain(
       "Warning: <text>: skipped 1 line(s) that were not valid JSON.",
     );
@@ -63,11 +59,6 @@ describe("public api facade", () => {
         typeName: "FromFiles",
       });
 
-      expect(result.resolvedInputPaths).toHaveLength(2);
-      expect(result.resolvedInputPaths).toEqual(
-        expect.arrayContaining([jsonlPath, jsonPath]),
-      );
-      expect(result.stats.recordsMerged).toBe(3);
       expect(result.warnings).toEqual([]);
       expect(result.output).toContain('"title": "FromFiles"');
     });

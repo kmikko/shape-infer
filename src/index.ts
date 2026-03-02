@@ -1,13 +1,10 @@
 export { generateFromFiles, generateFromText } from "./public-api.ts";
 export type {
   GenerateFromFilesOptions,
-  GenerateFromFilesResult,
   GenerateFromTextOptions,
-  GenerateInferenceFileSummary,
-  GenerateInferenceStats,
   GenerateInputFormat,
+  GenerateResult,
   GenerateSchemaOptions,
-  GenerateSchemaResult,
   GenerateTypeMode,
   GenerationOutputFormat,
 } from "./public-api.ts";

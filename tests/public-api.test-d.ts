@@ -1,15 +1,10 @@
 import { expectTypeOf } from "vitest";
 import { generateFromFiles, generateFromText } from "../src/index.ts";
 import type {
-  GenerateFromFilesResult,
   GenerateFromTextOptions,
-  GenerateSchemaResult,
+  GenerateResult,
   GenerateSchemaOptions,
-  GenerationOutputFormat,
 } from "../src/index.ts";
-
-const format: GenerationOutputFormat = "json-schema";
-expectTypeOf(format).toMatchTypeOf<"typescript" | "zod" | "json-schema">();
 
 const sharedOptions: GenerateSchemaOptions = {
   format: "zod",
@@ -22,7 +17,7 @@ const generatedFromText = generateFromText({
   text: '{"id":1}\n{"id":"2"}\n',
   inputFormat: "jsonl",
 });
-expectTypeOf(generatedFromText).toEqualTypeOf<Promise<GenerateSchemaResult>>();
+expectTypeOf(generatedFromText).toEqualTypeOf<Promise<GenerateResult>>();
 
 const textOptions: GenerateFromTextOptions = {
   text: '{"id":1}',
@@ -34,6 +29,4 @@ const generatedFromFiles = generateFromFiles({
   inputPatterns: ["fixtures/*.json*"],
   inputFormat: "auto",
 });
-expectTypeOf(generatedFromFiles).toEqualTypeOf<
-  Promise<GenerateFromFilesResult>
->();
+expectTypeOf(generatedFromFiles).toEqualTypeOf<Promise<GenerateResult>>();

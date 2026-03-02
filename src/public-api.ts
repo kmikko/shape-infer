@@ -16,20 +16,6 @@ export type GenerationOutputFormat = "typescript" | "zod" | "json-schema";
 export type GenerateInputFormat = "auto" | "jsonl" | "json";
 export type GenerateTypeMode = "strict" | "loose";
 
-export interface GenerateInferenceStats {
-  linesRead: number;
-  recordsMerged: number;
-  parseErrors: number;
-  skippedEmptyLines: number;
-}
-
-export interface GenerateInferenceFileSummary {
-  source: string;
-  format: "jsonl" | "json";
-  stats: GenerateInferenceStats;
-  parseErrorLines: number[];
-}
-
 export interface GenerateSchemaOptions {
   format?: GenerationOutputFormat;
   typeName?: string;
@@ -49,24 +35,14 @@ export interface GenerateFromTextOptions extends GenerateSchemaOptions {
   sourceName?: string;
 }
 
-export interface GenerateSchemaResult {
-  root: unknown;
+export interface GenerateResult {
   output: string;
-  format: GenerationOutputFormat;
-  typeName: string;
-  stats: GenerateInferenceStats;
-  parseErrorLines: number[];
-  files: GenerateInferenceFileSummary[];
   warnings: string[];
-}
-
-export interface GenerateFromFilesResult extends GenerateSchemaResult {
-  resolvedInputPaths: string[];
 }
 
 export async function generateFromFiles(
   options: GenerateFromFilesOptions,
-): Promise<GenerateFromFilesResult> {
+): Promise<GenerateResult> {
   if (options.inputPatterns.length === 0) {
     throw new Error("No input patterns provided.");
   }
@@ -78,17 +54,13 @@ export async function generateFromFiles(
   const inference = await inferFromFiles(resolvedInputPaths, {
     inputFormat: options.inputFormat,
   });
-  const result = finalizeGeneration(inference, options);
 
-  return {
-    ...result,
-    resolvedInputPaths,
-  };
+  return finalizeGeneration(inference, options);
 }
 
 export async function generateFromText(
   options: GenerateFromTextOptions,
-): Promise<GenerateSchemaResult> {
+): Promise<GenerateResult> {
   const sourceName = options.sourceName ?? "<text>";
   const inference = await inferFromText(options.text, {
     inputFormat: options.inputFormat,
@@ -128,7 +100,7 @@ async function inferFromText(
 function finalizeGeneration(
   inference: InferenceResult,
   options: GenerateSchemaOptions,
-): GenerateSchemaResult {
+): GenerateResult {
   const format = options.format ?? "typescript";
   const typeName = options.typeName ?? "Root";
   const output = emitGenerationOutput(
@@ -143,13 +115,7 @@ function finalizeGeneration(
   );
 
   return {
-    root: inference.root,
     output,
-    format,
-    typeName,
-    stats: inference.stats,
-    parseErrorLines: inference.parseErrorLines,
-    files: inference.files,
     warnings,
   };
 }
