@@ -1,158 +1,259 @@
 # shape-infer
 
-Infer a unified schema from mixed JSONL/JSON datasets and emit:
+[![npm version](https://img.shields.io/npm/v/shape-infer)](https://www.npmjs.com/package/shape-infer)
+[![license](https://img.shields.io/npm/l/shape-infer)](LICENSE)
+[![node](https://img.shields.io/node/v/shape-infer)](package.json)
 
-- TypeScript type aliases
-- Zod schemas (+ inferred type)
-- JSON Schema (draft 2020-12)
+Feed it JSON or JSONL, get back a clean schema — as **TypeScript types**, **Zod schemas**, or **JSON Schema** (draft 2020-12).
 
-The tool merges many records into one representative schema and handles missing fields, mixed types, changing values, and sparse/dynamic object keys.
+`shape-infer` merges many records into one representative schema, handling missing fields, mixed types, changing values, and sparse or dynamic object keys along the way.
 
-## Requirements
+### When is this useful?
 
-- Node.js `>=24`
-- pnpm
+- **Generating types for third-party APIs** that don't ship their own schema
+- **Bootstrapping TypeScript types** from sample JSON data instead of writing them by hand
+- **Building runtime validators** (Zod) for unknown or loosely-documented payloads
 
-## Install
+## Getting Started
 
-```bash
-pnpm add shape-infer
+Install globally to use the CLI anywhere:
+
+```sh
+npm install -g shape-infer   # or pnpm / yarn
 ```
 
-### Local Development
+Or add it as a project dependency:
 
-See [Releasing Docs](docs/releasing.md) for publish instructions.
-
-```bash
-pnpm install
+```sh
+npm add shape-infer
 ```
 
-## Quick Start
-
-Run directly from source (zero-build):
-
-```bash
-node src/cli.ts data.jsonl --type-name MyRecord --format typescript
-```
-
-Pipe from stdin:
-
-```bash
-cat data.jsonl | node src/cli.ts --format zod --type-name MyRecord
-curl -s https://example.com/data.json | node src/cli.ts --format json-schema
-```
-
-Write output to file:
-
-```bash
-node src/cli.ts data.jsonl --format json-schema --output schema.json
-```
-
-Build and run compiled CLI:
-
-```bash
-pnpm run build
-node dist/cli.js data.jsonl --format typescript
-```
+> Requires **Node.js >= 24**.
 
 ## CLI Usage
 
-```bash
+```
 shape-infer [pattern ...] [options]
 cat data.json | shape-infer [options]
 ```
 
-The npm `bin` command name is `shape-infer` and points to `dist/cli.js`.
+Pipe any JSON or JSONL source straight into `shape-infer` and pick your output format.
 
-## Input Behavior
+### Zod schema
 
-- Pass one or more file paths or globs as positional arguments. Omit to read from stdin.
-- Input paths are deduplicated and sorted per pattern expansion.
-- If no positional arguments are given and stdin is a TTY, CLI exits with an error.
-- For file patterns that match no files, CLI exits with an error.
-- Format is auto-detected per source:
-  - `.jsonl` / `.ndjson` extension → JSONL
-  - `.json` extension → JSON
-  - other extensions → content detection
-- Content auto-detection:
-  - first non-whitespace `[` → JSON
-  - first non-whitespace `{` and whole payload parses → JSON
-  - otherwise → JSONL
-- JSON top-level array: every array item is merged as a record.
-- JSON top-level object/scalar: treated as one record.
-- JSONL parse failures are skipped per line; valid lines are still merged.
+```sh
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f zod
+import { z } from "zod";
 
-## Output Behavior
+export const SwapiPlanetSchema = z.object({
+  "climate": z.string(),
+  "created": z.string().datetime(),
+  "diameter": z.string(),
+  "edited": z.string().datetime(),
+  "films": z.array(z.enum(["https://swapi.info/api/films/1", "https://swapi.info/api/films/2", "https://swapi.info/api/films/3", "https://swapi.info/api/films/4", "https://swapi.info/api/films/5", "https://swapi.info/api/films/6"])),
+  "gravity": z.string(),
+  "name": z.string(),
+  "orbital_period": z.string(),
+  "population": z.string(),
+  "residents": z.array(z.string().url()),
+  "rotation_period": z.string(),
+  "surface_water": z.string(),
+  "terrain": z.string(),
+  "url": z.string().url(),
+});
 
-- Default format is `typescript`.
-- Supported formats:
-  - `typescript` (alias: `ts`)
-  - `zod`
-  - `json-schema` (aliases: `jsonschema`, `schema`)
-- If no records are parsed, output falls back to unknown schema/type.
-
-## CLI Flags
-
-### Core (shown in `--help`)
-
-- `[pattern ...]`: Input file path(s) or glob(s). Positional. Repeatable. Omit to read from stdin.
-- `-o, --output <path>`: Write schema output to file (default stdout).
-- `-t, --type-name <name>`: Root type/schema name (default `Root`).
-- `-f, --format <typescript|zod|json-schema>`: Output format (default `typescript`).
-- `--mode <strict|loose>`: Emission strictness (default `strict`).
-- `--all-optional`: Force all object properties optional in emitted schemas.
-- `-V, --version`: Print version.
-- `-h, --help`: Print usage.
-
-Flags accept both space-separated and `=` syntax (e.g. `--format=zod`).
-
-Loose mode behavior:
-
-- literal enums collapse to base primitives
-- nullable unions are normalized in Zod (`x | null` -> `.nullable()`)
-- unions are preserved (no union-size truncation)
-
-## Parse Warnings
-
-Warnings are written to stderr:
-
-- JSONL: skipped invalid line count + captured line numbers
-- JSON: parse failure summary + captured line number (if available)
-- Global warning when zero records were merged
-
-## Examples
-
-Mixed files + glob:
-
-```bash
-node src/cli.ts \
-  fixtures/sample.jsonl \
-  "fixtures/sample*.json*" \
-  --format zod \
-  --type-name MixedRecord
+export type SwapiPlanet = z.infer<typeof SwapiPlanetSchema>;
 ```
 
-Loose mode + all optional:
+### TypeScript type
+
+Don't need runtime parsing? Emit a plain type instead:
+
+```sh
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f ts
+export type SwapiPlanet = {
+  climate: string;
+  created: string;
+  diameter: string;
+  edited: string;
+  films: Array<"https://swapi.info/api/films/1" | "https://swapi.info/api/films/2" | "https://swapi.info/api/films/3" | "https://swapi.info/api/films/4" | "https://swapi.info/api/films/5" | "https://swapi.info/api/films/6">;
+  gravity: string;
+  name: string;
+  orbital_period: string;
+  population: string;
+  residents: Array<string>;
+  rotation_period: string;
+  surface_water: string;
+  terrain: string;
+  url: string;
+};
+```
+
+### JSON Schema
+
+Not in the TypeScript ecosystem? Output JSON Schema instead:
+
+```sh
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f json-schema
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwapiPlanet",
+  "type": "object",
+  "properties": {
+    "climate": {
+      "type": "string"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "diameter": {
+      "type": "string"
+    },
+    "edited": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "films": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "enum": [
+          "https://swapi.info/api/films/1",
+          "https://swapi.info/api/films/2",
+          "https://swapi.info/api/films/3",
+          "https://swapi.info/api/films/4",
+          "https://swapi.info/api/films/5",
+          "https://swapi.info/api/films/6"
+        ]
+      }
+    },
+    "gravity": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "orbital_period": {
+      "type": "string"
+    },
+    "population": {
+      "type": "string"
+    },
+    "residents": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "rotation_period": {
+      "type": "string"
+    },
+    "surface_water": {
+      "type": "string"
+    },
+    "terrain": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": [
+    "climate",
+    "created",
+    "diameter",
+    "edited",
+    "films",
+    "gravity",
+    "name",
+    "orbital_period",
+    "population",
+    "residents",
+    "rotation_period",
+    "surface_water",
+    "terrain",
+    "url"
+  ]
+}
+```
+
+### More examples
+
+Read from files or globs:
 
 ```bash
-node src/cli.ts \
-  fixtures/sample.jsonl \
-  --format json-schema \
-  --mode loose \
-  --all-optional
+shape-infer data.jsonl --format zod --type-name MyRecord
+shape-infer "fixtures/sample*.json*" --format typescript
 ```
+
+Write output to a file:
+
+```bash
+shape-infer data.jsonl -f json-schema -o schema.json
+```
+
+Loose mode (enums collapse to primitives, unions preserved) with all properties optional:
+
+```bash
+shape-infer data.jsonl -f json-schema --mode loose --all-optional
+```
+
+## CLI Reference
+
+| Flag                   | Alias | Description                                                                        | Default      |
+| ---------------------- | ----- | ---------------------------------------------------------------------------------- | ------------ |
+| `[pattern ...]`        |       | Input file path(s) or glob(s). Omit to read from stdin.                            |              |
+| `--output <path>`      | `-o`  | Write output to a file instead of stdout.                                          | stdout       |
+| `--type-name <name>`   | `-t`  | Root type / schema name.                                                           | `Root`       |
+| `--format <fmt>`       | `-f`  | Output format: `typescript` (`ts`), `zod`, `json-schema` (`jsonschema`, `schema`). | `typescript` |
+| `--input-format <fmt>` |       | Input format hint: `auto`, `json`, `jsonl` (`ndjson`).                             | `auto`       |
+| `--mode <mode>`        |       | Emission strictness: `strict` or `loose`.                                          | `strict`     |
+| `--all-optional`       |       | Force all object properties to optional.                                           |              |
+| `--version`            | `-V`  | Print version.                                                                     |              |
+| `--help`               | `-h`  | Show usage.                                                                        |              |
+
+Flags accept both `--flag value` and `--flag=value` syntax. Use `--` to stop flag parsing and treat remaining arguments as file patterns.
+
+### Loose mode
+
+In loose mode the emitter relaxes the output:
+
+- Literal enums collapse to their base primitive type
+- Nullable unions normalize in Zod (`x | null` → `.nullable()`)
+- Unions are preserved without size truncation
+
+### Input detection
+
+Input format is auto-detected unless overridden with `--input-format`:
+
+- `.jsonl` / `.ndjson` extension → JSONL
+- `.json` extension → JSON
+- Other extensions → content-based detection (leading `[` or parseable `{` → JSON, otherwise JSONL)
+- JSON top-level arrays: each element is merged as a record
+- JSON top-level objects or scalars: treated as a single record
+- JSONL: invalid lines are skipped; valid lines are still merged
+
+File paths are deduplicated and sorted per pattern expansion. Unmatched patterns cause an error. When no positional arguments are given and stdin is a TTY, the CLI exits with an error.
+
+### Warnings
+
+Parse warnings are written to stderr:
+
+- JSONL: count of skipped invalid lines with line numbers
+- JSON: parse failure summary
+- A global warning when zero records were merged
 
 ## Programmatic API
 
-The package exposes a facade-only API from the published entrypoints:
+For more advanced use cases, `shape-infer` also exports a programmatic interface. Import from either `"shape-infer"` or `"shape-infer/public-api"` — both expose the same surface.
 
-- `generateFromText(...)`
-- `generateFromFiles(...)`
+### `generateFromText`
 
-Import from either:
-
-- `"shape-infer"` (root export)
-- `"shape-infer/public-api"` (facade-only subpath export)
+Infer a schema from a string of JSON or JSONL:
 
 ```ts
 import { generateFromText } from "shape-infer";
@@ -164,38 +265,75 @@ const result = await generateFromText({
   typeName: "Record",
 });
 
-console.log(result.output);
-console.log(result.stats);
-console.log(result.warnings);
+console.log(result.output); // the generated schema string
+console.log(result.warnings); // any parse warnings
 ```
 
-## NPM Scripts
+### `generateFromFiles`
 
-- `pnpm run dev -- --help`: Run CLI from `src/`.
-- `pnpm run start -- --help`: Run CLI from `dist/`.
-- `pnpm run build`: Bundle `src` to `dist` with tsup (ESM, with declarations and sourcemaps).
-- `pnpm run check:type`: Typecheck source and scripts.
-- `pnpm run api:check`: Validate published API reports for root and `public-api` entrypoints.
-- `pnpm run api:update`: Refresh API report baselines after intentional public API changes.
-- `pnpm test`: Run Vitest tests.
-- `pnpm run test:watch`: Run tests in watch mode.
-- `pnpm run test:update`: Update snapshot files.
-- `pnpm run test:coverage`: Run tests with coverage output.
-- `pnpm run test:type`: Run `*.test-d.ts` type-level tests.
-- `pnpm run test:smoke`: Run source CLI smoke scenarios.
-- `pnpm run test:cli`: Build and run compiled CLI smoke check.
-- `pnpm run test:pack`: Run consumer pack smoke scenarios.
-- `pnpm run test:all`: Run full test suite (unit + type + smoke + CLI + pack).
-- `pnpm run check:pack`: Validate package contents with `npm pack --dry-run`.
-- `pnpm run check:all`: Run typecheck + lint + API report validation + pack check.
+Infer a schema from one or more file patterns:
 
-## Testing Notes
+```ts
+import { generateFromFiles } from "shape-infer";
 
-Tests are written in TypeScript and run with Vitest.
+const result = await generateFromFiles({
+  inputPatterns: ["data/*.jsonl"],
+  format: "typescript",
+  typeName: "MyRecord",
+});
 
-The suite includes:
+console.log(result.output);
+```
 
-- emitter snapshot/golden tests
-- parser/inference edge-case tests (JSON, JSONL, auto-detect)
-- CLI parser/runtime integration tests
-- fuzz-like deterministic mixed-type fixtures
+### Options
+
+Both functions accept a shared set of options:
+
+| Option                  | Type                                     | Default        | Description                    |
+| ----------------------- | ---------------------------------------- | -------------- | ------------------------------ |
+| `format`                | `"typescript" \| "zod" \| "json-schema"` | `"typescript"` | Output format.                 |
+| `typeName`              | `string`                                 | `"Root"`       | Root type / schema name.       |
+| `typeMode`              | `"strict" \| "loose"`                    | `"strict"`     | Emission strictness.           |
+| `allOptionalProperties` | `boolean`                                | `false`        | Force all properties optional. |
+| `inputFormat`           | `"auto" \| "json" \| "jsonl"`            | `"auto"`       | Input format hint.             |
+
+`generateFromFiles` additionally accepts `inputPatterns: string[]` (required) and `cwd?: string`.
+`generateFromText` additionally accepts `text: string` (required) and `sourceName?: string`.
+
+Both return a `GenerateResult` with `output: string` and `warnings: string[]`.
+
+## Contributing
+
+### Setup
+
+```bash
+git clone https://github.com/kmikko/shape-infer.git
+cd shape-infer
+pnpm install
+```
+
+### Running locally
+
+```bash
+pnpm run dev -- --help              # run CLI from source (no build needed)
+pnpm run build                       # bundle to dist/
+pnpm run start -- --help             # run compiled CLI
+```
+
+### Testing
+
+Tests are written in TypeScript and run with [Vitest](https://vitest.dev/). The suite includes snapshot/golden tests, inference edge-case tests, CLI integration tests, and fuzz-like deterministic fixtures.
+
+```bash
+pnpm test                            # unit tests
+pnpm run test:all                    # full suite (unit + type + smoke + CLI + pack)
+pnpm run check:all                   # typecheck + lint + format + API reports + pack validation
+```
+
+### Releasing
+
+See the [releasing docs](docs/releasing.md) for the full publish workflow (changesets, CI, npm).
+
+## License
+
+[MIT](LICENSE)
