@@ -16,7 +16,7 @@ export interface InferenceStats {
   skippedEmptyLines: number;
 }
 
-export type InputFormat = "auto" | "jsonl" | "json";
+type InputFormat = "auto" | "jsonl" | "json";
 export type ResolvedInputFormat = "jsonl" | "json";
 
 export interface InferenceFileSummary {
