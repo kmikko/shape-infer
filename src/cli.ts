@@ -52,11 +52,13 @@ export async function runCli(
       ? await generateFromFiles({
           ...generationOptions,
           inputPatterns: options.inputPatterns,
+          inputFormat: options.inputFormat,
         })
       : await generateFromText({
           ...generationOptions,
           text: await readStdinText(io.stdin),
           sourceName: "<stdin>",
+          inputFormat: options.inputFormat,
         });
 
   if (options.outputPath) {
@@ -90,7 +92,6 @@ function resolveGenerationOptions(options: CliOptions): GenerateSchemaOptions {
     typeName: options.typeName,
     typeMode: options.typeMode,
     allOptionalProperties: options.allOptionalProperties,
-    inputFormat: options.inputFormat,
   };
 }
 
