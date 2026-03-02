@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
+import { realpathSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { stderr, stdin, stdout } from "node:process";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const _require = createRequire(import.meta.url);
+const { version } = _require("../package.json") as { version: string };
 import { buildUsage, parseCliArgs } from "./cli-options.ts";
 import type { CliOptions } from "./cli-options.ts";
 import { generateFromFiles, generateFromText } from "./public-api.ts";
@@ -32,10 +37,13 @@ export async function runCli(
     return;
   }
 
+  if (options.version) {
+    io.stdout.write(`${version}\n`);
+    return;
+  }
+
   if (options.inputPatterns.length === 0 && io.stdin.isTTY) {
-    throw new Error(
-      "Missing input. Use --input <path/glob> (repeatable) or pipe data through stdin.",
-    );
+    throw new Error("shape-infer: no input. Try 'shape-infer --help'.");
   }
 
   const generationOptions = resolveGenerationOptions(options);
@@ -44,12 +52,10 @@ export async function runCli(
       ? await generateFromFiles({
           ...generationOptions,
           inputPatterns: options.inputPatterns,
-          inputFormat: options.inputFormat,
         })
       : await generateFromText({
           ...generationOptions,
           text: await readStdinText(io.stdin),
-          inputFormat: options.inputFormat,
           sourceName: "<stdin>",
         });
 
@@ -84,6 +90,7 @@ function resolveGenerationOptions(options: CliOptions): GenerateSchemaOptions {
     typeName: options.typeName,
     typeMode: options.typeMode,
     allOptionalProperties: options.allOptionalProperties,
+    inputFormat: options.inputFormat,
   };
 }
 
@@ -95,7 +102,13 @@ export function isDirectExecution(
     return false;
   }
 
-  return moduleUrl === pathToFileURL(resolve(entry)).href;
+  try {
+    const realEntry = realpathSync(resolve(entry));
+    const realModule = fileURLToPath(moduleUrl);
+    return realpathSync(realModule) === realEntry;
+  } catch {
+    return moduleUrl === pathToFileURL(resolve(entry)).href;
+  }
 }
 
 export function launchCliFromProcessArgs(

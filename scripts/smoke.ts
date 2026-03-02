@@ -17,7 +17,6 @@ const cases: SmokeCase[] = [
   {
     name: "typescript output",
     args: [
-      "--input",
       fixture("sample.jsonl"),
       "--type-name",
       "SampleRecord",
@@ -28,7 +27,6 @@ const cases: SmokeCase[] = [
   {
     name: "zod output",
     args: [
-      "--input",
       fixture("sample.jsonl"),
       "--type-name",
       "SampleRecord",
@@ -39,7 +37,6 @@ const cases: SmokeCase[] = [
   {
     name: "json-schema output",
     args: [
-      "--input",
       fixture("sample.jsonl"),
       "--type-name",
       "SampleRecord",
@@ -50,14 +47,9 @@ const cases: SmokeCase[] = [
   {
     name: "multi-input merge",
     args: [
-      "--input",
       fixture("sample.jsonl"),
-      "--input",
       fixture("sample-array.json"),
-      "--input",
       fixture("sample-object.json"),
-      "--input-format",
-      "auto",
       "--type-name",
       "MixedRecord",
       "--format",
@@ -67,10 +59,7 @@ const cases: SmokeCase[] = [
   {
     name: "glob ingestion",
     args: [
-      "--input",
       path.resolve(root, "tests", "fixtures", "smoke", "sample*.json*"),
-      "--input-format",
-      "auto",
       "--type-name",
       "MixedRecord",
       "--format",

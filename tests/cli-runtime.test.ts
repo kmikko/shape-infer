@@ -59,7 +59,7 @@ describe("cli runtime", () => {
     });
 
     expect(io.output.text()).toContain("Usage:");
-    expect(io.output.text()).toContain("--input-format");
+    expect(io.output.text()).toContain("--version");
     expect(io.errors.text()).toBe("");
   });
 
@@ -72,7 +72,7 @@ describe("cli runtime", () => {
         stdout: io.output,
         stderr: io.errors,
       }),
-    ).rejects.toThrow(/Missing input/);
+    ).rejects.toThrow(/shape-infer: no input/);
   });
 
   test("isDirectExecution returns false when entry is missing", () => {
@@ -118,21 +118,11 @@ describe("cli runtime", () => {
   test("parses stdin JSON in auto mode", async () => {
     const io = createIo('[{"id":1},{"id":"2"}]\n');
 
-    await runCli(
-      [
-        "--input-format",
-        "auto",
-        "--type-name",
-        "FromRuntime",
-        "--format",
-        "typescript",
-      ],
-      {
-        stdin: io.input,
-        stdout: io.output,
-        stderr: io.errors,
-      },
-    );
+    await runCli(["--type-name", "FromRuntime", "--format", "typescript"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors,
+    });
 
     expect(io.output.text()).toContain("export type FromRuntime =");
     expect(io.output.text()).toContain("id: string | number");
@@ -142,21 +132,11 @@ describe("cli runtime", () => {
   test("auto-detects jsonl from stdin object lines", async () => {
     const io = createIo('{"id":1}\n{"id":"2"}\n');
 
-    await runCli(
-      [
-        "--input-format",
-        "auto",
-        "--type-name",
-        "FromJsonl",
-        "--format",
-        "typescript",
-      ],
-      {
-        stdin: io.input,
-        stdout: io.output,
-        stderr: io.errors,
-      },
-    );
+    await runCli(["--type-name", "FromJsonl", "--format", "typescript"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors,
+    });
 
     expect(io.output.text()).toContain("export type FromJsonl =");
     expect(io.output.text()).toContain("id: string | number");
@@ -166,7 +146,7 @@ describe("cli runtime", () => {
   test("prints parse warnings for invalid jsonl lines", async () => {
     const io = createIo('{"id":1}\nnot-json\n{"id":2}\n');
 
-    await runCli(["--input-format", "jsonl", "--format", "typescript"], {
+    await runCli(["--format", "typescript"], {
       stdin: io.input,
       stdout: io.output,
       stderr: io.errors,
@@ -187,10 +167,7 @@ describe("cli runtime", () => {
       const io = createIo("", true);
       await runCli(
         [
-          "--input",
           inputPath,
-          "--input-format",
-          "auto",
           "--format",
           "json-schema",
           "--output",
@@ -215,10 +192,10 @@ describe("cli runtime", () => {
 
   test("handles buffer stdin and prints json parse warning + no-record warning", async () => {
     const io = createIoFromChunks([
-      Buffer.from('{\n  "id": 1,\n  "name":\n}\n'),
+      Buffer.from('[\n  {"id": 1},\n  broken\n]\n'),
     ]);
 
-    await runCli(["--input-format", "json", "--format", "typescript"], {
+    await runCli(["--format", "typescript"], {
       stdin: io.input,
       stdout: io.output,
       stderr: io.errors,
@@ -232,22 +209,11 @@ describe("cli runtime", () => {
   test("supports loose + all-optional modes together", async () => {
     const io = createIo('[{"kind":"A"},{"kind":"B"}]\n');
 
-    await runCli(
-      [
-        "--input-format",
-        "auto",
-        "--format",
-        "zod",
-        "--mode",
-        "loose",
-        "--all-optional",
-      ],
-      {
-        stdin: io.input,
-        stdout: io.output,
-        stderr: io.errors,
-      },
-    );
+    await runCli(["--format", "zod", "--mode", "loose", "--all-optional"], {
+      stdin: io.input,
+      stdout: io.output,
+      stderr: io.errors,
+    });
 
     expect(io.output.text()).toContain("export const RootSchema");
     expect(io.errors.text()).toBe("");

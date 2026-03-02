@@ -32,51 +32,52 @@ pnpm install
 Run directly from source (zero-build):
 
 ```bash
-node src/cli.ts --input data.jsonl --type-name MyRecord --format typescript
+node src/cli.ts data.jsonl --type-name MyRecord --format typescript
 ```
 
-Read from stdin:
+Pipe from stdin:
 
 ```bash
-cat data.jsonl | node src/cli.ts --input-format auto --format zod --type-name MyRecord
+cat data.jsonl | node src/cli.ts --format zod --type-name MyRecord
+curl -s https://example.com/data.json | node src/cli.ts --format json-schema
 ```
 
 Write output to file:
 
 ```bash
-node src/cli.ts --input data.jsonl --format json-schema --output schema.json
+node src/cli.ts data.jsonl --format json-schema --output schema.json
 ```
 
 Build and run compiled CLI:
 
 ```bash
 pnpm run build
-node dist/cli.js --input data.jsonl --format typescript
+node dist/cli.js data.jsonl --format typescript
 ```
 
 ## CLI Usage
 
 ```bash
-shape-infer --input <path-or-glob> [--input <path-or-glob> ...] [options]
+shape-infer [pattern ...] [options]
+cat data.json | shape-infer [options]
 ```
 
 The npm `bin` command name is `shape-infer` and points to `dist/cli.js`.
 
 ## Input Behavior
 
-- `--input` is repeatable and supports globs.
+- Pass one or more file paths or globs as positional arguments. Omit to read from stdin.
 - Input paths are deduplicated and sorted per pattern expansion.
-- If `--input` is omitted, input is read from stdin.
-- If no `--input` is given and stdin is a TTY, CLI exits with a missing-input error.
+- If no positional arguments are given and stdin is a TTY, CLI exits with an error.
 - For file patterns that match no files, CLI exits with an error.
-- `--input-format auto` resolves format per source:
-  - `.jsonl` / `.ndjson` extension -> JSONL
-  - `.json` extension -> JSON
-  - other extensions -> content detection
+- Format is auto-detected per source:
+  - `.jsonl` / `.ndjson` extension → JSONL
+  - `.json` extension → JSON
+  - other extensions → content detection
 - Content auto-detection:
-  - first non-whitespace `[` -> JSON
-  - first non-whitespace `{` and whole payload parses -> JSON
-  - otherwise -> JSONL
+  - first non-whitespace `[` → JSON
+  - first non-whitespace `{` and whole payload parses → JSON
+  - otherwise → JSONL
 - JSON top-level array: every array item is merged as a record.
 - JSON top-level object/scalar: treated as one record.
 - JSONL parse failures are skipped per line; valid lines are still merged.
@@ -94,14 +95,16 @@ The npm `bin` command name is `shape-infer` and points to `dist/cli.js`.
 
 ### Core (shown in `--help`)
 
-- `-i, --input <path-or-glob>`: Input file path or glob. Repeatable.
-- `--input-format <auto|jsonl|json>`: Input format mode. Default `auto`. Alias `ndjson` maps to `jsonl`.
+- `[pattern ...]`: Input file path(s) or glob(s). Positional. Repeatable. Omit to read from stdin.
 - `-o, --output <path>`: Write schema output to file (default stdout).
 - `-t, --type-name <name>`: Root type/schema name (default `Root`).
 - `-f, --format <typescript|zod|json-schema>`: Output format (default `typescript`).
 - `--mode <strict|loose>`: Emission strictness (default `strict`).
 - `--all-optional`: Force all object properties optional in emitted schemas.
+- `-V, --version`: Print version.
 - `-h, --help`: Print usage.
+
+Flags accept both space-separated and `=` syntax (e.g. `--format=zod`).
 
 Loose mode behavior:
 
@@ -123,9 +126,8 @@ Mixed files + glob:
 
 ```bash
 node src/cli.ts \
-  --input fixtures/sample.jsonl \
-  --input "fixtures/sample*.json*" \
-  --input-format auto \
+  fixtures/sample.jsonl \
+  "fixtures/sample*.json*" \
   --format zod \
   --type-name MixedRecord
 ```
@@ -134,7 +136,7 @@ Loose mode + all optional:
 
 ```bash
 node src/cli.ts \
-  --input fixtures/sample.jsonl \
+  fixtures/sample.jsonl \
   --format json-schema \
   --mode loose \
   --all-optional

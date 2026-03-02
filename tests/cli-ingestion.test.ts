@@ -10,10 +10,7 @@ describe("CLI ingestion", () => {
       await writeFile(path.join(directory, "b.json"), '[{"id":"2"}]\n', "utf8");
 
       const { stdout, stderr } = await runCli([
-        "--input",
         path.join(directory, "*.json*"),
-        "--input-format",
-        "auto",
         "--type-name",
         "AutoMixed",
         "--format",
@@ -28,14 +25,7 @@ describe("CLI ingestion", () => {
 
   test("stdin auto-detect parses JSON array input", async () => {
     const { stdout, stderr } = await runCli(
-      [
-        "--input-format",
-        "auto",
-        "--type-name",
-        "FromStdin",
-        "--format",
-        "json-schema",
-      ],
+      ["--type-name", "FromStdin", "--format", "json-schema"],
       '[{"id":1},{"id":"2"}]\n',
     );
 
@@ -47,8 +37,6 @@ describe("CLI ingestion", () => {
   test("applies loose mode and all-optional properties in zod output", async () => {
     const { stdout, stderr } = await runCli(
       [
-        "--input-format",
-        "auto",
         "--type-name",
         "LooseOptional",
         "--format",
@@ -62,6 +50,17 @@ describe("CLI ingestion", () => {
 
     expect(stdout).toMatch(/export const LooseOptionalSchema =/);
     expect(stdout).toMatch(/"kind": z\.string\(\)\.nullable\(\)\.optional\(\)/);
+    expect(stderr).toBe("");
+  });
+
+  test("stdin with --input-format jsonl parses concatenated JSON objects", async () => {
+    const { stdout, stderr } = await runCli(
+      ["--input-format", "jsonl", "--type-name", "Piped"],
+      '{"id":1}\n{"id":"2"}\n',
+    );
+
+    expect(stdout).toMatch(/export type Piped =/);
+    expect(stdout).toMatch(/id: string \| number;/);
     expect(stderr).toBe("");
   });
 });

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Simplified CLI surface to core options only:
-  - kept: `--input`, `--input-format`, `--output`, `--type-name`, `--format`, `--mode`, `--all-optional`, `--help`
+  - kept: `--input-format`, `--output`, `--type-name`, `--format`, `--mode`, `--all-optional`, `--help`
   - removed: heuristic tuning flags, diagnostics flags, and legacy aliases (`--type-mode`, `--optional-fields`, `--all-optional-properties`)
 - Simplified programmatic API by removing advanced tuning and diagnostics options from `generateFromText`/`generateFromFiles`.
 - Simplified generation result shape by removing diagnostics payloads from public API results.
