@@ -50,7 +50,7 @@ Releasing is automatic by default. The `changesets.yml` workflow has two modes d
 
 3. **Review and merge the "Version Packages" PR.** Check the version bump and changelog look correct, then merge.
 
-4. **Workflow publishes automatically.** The merge triggers `changesets.yml` again — this time it detects no pending changesets, builds `dist/`, and runs `pnpm publish`. The package appears on npm within ~1 minute.
+4. **Workflow publishes automatically.** The merge triggers `changesets.yml` again — this time it detects no pending changesets, builds `dist/`, and runs `npm publish` via OIDC trusted publishing (no token required). The package appears on npm within ~1 minute, with a provenance attestation automatically attached.
 
 5. **Verify on npm:**
    - `https://www.npmjs.com/package/shape-infer`
@@ -67,26 +67,43 @@ pnpm run check:all
 npm publish
 ```
 
-Ensure you are logged in locally (`npm whoami`) before running `npm publish`.
+Ensure you are logged in locally (`npm whoami`) before running `npm publish`. OIDC trusted publishing only works from GitHub Actions — local publishes use your interactive npm session.
 
 ---
 
 ## Setup: required secrets
 
-Both secrets live under **repo Settings → Secrets and variables → Actions**.
+Only one secret is needed. npm publishing uses OIDC trusted publishing — no `NPM_TOKEN` required.
 
 ### CHANGESET_TOKEN
 
-A GitHub Personal Access Token (classic) with `repo` scope. Needed so the workflow can open PRs on your behalf.
+A GitHub fine-grained Personal Access Token. Needed so the workflow can push commits and open PRs on your behalf.
 
-1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
-2. Generate a token with `repo` scope
-3. Add as a repository secret named `CHANGESET_TOKEN`
+1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens**
+2. Click **Generate new token**
+3. Set:
+   - **Resource owner:** your org or user
+   - **Repository access:** Only select repositories → pick your repo
+4. Under **Permissions → Repository permissions**, set:
+   - `Contents` → **Read and write**
+   - `Pull requests` → **Read and write**
+5. Generate and copy the token
+6. Add it as a repo secret: `Settings → Secrets → Actions` → name it `CHANGESET_TOKEN`
 
-### NPM_TOKEN
+---
 
-A **granular npm access token** scoped to publish-only for the `shape-infer` package. Granular tokens bypass 2FA and work in automation without exposing full account access.
+## Setup: npm OIDC trusted publishing
 
-1. Go to **npmjs.com → Account → Access Tokens → Generate New Token → Granular Access Token**
-2. Set scope: **Read and write** on the `shape-infer` package only
-3. Add as a repository secret named `NPM_TOKEN`
+Publishing to npm uses [OIDC trusted publishing](https://docs.npmjs.com/trusted-publishers) — the workflow authenticates via a short-lived GitHub OIDC token instead of a long-lived `NPM_TOKEN`. Provenance attestations are generated automatically.
+
+This only needs to be configured once on npmjs.com.
+
+1. Go to **npmjs.com → Packages → shape-infer → Settings → Trusted publishing**
+2. Click **Add a trusted publisher** and select **GitHub Actions**
+3. Fill in:
+   - **Organization or user:** your GitHub username
+   - **Repository:** `shape-infer`
+   - **Workflow filename:** `changesets.yml`
+4. Save
+
+No `NPM_TOKEN` secret is needed in GitHub. The `id-token: write` permission in the workflow is what allows GitHub Actions to mint the OIDC token.

@@ -8,6 +8,10 @@ jobs:
   version:
     name: Version packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,11 +26,17 @@ jobs:
         with:
           node-version: "24"
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
+
+      # Pre-create $HOME/.npmrc so changesets/action does not overwrite the
+      # OIDC-capable .npmrc that setup-node wrote with an NPM_TOKEN entry.
+      - name: Preserve .npmrc for OIDC
+        run: touch "$HOME/.npmrc"
 
       - name: Version or publish
         uses: changesets/action@v1
@@ -36,7 +46,6 @@ jobs:
           # When the version PR is merged and the version isn't on npm yet:
           # publishes automatically.
           version: pnpm changeset version
-          publish: pnpm publish --no-git-checks
+          publish: npm publish --no-git-checks
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
