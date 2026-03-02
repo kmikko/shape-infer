@@ -50,10 +50,13 @@ Releasing is automatic by default. The `changesets.yml` workflow has two modes d
 
 3. **Review and merge the "Version Packages" PR.** Check the version bump and changelog look correct, then merge.
 
-4. **Workflow publishes automatically.** The merge triggers `changesets.yml` again — this time it detects no pending changesets, builds `dist/`, and runs `npm publish` via OIDC trusted publishing (no token required). The package appears on npm within ~1 minute, with a provenance attestation automatically attached.
+4. **Workflow publishes automatically.** The merge triggers `changesets.yml` again — this time it detects no pending changesets, builds `dist/`, and runs `npm publish` via OIDC trusted publishing (no token required). The package appears on npm within ~1 minute, with a provenance attestation automatically attached. A GitHub Release is created at the same time, tagged `shape-infer@x.y.z`, with the changelog entry as its body.
 
-5. **Verify on npm:**
-   - `https://www.npmjs.com/package/shape-infer`
+   > **Edge case:** if the workflow dies after `npm publish` but before the release is created, re-running the workflow will skip npm (already published) and also skip the GitHub Release (nothing newly published). In that case create the release manually: `gh release create shape-infer@x.y.z --notes "see CHANGELOG.md"`
+
+5. **Verify:**
+   - npm: `https://www.npmjs.com/package/shape-infer`
+   - GitHub: `https://github.com/kmikko/shape-infer/releases`
    - Smoke-test: `npm install shape-infer`
 
 ### Manual release (fallback)

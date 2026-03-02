@@ -42,8 +42,9 @@ jobs:
           # When pending changesets exist: bumps package.json + CHANGELOG.md
           # and opens (or updates) a "Version Packages" PR.
           # When the version PR is merged and the version isn't on npm yet:
-          # publishes automatically.
+          # publishes to npm and creates a GitHub Release automatically.
           version: pnpm changeset version
           publish: bash scripts/ci-publish.sh
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
