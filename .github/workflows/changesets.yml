@@ -1,0 +1,42 @@
+name: Changesets
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  version:
+    name: Version packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Required so changesets can diff against the previous commit
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "8.6.2"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Version or publish
+        uses: changesets/action@v1
+        with:
+          # When pending changesets exist: bumps package.json + CHANGELOG.md
+          # and opens (or updates) a "Version Packages" PR.
+          # When the version PR is merged and the version isn't on npm yet:
+          # publishes automatically.
+          version: pnpm changeset version
+          publish: pnpm publish --no-git-checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHANGESET_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

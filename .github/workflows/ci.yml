@@ -6,32 +6,148 @@ on:
   pull_request:
     branches: [main]
 
-jobs:
-  verify:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22]
+# Shared setup used by every job via YAML anchors
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "8.6.2"
 
+jobs:
+  # ── Fan-out: no dependencies ──────────────────────────────────────────────
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check:type
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check:format
+      - run: pnpm run check:lint
+      - run: pnpm run check:knip
 
-      - name: Run test suite
-        run: pnpm run test:all
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test
+      - run: pnpm run test:type
 
-      - name: Run checks
-        run: pnpm run check:all
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # ── Gate on build ─────────────────────────────────────────────────────────
+
+  validate:
+    name: Validate package
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: pnpm run check:pack
+      - run: pnpm run check:publint
+      - run: pnpm run check:attw
+      - run: pnpm run test:smoke
+      - run: pnpm run test:cli
+      - run: pnpm run test:pack
+
+  api:
+    name: API extractor
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: pnpm exec api-extractor run -c api-extractor.index.json
+      - run: pnpm exec api-extractor run -c api-extractor.public-api.json
+
+  # ── Changeset reminder (PR only) ─────────────────────────────────────────
+
+  changeset-check:
+    name: Changeset check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check for changeset
+        # Warn (non-blocking) when a PR adds no .changeset/*.md file.
+        # Contributors should run `pnpm changeset` before merging.
+        run: |
+          NEW_CHANGESETS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+            | grep -c "^\.changeset/.*\.md$" || true)
+          if [ "$NEW_CHANGESETS" -eq 0 ]; then
+            echo "::warning::No changeset file found in this PR. Run 'pnpm changeset' to document the change for the release log."
+          else
+            echo "✓ Found $NEW_CHANGESETS changeset file(s)."
+          fi
