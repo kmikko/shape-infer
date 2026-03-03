@@ -128,7 +128,7 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
 ",
   "zodLooseOptional": "import { z } from "zod";
 
-export const SnapshotTypeSchema = z.object({
+export const SnapshotType = z.object({
   "category": z.string().optional(),
   "certification": z.string().nullable().optional(),
   "id": z.union([z.string(), z.number().int()]).optional(),
@@ -137,11 +137,11 @@ export const SnapshotTypeSchema = z.object({
   "tags": z.array(z.string()).optional(),
 });
 
-export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
+export type SnapshotType = z.infer<typeof SnapshotType>;
 ",
   "zodStrict": "import { z } from "zod";
 
-export const SnapshotTypeSchema = z.object({
+export const SnapshotType = z.object({
   "category": z.string(),
   "certification": z.union([z.string(), z.null()]),
   "id": z.union([z.string(), z.number().int()]),
@@ -150,7 +150,7 @@ export const SnapshotTypeSchema = z.object({
   "tags": z.array(z.string()),
 });
 
-export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
+export type SnapshotType = z.infer<typeof SnapshotType>;
 ",
 }
 `;
@@ -301,7 +301,7 @@ exports[`emitter golden snapshots > record-like-attributes 1`] = `
 ",
   "zodLooseOptional": "import { z } from "zod";
 
-export const SnapshotTypeSchema = z.object({
+export const SnapshotType = z.object({
   "attributes": z.object({
     "a": z.string().optional(),
     "b": z.string().optional(),
@@ -319,11 +319,11 @@ export const SnapshotTypeSchema = z.object({
   "sku": z.string().optional(),
 });
 
-export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
+export type SnapshotType = z.infer<typeof SnapshotType>;
 ",
   "zodStrict": "import { z } from "zod";
 
-export const SnapshotTypeSchema = z.object({
+export const SnapshotType = z.object({
   "attributes": z.object({
     "a": z.string().optional(),
     "b": z.string().optional(),
@@ -341,7 +341,7 @@ export const SnapshotTypeSchema = z.object({
   "sku": z.string(),
 });
 
-export type SnapshotType = z.infer<typeof SnapshotTypeSchema>;
+export type SnapshotType = z.infer<typeof SnapshotType>;
 ",
 }
 `;

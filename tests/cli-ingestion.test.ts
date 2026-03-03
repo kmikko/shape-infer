@@ -48,7 +48,7 @@ describe("CLI ingestion", () => {
       '[{"kind":"A"},{"kind":"B"},{"kind":null}]\n',
     );
 
-    expect(stdout).toMatch(/export const LooseOptionalSchema =/);
+    expect(stdout).toMatch(/export const LooseOptional =/);
     expect(stdout).toMatch(/"kind": z\.string\(\)\.nullable\(\)\.optional\(\)/);
     expect(stderr).toBe("");
   });

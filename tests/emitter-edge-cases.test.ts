@@ -14,7 +14,7 @@ describe("emitter edge cases", () => {
     const schema = emitJsonSchema(root, { rootTitle: "UnknownRoot" });
 
     expect(ts).toContain("export type UnknownRoot = unknown;");
-    expect(zod).toContain("const UnknownRootSchema = z.unknown();");
+    expect(zod).toContain("const UnknownRoot = z.unknown();");
     expect(schema).toMatchObject({
       $schema: "https://json-schema.org/draft/2020-12/schema",
       title: "UnknownRoot",
@@ -31,7 +31,7 @@ describe("emitter edge cases", () => {
     expect(ts).not.toContain("export type OverflowRoot = unknown;");
     expect(ts).toContain("string");
     expect(ts).toContain("number");
-    expect(zod).toContain("const OverflowRootSchema = z.union([");
+    expect(zod).toContain("const OverflowRoot = z.union([");
     expect(schema).toHaveProperty("anyOf");
     expect(Array.isArray(schema.anyOf)).toBe(true);
     expect((schema.anyOf as unknown[]).length).toBeGreaterThan(1);
@@ -52,7 +52,7 @@ describe("emitter edge cases", () => {
     });
 
     expect(objectTs).toContain("export type EmptyObject = {};");
-    expect(objectZod).toContain("const EmptyObjectSchema = z.object({});");
+    expect(objectZod).toContain("const EmptyObject = z.object({});");
     expect(objectSchema).toMatchObject({
       type: "object",
       properties: {},
@@ -69,9 +69,7 @@ describe("emitter edge cases", () => {
     });
 
     expect(arrayTs).toContain("export type EmptyArray = Array<unknown>;");
-    expect(arrayZod).toContain(
-      "const EmptyArraySchema = z.array(z.unknown());",
-    );
+    expect(arrayZod).toContain("const EmptyArray = z.array(z.unknown());");
     expect(arraySchema).toMatchObject({
       type: "array",
       items: {},
@@ -190,7 +188,7 @@ describe("emitter edge cases", () => {
     const zod = emitZodSchema(node, { rootTypeName: "NegZero" });
 
     // The emitted schema is a union of number literals
-    expect(zod).toContain("NegZeroSchema");
+    expect(zod).toContain("NegZero");
     expect(zod).toMatch(/z\.literal\(/);
   });
 
@@ -246,16 +244,16 @@ describe("emitter edge cases", () => {
     expect(tsNoExport.startsWith("type Root = ")).toBe(true);
 
     const zodDefault = emitZodSchema(root);
-    expect(zodDefault).toContain("export const RootSchema =");
+    expect(zodDefault).toContain("export const Root =");
     expect(zodDefault).toContain("export type Root =");
 
     const zodNoExport = emitZodSchema(root, {
       exportSchema: false,
       exportType: false,
     });
-    expect(zodNoExport).toContain("const RootSchema =");
+    expect(zodNoExport).toContain("const Root =");
     expect(zodNoExport).toContain("type Root =");
-    expect(zodNoExport).not.toContain("export const RootSchema =");
+    expect(zodNoExport).not.toContain("export const Root =");
     expect(zodNoExport).not.toContain("export type Root =");
   });
 });

@@ -12,7 +12,7 @@ describe("public api facade", () => {
       typeName: "FromText",
     });
 
-    expect(result.output).toContain("export const FromTextSchema");
+    expect(result.output).toContain("export const FromText");
     expect(result.warnings).toEqual([]);
   });
 

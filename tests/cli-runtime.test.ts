@@ -215,7 +215,7 @@ describe("cli runtime", () => {
       stderr: io.errors,
     });
 
-    expect(io.output.text()).toContain("export const RootSchema");
+    expect(io.output.text()).toContain("export const Root");
     expect(io.errors.text()).toBe("");
   });
 });

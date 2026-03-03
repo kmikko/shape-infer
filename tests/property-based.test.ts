@@ -148,7 +148,7 @@ function compileZodSchemaFromEmitterSource(
   source: string,
   schemaName: string,
 ): RuntimeZodSchema {
-  const schemaIdentifier = `${schemaName}Schema`;
+  const schemaIdentifier = schemaName;
   const runtimeSource = source
     .replace(/^\s*import\s+\{\s*z\s*\}\s+from\s+"zod";\s*$/m, "")
     .replace(/\(input:\s*unknown\):\s*unknown/g, "(input)")
