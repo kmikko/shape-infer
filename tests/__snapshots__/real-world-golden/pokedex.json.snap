@@ -1,0 +1,455 @@
+{
+  "fixture": "pokedex.json",
+  "loose": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pokedex",
+  "type": "object",
+  "properties": {
+    "pokemon": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "avg_spawns": {
+            "type": "number"
+          },
+          "candy": {
+            "type": "string"
+          },
+          "candy_count": {
+            "type": "integer"
+          },
+          "egg": {
+            "type": "string"
+          },
+          "height": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "img": {
+            "type": "string",
+            "format": "uri"
+          },
+          "multipliers": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "next_evolution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "num": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "num"
+              ]
+            }
+          },
+          "num": {
+            "type": "string"
+          },
+          "prev_evolution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "num": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "num"
+              ]
+            }
+          },
+          "spawn_chance": {
+            "type": "number"
+          },
+          "spawn_time": {
+            "type": "string"
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weight": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avg_spawns",
+          "candy",
+          "egg",
+          "height",
+          "id",
+          "img",
+          "multipliers",
+          "name",
+          "num",
+          "spawn_chance",
+          "spawn_time",
+          "type",
+          "weaknesses",
+          "weight"
+        ]
+      }
+    }
+  },
+  "required": [
+    "pokemon"
+  ]
+}
+",
+    "typescript": "export type Pokedex = {
+  pokemon: Array<{
+      avg_spawns: number;
+      candy: string;
+      candy_count?: number;
+      egg: string;
+      height: string;
+      id: number;
+      img: string;
+      multipliers: Array<number> | null;
+      name: string;
+      next_evolution?: Array<{
+          name: string;
+          num: string;
+        }>;
+      num: string;
+      prev_evolution?: Array<{
+          name: string;
+          num: string;
+        }>;
+      spawn_chance: number;
+      spawn_time: string;
+      type: Array<string>;
+      weaknesses: Array<string>;
+      weight: string;
+    }>;
+};
+",
+    "zod": "import { z } from "zod";
+
+export const Pokedex = z.object({
+  "pokemon": z.array(z.object({
+      "avg_spawns": z.number(),
+      "candy": z.string(),
+      "candy_count": z.number().int().optional(),
+      "egg": z.string(),
+      "height": z.string(),
+      "id": z.number().int(),
+      "img": z.string().url(),
+      "multipliers": z.array(z.number()).nullable(),
+      "name": z.string(),
+      "next_evolution": z.array(z.object({
+          "name": z.string(),
+          "num": z.string(),
+        })).optional(),
+      "num": z.string(),
+      "prev_evolution": z.array(z.object({
+          "name": z.string(),
+          "num": z.string(),
+        })).optional(),
+      "spawn_chance": z.number(),
+      "spawn_time": z.string(),
+      "type": z.array(z.string()),
+      "weaknesses": z.array(z.string()),
+      "weight": z.string(),
+    })),
+});
+
+export type Pokedex = z.infer<typeof Pokedex>;
+",
+  },
+  "sampleSummary": {
+    "emissionModes": [
+      "strict",
+      "loose",
+    ],
+    "inputFormat": "json",
+    "limits": {
+      "jsonArrayItems": 100,
+      "jsonMapKeys": 100,
+      "jsonlLines": 100,
+    },
+    "recordsAfterSampling": 100,
+    "recordsBeforeSampling": 151,
+    "sampleMode": "json-array",
+    "sampledArrayProperty": "pokemon",
+  },
+  "strict": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Pokedex",
+  "type": "object",
+  "properties": {
+    "pokemon": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "avg_spawns": {
+            "type": "number"
+          },
+          "candy": {
+            "type": "string"
+          },
+          "candy_count": {
+            "type": "integer",
+            "enum": [
+              12,
+              25,
+              50,
+              100
+            ]
+          },
+          "egg": {
+            "type": "string",
+            "enum": [
+              "10 km",
+              "2 km",
+              "5 km",
+              "Not in Eggs"
+            ]
+          },
+          "height": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "img": {
+            "type": "string",
+            "format": "uri"
+          },
+          "multipliers": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "next_evolution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "num": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "num"
+              ]
+            }
+          },
+          "num": {
+            "type": "string"
+          },
+          "prev_evolution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "num": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "num"
+              ]
+            }
+          },
+          "spawn_chance": {
+            "type": "number"
+          },
+          "spawn_time": {
+            "type": "string"
+          },
+          "type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Bug",
+                "Electric",
+                "Fighting",
+                "Fire",
+                "Flying",
+                "Ghost",
+                "Grass",
+                "Ground",
+                "Ice",
+                "Normal",
+                "Poison",
+                "Psychic",
+                "Rock",
+                "Water"
+              ]
+            }
+          },
+          "weaknesses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Bug",
+                "Dark",
+                "Electric",
+                "Fairy",
+                "Fighting",
+                "Fire",
+                "Flying",
+                "Ghost",
+                "Grass",
+                "Ground",
+                "Ice",
+                "Poison",
+                "Psychic",
+                "Rock",
+                "Steel",
+                "Water"
+              ]
+            }
+          },
+          "weight": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avg_spawns",
+          "candy",
+          "egg",
+          "height",
+          "id",
+          "img",
+          "multipliers",
+          "name",
+          "num",
+          "spawn_chance",
+          "spawn_time",
+          "type",
+          "weaknesses",
+          "weight"
+        ]
+      }
+    }
+  },
+  "required": [
+    "pokemon"
+  ]
+}
+",
+    "typescript": "export type Pokedex = {
+  pokemon: Array<{
+      avg_spawns: number;
+      candy: string;
+      candy_count?: 12 | 25 | 50 | 100;
+      egg: "10 km" | "2 km" | "5 km" | "Not in Eggs";
+      height: string;
+      id: number;
+      img: string;
+      multipliers: Array<number> | null;
+      name: string;
+      next_evolution?: Array<{
+          name: string;
+          num: string;
+        }>;
+      num: string;
+      prev_evolution?: Array<{
+          name: string;
+          num: string;
+        }>;
+      spawn_chance: number;
+      spawn_time: string;
+      type: Array<"Bug" | "Electric" | "Fighting" | "Fire" | "Flying" | "Ghost" | "Grass" | "Ground" | "Ice" | "Normal" | "Poison" | "Psychic" | "Rock" | "Water">;
+      weaknesses: Array<"Bug" | "Dark" | "Electric" | "Fairy" | "Fighting" | "Fire" | "Flying" | "Ghost" | "Grass" | "Ground" | "Ice" | "Poison" | "Psychic" | "Rock" | "Steel" | "Water">;
+      weight: string;
+    }>;
+};
+",
+    "zod": "import { z } from "zod";
+
+export const Pokedex = z.object({
+  "pokemon": z.array(z.object({
+      "avg_spawns": z.number(),
+      "candy": z.string(),
+      "candy_count": z.union([z.literal(12), z.literal(25), z.literal(50), z.literal(100)]).optional(),
+      "egg": z.enum(["10 km", "2 km", "5 km", "Not in Eggs"]),
+      "height": z.string(),
+      "id": z.number().int(),
+      "img": z.string().url(),
+      "multipliers": z.union([z.array(z.number()), z.null()]),
+      "name": z.string(),
+      "next_evolution": z.array(z.object({
+          "name": z.string(),
+          "num": z.string(),
+        })).optional(),
+      "num": z.string(),
+      "prev_evolution": z.array(z.object({
+          "name": z.string(),
+          "num": z.string(),
+        })).optional(),
+      "spawn_chance": z.number(),
+      "spawn_time": z.string(),
+      "type": z.array(z.enum(["Bug", "Electric", "Fighting", "Fire", "Flying", "Ghost", "Grass", "Ground", "Ice", "Normal", "Poison", "Psychic", "Rock", "Water"])),
+      "weaknesses": z.array(z.enum(["Bug", "Dark", "Electric", "Fairy", "Fighting", "Fire", "Flying", "Ghost", "Grass", "Ground", "Ice", "Poison", "Psychic", "Rock", "Steel", "Water"])),
+      "weight": z.string(),
+    })),
+});
+
+export type Pokedex = z.infer<typeof Pokedex>;
+",
+  },
+}

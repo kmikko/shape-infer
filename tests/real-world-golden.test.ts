@@ -126,7 +126,13 @@ describe("real-world golden snapshots", () => {
         loose: await emitFixtureOutputs(values, fixture.typeBaseName, "loose"),
       };
 
-      expect(snapshotPayload).toMatchSnapshot();
+      const snapshotPath = path.join(
+        __dirname,
+        "__snapshots__",
+        "real-world-golden",
+        `${fixture.fileName}.snap`,
+      );
+      await expect(snapshotPayload).toMatchFileSnapshot(snapshotPath);
     });
   }
 });

@@ -1,0 +1,1279 @@
+{
+  "fixture": "sample-ol-editions-100.jsonl",
+  "loose": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenLibraryEditions",
+  "type": "object",
+  "properties": {
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    "by_statement": {
+      "type": "string"
+    },
+    "classifications": {
+      "type": "object",
+      "properties": {}
+    },
+    "contributions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "copyright_date": {
+      "type": "string"
+    },
+    "covers": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "created": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "description": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "dewey_decimal_class": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "edition_name": {
+      "type": "string"
+    },
+    "full_title": {
+      "type": "string"
+    },
+    "genres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ia_box_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "properties": {
+        "amazon": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "better_world_books": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goodreads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "librarything": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "isbn_10": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isbn_13": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "key": {
+      "type": "string"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    "last_modified": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "latest_revision": {
+      "type": "integer"
+    },
+    "lc_classifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lccn": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "url"
+        ]
+      }
+    },
+    "local_id": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "notes": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "number_of_pages": {
+      "type": "integer"
+    },
+    "ocaid": {
+      "type": "string"
+    },
+    "oclc_number": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "oclc_numbers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "openlibrary": {
+      "type": "string"
+    },
+    "other_titles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pagination": {
+      "type": "string"
+    },
+    "physical_dimensions": {
+      "type": "string"
+    },
+    "physical_format": {
+      "type": "string"
+    },
+    "publish_country": {
+      "type": "string"
+    },
+    "publish_date": {
+      "type": "string"
+    },
+    "publish_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "publishers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_records": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "subject_people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_place": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_time": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_times": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "table_of_contents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "type"
+        ]
+      }
+    },
+    "title": {
+      "type": "string"
+    },
+    "title_prefix": {
+      "type": "string"
+    },
+    "type": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    },
+    "url": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "weight": {
+      "type": "string"
+    },
+    "work_title": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "works": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    }
+  },
+  "required": [
+    "key",
+    "last_modified",
+    "latest_revision",
+    "revision",
+    "title",
+    "type"
+  ]
+}
+",
+    "typescript": "export type OpenLibraryEditions = {
+  authors?: Array<{
+      key: string;
+    }>;
+  by_statement?: string;
+  classifications?: {};
+  contributions?: Array<string>;
+  copyright_date?: string;
+  covers?: Array<number>;
+  created?: {
+    type: string;
+    value: string;
+  };
+  description?: {
+    type: string;
+    value: string;
+  };
+  dewey_decimal_class?: Array<string>;
+  edition_name?: string;
+  full_title?: string;
+  genres?: Array<string>;
+  ia_box_id?: Array<string>;
+  identifiers?: {
+    amazon?: Array<string>;
+    better_world_books?: Array<string>;
+    goodreads?: Array<string>;
+    librarything?: Array<string>;
+  };
+  isbn_10?: Array<string>;
+  isbn_13?: Array<string>;
+  key: string;
+  languages?: Array<{
+      key: string;
+    }>;
+  last_modified: {
+    type: string;
+    value: string;
+  };
+  latest_revision: number;
+  lc_classifications?: Array<string>;
+  lccn?: Array<string>;
+  links?: Array<{
+      title: string;
+      url: string;
+    }>;
+  local_id?: Array<string>;
+  notes?: {
+    type: string;
+    value: string;
+  };
+  number_of_pages?: number;
+  ocaid?: string;
+  oclc_number?: Array<string>;
+  oclc_numbers?: Array<string>;
+  openlibrary?: string;
+  other_titles?: Array<string>;
+  pagination?: string;
+  physical_dimensions?: string;
+  physical_format?: string;
+  publish_country?: string;
+  publish_date?: string;
+  publish_places?: Array<string>;
+  publishers?: Array<string>;
+  revision: number;
+  series?: Array<string>;
+  source_records?: Array<string>;
+  subject_people?: Array<string>;
+  subject_place?: Array<string>;
+  subject_places?: Array<string>;
+  subject_time?: Array<string>;
+  subject_times?: Array<string>;
+  subjects?: Array<string>;
+  subtitle?: string;
+  table_of_contents?: Array<{
+      level?: number;
+      title: string;
+      type: {
+        key: string;
+      };
+    }>;
+  title: string;
+  title_prefix?: string;
+  type: {
+    key: string;
+  };
+  url?: Array<string>;
+  weight?: string;
+  work_title?: Array<string>;
+  works?: Array<{
+      key: string;
+    }>;
+};
+",
+    "zod": "import { z } from "zod";
+
+export const OpenLibraryEditions = z.object({
+  "authors": z.array(z.object({
+      "key": z.string(),
+    })).optional(),
+  "by_statement": z.string().optional(),
+  "classifications": z.object({}).optional(),
+  "contributions": z.array(z.string()).optional(),
+  "copyright_date": z.string().optional(),
+  "covers": z.array(z.number().int()).optional(),
+  "created": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "description": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "dewey_decimal_class": z.array(z.string()).optional(),
+  "edition_name": z.string().optional(),
+  "full_title": z.string().optional(),
+  "genres": z.array(z.string()).optional(),
+  "ia_box_id": z.array(z.string()).optional(),
+  "identifiers": z.object({
+    "amazon": z.array(z.string()).optional(),
+    "better_world_books": z.array(z.string()).optional(),
+    "goodreads": z.array(z.string()).optional(),
+    "librarything": z.array(z.string()).optional(),
+  }).optional(),
+  "isbn_10": z.array(z.string()).optional(),
+  "isbn_13": z.array(z.string()).optional(),
+  "key": z.string(),
+  "languages": z.array(z.object({
+      "key": z.string(),
+    })).optional(),
+  "last_modified": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "latest_revision": z.number().int(),
+  "lc_classifications": z.array(z.string()).optional(),
+  "lccn": z.array(z.string()).optional(),
+  "links": z.array(z.object({
+      "title": z.string(),
+      "url": z.string(),
+    })).optional(),
+  "local_id": z.array(z.string().url()).optional(),
+  "notes": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "number_of_pages": z.number().int().optional(),
+  "ocaid": z.string().optional(),
+  "oclc_number": z.array(z.string()).optional(),
+  "oclc_numbers": z.array(z.string()).optional(),
+  "openlibrary": z.string().optional(),
+  "other_titles": z.array(z.string()).optional(),
+  "pagination": z.string().optional(),
+  "physical_dimensions": z.string().optional(),
+  "physical_format": z.string().optional(),
+  "publish_country": z.string().optional(),
+  "publish_date": z.string().optional(),
+  "publish_places": z.array(z.string()).optional(),
+  "publishers": z.array(z.string()).optional(),
+  "revision": z.number().int(),
+  "series": z.array(z.string()).optional(),
+  "source_records": z.array(z.string().url()).optional(),
+  "subject_people": z.array(z.string()).optional(),
+  "subject_place": z.array(z.string()).optional(),
+  "subject_places": z.array(z.string()).optional(),
+  "subject_time": z.array(z.string()).optional(),
+  "subject_times": z.array(z.string()).optional(),
+  "subjects": z.array(z.string()).optional(),
+  "subtitle": z.string().optional(),
+  "table_of_contents": z.array(z.object({
+      "level": z.number().int().optional(),
+      "title": z.string(),
+      "type": z.object({
+        "key": z.string(),
+      }),
+    })).optional(),
+  "title": z.string(),
+  "title_prefix": z.string().optional(),
+  "type": z.object({
+    "key": z.string(),
+  }),
+  "url": z.array(z.string()).optional(),
+  "weight": z.string().optional(),
+  "work_title": z.array(z.string()).optional(),
+  "works": z.array(z.object({
+      "key": z.string(),
+    })).optional(),
+});
+
+export type OpenLibraryEditions = z.infer<typeof OpenLibraryEditions>;
+",
+  },
+  "sampleSummary": {
+    "emissionModes": [
+      "strict",
+      "loose",
+    ],
+    "inputFormat": "jsonl",
+    "limits": {
+      "jsonArrayItems": 100,
+      "jsonMapKeys": 100,
+      "jsonlLines": 100,
+    },
+    "recordsAfterSampling": 100,
+    "recordsBeforeSampling": 100,
+    "sampleMode": "jsonl-lines",
+  },
+  "strict": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenLibraryEditions",
+  "type": "object",
+  "properties": {
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    "by_statement": {
+      "type": "string"
+    },
+    "classifications": {
+      "type": "object",
+      "properties": {}
+    },
+    "contributions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "copyright_date": {
+      "type": "string"
+    },
+    "covers": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "created": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "description": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "dewey_decimal_class": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "edition_name": {
+      "type": "string"
+    },
+    "full_title": {
+      "type": "string"
+    },
+    "genres": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ia_box_id": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "properties": {
+        "amazon": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "better_world_books": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "goodreads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "librarything": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "isbn_10": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isbn_13": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "key": {
+      "type": "string"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "/languages/ara",
+              "/languages/chi",
+              "/languages/eng",
+              "/languages/fre",
+              "/languages/ger",
+              "/languages/ita",
+              "/languages/jpn",
+              "/languages/lat",
+              "/languages/may",
+              "/languages/pol",
+              "/languages/rus",
+              "/languages/spa",
+              "/languages/ukr"
+            ]
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    },
+    "last_modified": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "latest_revision": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        19
+      ]
+    },
+    "lc_classifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lccn": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "url"
+        ]
+      }
+    },
+    "local_id": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "notes": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "number_of_pages": {
+      "type": "integer"
+    },
+    "ocaid": {
+      "type": "string"
+    },
+    "oclc_number": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "oclc_numbers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "openlibrary": {
+      "type": "string"
+    },
+    "other_titles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pagination": {
+      "type": "string"
+    },
+    "physical_dimensions": {
+      "type": "string"
+    },
+    "physical_format": {
+      "type": "string"
+    },
+    "publish_country": {
+      "type": "string"
+    },
+    "publish_date": {
+      "type": "string"
+    },
+    "publish_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "publishers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revision": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        19
+      ]
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_records": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "subject_people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_place": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_time": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_times": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "table_of_contents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "type"
+        ]
+      }
+    },
+    "title": {
+      "type": "string"
+    },
+    "title_prefix": {
+      "type": "string"
+    },
+    "type": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    },
+    "url": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "weight": {
+      "type": "string"
+    },
+    "work_title": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "works": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
+      }
+    }
+  },
+  "required": [
+    "key",
+    "last_modified",
+    "latest_revision",
+    "revision",
+    "title",
+    "type"
+  ]
+}
+",
+    "typescript": "export type OpenLibraryEditions = {
+  authors?: Array<{
+      key: string;
+    }>;
+  by_statement?: string;
+  classifications?: {};
+  contributions?: Array<string>;
+  copyright_date?: string;
+  covers?: Array<number>;
+  created?: {
+    type: string;
+    value: string;
+  };
+  description?: {
+    type: string;
+    value: string;
+  };
+  dewey_decimal_class?: Array<string>;
+  edition_name?: string;
+  full_title?: string;
+  genres?: Array<string>;
+  ia_box_id?: Array<string>;
+  identifiers?: {
+    amazon?: Array<string>;
+    better_world_books?: Array<string>;
+    goodreads?: Array<string>;
+    librarything?: Array<string>;
+  };
+  isbn_10?: Array<string>;
+  isbn_13?: Array<string>;
+  key: string;
+  languages?: Array<{
+      key: "/languages/ara" | "/languages/chi" | "/languages/eng" | "/languages/fre" | "/languages/ger" | "/languages/ita" | "/languages/jpn" | "/languages/lat" | "/languages/may" | "/languages/pol" | "/languages/rus" | "/languages/spa" | "/languages/ukr";
+    }>;
+  last_modified: {
+    type: string;
+    value: string;
+  };
+  latest_revision: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 11 | 19;
+  lc_classifications?: Array<string>;
+  lccn?: Array<string>;
+  links?: Array<{
+      title: string;
+      url: string;
+    }>;
+  local_id?: Array<string>;
+  notes?: {
+    type: string;
+    value: string;
+  };
+  number_of_pages?: number;
+  ocaid?: string;
+  oclc_number?: Array<string>;
+  oclc_numbers?: Array<string>;
+  openlibrary?: string;
+  other_titles?: Array<string>;
+  pagination?: string;
+  physical_dimensions?: string;
+  physical_format?: string;
+  publish_country?: string;
+  publish_date?: string;
+  publish_places?: Array<string>;
+  publishers?: Array<string>;
+  revision: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 11 | 19;
+  series?: Array<string>;
+  source_records?: Array<string>;
+  subject_people?: Array<string>;
+  subject_place?: Array<string>;
+  subject_places?: Array<string>;
+  subject_time?: Array<string>;
+  subject_times?: Array<string>;
+  subjects?: Array<string>;
+  subtitle?: string;
+  table_of_contents?: Array<{
+      level?: number;
+      title: string;
+      type: {
+        key: string;
+      };
+    }>;
+  title: string;
+  title_prefix?: string;
+  type: {
+    key: string;
+  };
+  url?: Array<string>;
+  weight?: string;
+  work_title?: Array<string>;
+  works?: Array<{
+      key: string;
+    }>;
+};
+",
+    "zod": "import { z } from "zod";
+
+export const OpenLibraryEditions = z.object({
+  "authors": z.array(z.object({
+      "key": z.string(),
+    })).optional(),
+  "by_statement": z.string().optional(),
+  "classifications": z.object({}).optional(),
+  "contributions": z.array(z.string()).optional(),
+  "copyright_date": z.string().optional(),
+  "covers": z.array(z.number().int()).optional(),
+  "created": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "description": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "dewey_decimal_class": z.array(z.string()).optional(),
+  "edition_name": z.string().optional(),
+  "full_title": z.string().optional(),
+  "genres": z.array(z.string()).optional(),
+  "ia_box_id": z.array(z.string()).optional(),
+  "identifiers": z.object({
+    "amazon": z.array(z.string()).optional(),
+    "better_world_books": z.array(z.string()).optional(),
+    "goodreads": z.array(z.string()).optional(),
+    "librarything": z.array(z.string()).optional(),
+  }).optional(),
+  "isbn_10": z.array(z.string()).optional(),
+  "isbn_13": z.array(z.string()).optional(),
+  "key": z.string(),
+  "languages": z.array(z.object({
+      "key": z.enum(["/languages/ara", "/languages/chi", "/languages/eng", "/languages/fre", "/languages/ger", "/languages/ita", "/languages/jpn", "/languages/lat", "/languages/may", "/languages/pol", "/languages/rus", "/languages/spa", "/languages/ukr"]),
+    })).optional(),
+  "last_modified": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "latest_revision": z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(11), z.literal(19)]),
+  "lc_classifications": z.array(z.string()).optional(),
+  "lccn": z.array(z.string()).optional(),
+  "links": z.array(z.object({
+      "title": z.string(),
+      "url": z.string(),
+    })).optional(),
+  "local_id": z.array(z.string().url()).optional(),
+  "notes": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "number_of_pages": z.number().int().optional(),
+  "ocaid": z.string().optional(),
+  "oclc_number": z.array(z.string()).optional(),
+  "oclc_numbers": z.array(z.string()).optional(),
+  "openlibrary": z.string().optional(),
+  "other_titles": z.array(z.string()).optional(),
+  "pagination": z.string().optional(),
+  "physical_dimensions": z.string().optional(),
+  "physical_format": z.string().optional(),
+  "publish_country": z.string().optional(),
+  "publish_date": z.string().optional(),
+  "publish_places": z.array(z.string()).optional(),
+  "publishers": z.array(z.string()).optional(),
+  "revision": z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(11), z.literal(19)]),
+  "series": z.array(z.string()).optional(),
+  "source_records": z.array(z.string().url()).optional(),
+  "subject_people": z.array(z.string()).optional(),
+  "subject_place": z.array(z.string()).optional(),
+  "subject_places": z.array(z.string()).optional(),
+  "subject_time": z.array(z.string()).optional(),
+  "subject_times": z.array(z.string()).optional(),
+  "subjects": z.array(z.string()).optional(),
+  "subtitle": z.string().optional(),
+  "table_of_contents": z.array(z.object({
+      "level": z.number().int().optional(),
+      "title": z.string(),
+      "type": z.object({
+        "key": z.string(),
+      }),
+    })).optional(),
+  "title": z.string(),
+  "title_prefix": z.string().optional(),
+  "type": z.object({
+    "key": z.string(),
+  }),
+  "url": z.array(z.string()).optional(),
+  "weight": z.string().optional(),
+  "work_title": z.array(z.string()).optional(),
+  "works": z.array(z.object({
+      "key": z.string(),
+    })).optional(),
+});
+
+export type OpenLibraryEditions = z.infer<typeof OpenLibraryEditions>;
+",
+  },
+}

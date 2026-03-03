@@ -1,0 +1,550 @@
+{
+  "fixture": "sample-ol-works-100.jsonl",
+  "loose": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenLibraryWorks",
+  "type": "object",
+  "properties": {
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "author",
+          "type"
+        ]
+      }
+    },
+    "covers": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "created": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "description": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "dewey_number": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "first_publish_date": {
+      "type": "string"
+    },
+    "key": {
+      "type": "string"
+    },
+    "last_modified": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "latest_revision": {
+      "type": "integer"
+    },
+    "lc_classifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "subject_people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_times": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  "required": [
+    "created",
+    "key",
+    "last_modified",
+    "latest_revision",
+    "revision",
+    "title",
+    "type"
+  ]
+}
+",
+    "typescript": "export type OpenLibraryWorks = {
+  authors?: Array<{
+      author: {
+        key: string;
+      };
+      type: {
+        key: string;
+      } | string;
+    }>;
+  covers?: Array<number>;
+  created: {
+    type: string;
+    value: string;
+  };
+  description?: {
+    type: string;
+    value: string;
+  };
+  dewey_number?: Array<string>;
+  first_publish_date?: string;
+  key: string;
+  last_modified: {
+    type: string;
+    value: string;
+  };
+  latest_revision: number;
+  lc_classifications?: Array<string>;
+  revision: number;
+  subject_people?: Array<string>;
+  subject_places?: Array<string>;
+  subject_times?: Array<string>;
+  subjects?: Array<string>;
+  subtitle?: string;
+  title: string;
+  type: {
+    key: string;
+  };
+};
+",
+    "zod": "import { z } from "zod";
+
+export const OpenLibraryWorks = z.object({
+  "authors": z.array(z.object({
+      "author": z.object({
+        "key": z.string(),
+      }),
+      "type": z.union([z.object({
+        "key": z.string(),
+      }), z.string()]),
+    })).optional(),
+  "covers": z.array(z.number().int()).optional(),
+  "created": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "description": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "dewey_number": z.array(z.string()).optional(),
+  "first_publish_date": z.string().optional(),
+  "key": z.string(),
+  "last_modified": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "latest_revision": z.number().int(),
+  "lc_classifications": z.array(z.string()).optional(),
+  "revision": z.number().int(),
+  "subject_people": z.array(z.string()).optional(),
+  "subject_places": z.array(z.string()).optional(),
+  "subject_times": z.array(z.string()).optional(),
+  "subjects": z.array(z.string()).optional(),
+  "subtitle": z.string().optional(),
+  "title": z.string(),
+  "type": z.object({
+    "key": z.string(),
+  }),
+});
+
+export type OpenLibraryWorks = z.infer<typeof OpenLibraryWorks>;
+",
+  },
+  "sampleSummary": {
+    "emissionModes": [
+      "strict",
+      "loose",
+    ],
+    "inputFormat": "jsonl",
+    "limits": {
+      "jsonArrayItems": 100,
+      "jsonMapKeys": 100,
+      "jsonlLines": 100,
+    },
+    "recordsAfterSampling": 100,
+    "recordsBeforeSampling": 100,
+    "sampleMode": "jsonl-lines",
+  },
+  "strict": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenLibraryWorks",
+  "type": "object",
+  "properties": {
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "author": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key"
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "author",
+          "type"
+        ]
+      }
+    },
+    "covers": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "created": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "description": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "dewey_number": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "first_publish_date": {
+      "type": "string"
+    },
+    "key": {
+      "type": "string"
+    },
+    "last_modified": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    "latest_revision": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "lc_classifications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revision": {
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "subject_people": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_places": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subject_times": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  "required": [
+    "created",
+    "key",
+    "last_modified",
+    "latest_revision",
+    "revision",
+    "title",
+    "type"
+  ]
+}
+",
+    "typescript": "export type OpenLibraryWorks = {
+  authors?: Array<{
+      author: {
+        key: string;
+      };
+      type: {
+        key: string;
+      } | string;
+    }>;
+  covers?: Array<number>;
+  created: {
+    type: string;
+    value: string;
+  };
+  description?: {
+    type: string;
+    value: string;
+  };
+  dewey_number?: Array<string>;
+  first_publish_date?: string;
+  key: string;
+  last_modified: {
+    type: string;
+    value: string;
+  };
+  latest_revision: 1 | 2 | 3 | 4 | 5 | 6;
+  lc_classifications?: Array<string>;
+  revision: 1 | 2 | 3 | 4 | 5 | 6;
+  subject_people?: Array<string>;
+  subject_places?: Array<string>;
+  subject_times?: Array<string>;
+  subjects?: Array<string>;
+  subtitle?: string;
+  title: string;
+  type: {
+    key: string;
+  };
+};
+",
+    "zod": "import { z } from "zod";
+
+export const OpenLibraryWorks = z.object({
+  "authors": z.array(z.object({
+      "author": z.object({
+        "key": z.string(),
+      }),
+      "type": z.union([z.object({
+        "key": z.string(),
+      }), z.string()]),
+    })).optional(),
+  "covers": z.array(z.number().int()).optional(),
+  "created": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "description": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }).optional(),
+  "dewey_number": z.array(z.string()).optional(),
+  "first_publish_date": z.string().optional(),
+  "key": z.string(),
+  "last_modified": z.object({
+    "type": z.string(),
+    "value": z.string(),
+  }),
+  "latest_revision": z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)]),
+  "lc_classifications": z.array(z.string()).optional(),
+  "revision": z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)]),
+  "subject_people": z.array(z.string()).optional(),
+  "subject_places": z.array(z.string()).optional(),
+  "subject_times": z.array(z.string()).optional(),
+  "subjects": z.array(z.string()).optional(),
+  "subtitle": z.string().optional(),
+  "title": z.string(),
+  "type": z.object({
+    "key": z.string(),
+  }),
+});
+
+export type OpenLibraryWorks = z.infer<typeof OpenLibraryWorks>;
+",
+  },
+}
