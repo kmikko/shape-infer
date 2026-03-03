@@ -4,31 +4,81 @@
 [![license](https://img.shields.io/npm/l/shape-infer)](LICENSE)
 [![node](https://img.shields.io/node/v/shape-infer)](package.json)
 
-Feed it JSON or JSONL, get back a clean schema — as **TypeScript types**, **Zod schemas**, or **JSON Schema** (draft 2020-12).
+Infer a unified schema from JSON or JSONL records and emit **TypeScript types**, **Zod schemas**, or **JSON Schema** (draft 2020-12).
 
 `shape-infer` merges many records into one representative schema, handling missing fields, mixed types, changing values, and sparse or dynamic object keys along the way.
 
-### When is this useful?
-
-- **Generating types for third-party APIs** that don't ship their own schema
-- **Bootstrapping TypeScript types** from sample JSON data instead of writing them by hand
-- **Building runtime validators** (Zod) for unknown or loosely-documented payloads
-
-## Getting Started
-
-Install globally to use the CLI anywhere:
-
 ```sh
-npm install -g shape-infer   # or pnpm / yarn
+curl -s "https://swapi.info/api/planets" | npx shape-infer -t Planet -f zod
 ```
 
-Or add it as a project dependency:
+```ts
+import { z } from "zod";
 
-```sh
-npm add shape-infer
+export const PlanetSchema = z.object({
+  climate: z.string(),
+  created: z.string().datetime(),
+  diameter: z.string(),
+  edited: z.string().datetime(),
+  films: z.array(
+    z.enum([
+      "https://swapi.info/api/films/1",
+      "https://swapi.info/api/films/2",
+      "https://swapi.info/api/films/3",
+      "https://swapi.info/api/films/4",
+      "https://swapi.info/api/films/5",
+      "https://swapi.info/api/films/6",
+    ]),
+  ),
+  gravity: z.string(),
+  name: z.string(),
+  orbital_period: z.string(),
+  population: z.string(),
+  residents: z.array(z.string().url()),
+  rotation_period: z.string(),
+  surface_water: z.string(),
+  terrain: z.string(),
+  url: z.string().url(),
+});
+
+export type Planet = z.infer<typeof PlanetSchema>;
 ```
 
-> Requires **Node.js >= 24**.
+No install required. Pipe any JSON or JSONL source and get back something you can use.
+
+## When is this useful?
+
+- **Third-party APIs without published types** — point it at recorded responses and get TypeScript types or a Zod validator immediately
+- **Bootstrapping types from sample data** — faster than writing them by hand, especially for deeply nested or sparse payloads
+- **Exploring unknown datasets** — JSONL event logs, API captures, data dumps — get a structural overview before writing any parsing code
+
+## Quick start
+
+No install needed:
+
+```sh
+npx shape-infer data.jsonl -f zod
+```
+
+Pick your output format:
+
+```sh
+npx shape-infer data.jsonl -f zod          # Zod v4 schema + inferred type
+npx shape-infer data.jsonl -f typescript   # plain type alias, no runtime dependency
+npx shape-infer data.jsonl -f json-schema  # JSON Schema draft 2020-12
+```
+
+For frequent use, install globally:
+
+```sh
+npm install -g shape-infer
+```
+
+Or as a project dependency if you're using the [programmatic API](#programmatic-api):
+
+```sh
+npm/yarn/pnpm add shape-infer
+```
 
 ## CLI Usage
 
@@ -37,9 +87,9 @@ shape-infer [pattern ...] [options]
 cat data.json | shape-infer [options]
 ```
 
-Pipe any JSON or JSONL source straight into `shape-infer` and pick your output format.
-
 ### Zod schema
+
+Want runtime validation alongside your types? Start here:
 
 ```sh
 $ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f zod
@@ -100,84 +150,16 @@ $ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f json-
   "title": "SwapiPlanet",
   "type": "object",
   "properties": {
-    "climate": {
-      "type": "string"
-    },
-    "created": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "diameter": {
-      "type": "string"
-    },
-    "edited": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "films": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri",
-        "enum": [
-          "https://swapi.info/api/films/1",
-          "https://swapi.info/api/films/2",
-          "https://swapi.info/api/films/3",
-          "https://swapi.info/api/films/4",
-          "https://swapi.info/api/films/5",
-          "https://swapi.info/api/films/6"
-        ]
-      }
-    },
-    "gravity": {
-      "type": "string"
-    },
-    "name": {
-      "type": "string"
-    },
-    "orbital_period": {
-      "type": "string"
-    },
-    "population": {
-      "type": "string"
-    },
+    "climate": { "type": "string" },
+    "created": { "type": "string", "format": "date-time" },
     "residents": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "format": "uri"
-      }
+      "items": { "type": "string", "format": "uri" }
     },
-    "rotation_period": {
-      "type": "string"
-    },
-    "surface_water": {
-      "type": "string"
-    },
-    "terrain": {
-      "type": "string"
-    },
-    "url": {
-      "type": "string",
-      "format": "uri"
-    }
+    "url": { "type": "string", "format": "uri" }
+    // ...
   },
-  "required": [
-    "climate",
-    "created",
-    "diameter",
-    "edited",
-    "films",
-    "gravity",
-    "name",
-    "orbital_period",
-    "population",
-    "residents",
-    "rotation_period",
-    "surface_water",
-    "terrain",
-    "url"
-  ]
+  "required": ["climate", "created", "diameter", ...]
 }
 ```
 
@@ -196,7 +178,15 @@ Write output to a file:
 shape-infer data.jsonl -f json-schema -o schema.json
 ```
 
-Loose mode (enums collapse to primitives, unions preserved) with all properties optional:
+Loose mode — useful when working with a limited number of samples against a seemingly complex schema:
+
+```bash
+shape-infer data.jsonl -f zod --mode loose
+```
+
+In loose mode the emitter relaxes the output: literal enums collapse to their base primitive type, nullable unions normalize in Zod (`x | null` → `.nullable()`), and unions are preserved without size truncation.
+
+Force all properties optional:
 
 ```bash
 shape-infer data.jsonl -f json-schema --mode loose --all-optional
@@ -217,14 +207,6 @@ shape-infer data.jsonl -f json-schema --mode loose --all-optional
 | `--help`               | `-h`  | Show usage.                                                                        |              |
 
 Flags accept both `--flag value` and `--flag=value` syntax. Use `--` to stop flag parsing and treat remaining arguments as file patterns.
-
-### Loose mode
-
-In loose mode the emitter relaxes the output:
-
-- Literal enums collapse to their base primitive type
-- Nullable unions normalize in Zod (`x | null` → `.nullable()`)
-- Unions are preserved without size truncation
 
 ### Input detection
 
@@ -302,6 +284,18 @@ Both functions accept a shared set of options:
 
 Both return a `GenerateResult` with `output: string` and `warnings: string[]`.
 
+## Prior art
+
+Several tools exist in this space and are worth knowing about before reaching for `shape-infer`.
+
+[**quicktype**](https://github.com/glideapps/quicktype) is the most established option and the right choice if you need output beyond the JS/TS ecosystem — it supports 20+ target languages. Its TypeScript output is solid. The Zod target exists but is not a primary focus of the project, and targets Zod v3. It does not treat JSONL as a native input format.
+
+[**@jsonhero/schema-infer**](https://github.com/triggerdotdev/schema-infer) has the closest inference model to `shape-infer` — it merges multiple JSON samples into a single representative JSON Schema 2020-12 document and handles optional fields and conflicting types well. If JSON Schema is all you need, it is a solid choice. It does not emit TypeScript types or Zod schemas and has no dedicated JSONL pipeline. The project has been quiet since 2023.
+
+[**json-schema-to-zod**](https://github.com/StefanTerdell/json-schema-to-zod) solves a related but different problem: converting an existing JSON Schema into Zod source code. Worth knowing about, though the project was archived following Zod v4's release.
+
+`shape-infer` exists for a specific situation: you have data from an external source — an API without published types, a recorded response log, an unfamiliar dataset — and you need to understand its shape before you can work with it meaningfully. The goal is to infer a single coherent schema from many records rather than a single sample, and emit it in whatever form is most useful: a runtime validator, a plain type, or a language-agnostic schema.
+
 ## Contributing
 
 ### Setup
@@ -315,7 +309,7 @@ pnpm install
 ### Running locally
 
 ```bash
-pnpm run dev -- --help              # run CLI from source (no build needed)
+pnpm run dev -- --help               # run CLI from source (no build needed)
 pnpm run build                       # bundle to dist/
 pnpm run start -- --help             # run compiled CLI
 ```
