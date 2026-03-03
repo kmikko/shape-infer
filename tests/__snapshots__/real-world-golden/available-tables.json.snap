@@ -1,0 +1,928 @@
+{
+  "fixture": "available-tables.json",
+  "loose": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AvailableTables",
+  "type": "object",
+  "properties": {
+    "days": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slot": {
+                  "type": "string"
+                },
+                "tables": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer"
+                      },
+                      "room": {
+                        "type": "string"
+                      },
+                      "size": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "number",
+                      "room",
+                      "size"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "slot",
+                "tables"
+              ]
+            }
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "days"
+  ]
+}
+",
+    "typescript": "export type AvailableTables = {
+  days: Record<string, Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }> | string>;
+};
+",
+    "zod": "import { z } from "zod";
+
+export const AvailableTables = z.object({
+  "days": z.record(z.string(), z.union([z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })), z.string()])),
+});
+
+export type AvailableTables = z.infer<typeof AvailableTables>;
+",
+  },
+  "sampleSummary": {
+    "emissionModes": [
+      "strict",
+      "loose",
+    ],
+    "inputFormat": "json",
+    "limits": {
+      "jsonArrayItems": 100,
+      "jsonMapKeys": 100,
+      "jsonlLines": 100,
+    },
+    "recordsAfterSampling": 1,
+    "recordsBeforeSampling": 1,
+    "sampleMode": "json-single-root",
+  },
+  "strict": {
+    "jsonSchema": "{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AvailableTables",
+  "type": "object",
+  "properties": {
+    "days": {
+      "type": "object",
+      "properties": {
+        "2026-10-friday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-10-monday": {
+          "type": "string"
+        },
+        "2026-10-saturday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-10-sunday": {
+          "type": "string"
+        },
+        "2026-10-thursday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-10-tuesday": {
+          "type": "string"
+        },
+        "2026-10-wednesday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-11-friday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-11-monday": {
+          "type": "string"
+        },
+        "2026-11-saturday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-11-sunday": {
+          "type": "string"
+        },
+        "2026-11-thursday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-11-tuesday": {
+          "type": "string"
+        },
+        "2026-11-wednesday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-12-friday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-12-monday": {
+          "type": "string"
+        },
+        "2026-12-saturday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-12-sunday": {
+          "type": "string"
+        },
+        "2026-12-thursday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-12-tuesday": {
+          "type": "string"
+        },
+        "2026-12-wednesday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-13-friday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-13-monday": {
+          "type": "string"
+        },
+        "2026-13-saturday": {
+          "type": "array",
+          "items": {}
+        },
+        "2026-13-sunday": {
+          "type": "string"
+        },
+        "2026-13-thursday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-13-tuesday": {
+          "type": "string"
+        },
+        "2026-13-wednesday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-14-friday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer",
+                      "enum": [
+                        3,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11
+                      ]
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "enum": [
+                        2,
+                        4,
+                        5,
+                        8
+                      ]
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-14-monday": {
+          "type": "string"
+        },
+        "2026-14-saturday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer",
+                      "enum": [
+                        3,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11
+                      ]
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "enum": [
+                        2,
+                        4,
+                        5,
+                        8
+                      ]
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-14-sunday": {
+          "type": "string"
+        },
+        "2026-14-thursday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "enum": [
+                        2,
+                        4,
+                        5
+                      ]
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        },
+        "2026-14-tuesday": {
+          "type": "string"
+        },
+        "2026-14-wednesday": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slot": {
+                "type": "string"
+              },
+              "tables": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "number": {
+                      "type": "integer"
+                    },
+                    "room": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "enum": [
+                        2,
+                        4,
+                        5,
+                        8
+                      ]
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "room",
+                    "size"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "slot",
+              "tables"
+            ]
+          }
+        }
+      },
+      "required": [
+        "2026-10-friday",
+        "2026-10-monday",
+        "2026-10-saturday",
+        "2026-10-sunday",
+        "2026-10-thursday",
+        "2026-10-tuesday",
+        "2026-10-wednesday",
+        "2026-11-friday",
+        "2026-11-monday",
+        "2026-11-saturday",
+        "2026-11-sunday",
+        "2026-11-thursday",
+        "2026-11-tuesday",
+        "2026-11-wednesday",
+        "2026-12-friday",
+        "2026-12-monday",
+        "2026-12-saturday",
+        "2026-12-sunday",
+        "2026-12-thursday",
+        "2026-12-tuesday",
+        "2026-12-wednesday",
+        "2026-13-friday",
+        "2026-13-monday",
+        "2026-13-saturday",
+        "2026-13-sunday",
+        "2026-13-thursday",
+        "2026-13-tuesday",
+        "2026-13-wednesday",
+        "2026-14-friday",
+        "2026-14-monday",
+        "2026-14-saturday",
+        "2026-14-sunday",
+        "2026-14-thursday",
+        "2026-14-tuesday",
+        "2026-14-wednesday"
+      ]
+    }
+  },
+  "required": [
+    "days"
+  ]
+}
+",
+    "typescript": "export type AvailableTables = {
+  days: {
+    "2026-10-friday": Array<unknown>;
+    "2026-10-monday": string;
+    "2026-10-saturday": Array<unknown>;
+    "2026-10-sunday": string;
+    "2026-10-thursday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-10-tuesday": string;
+    "2026-10-wednesday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-11-friday": Array<unknown>;
+    "2026-11-monday": string;
+    "2026-11-saturday": Array<unknown>;
+    "2026-11-sunday": string;
+    "2026-11-thursday": Array<unknown>;
+    "2026-11-tuesday": string;
+    "2026-11-wednesday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-12-friday": Array<unknown>;
+    "2026-12-monday": string;
+    "2026-12-saturday": Array<unknown>;
+    "2026-12-sunday": string;
+    "2026-12-thursday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-12-tuesday": string;
+    "2026-12-wednesday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-13-friday": Array<unknown>;
+    "2026-13-monday": string;
+    "2026-13-saturday": Array<unknown>;
+    "2026-13-sunday": string;
+    "2026-13-thursday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-13-tuesday": string;
+    "2026-13-wednesday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: number;
+          }>;
+      }>;
+    "2026-14-friday": Array<{
+        slot: string;
+        tables: Array<{
+            number: 3 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+            room: string;
+            size: 2 | 4 | 5 | 8;
+          }>;
+      }>;
+    "2026-14-monday": string;
+    "2026-14-saturday": Array<{
+        slot: string;
+        tables: Array<{
+            number: 3 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+            room: string;
+            size: 2 | 4 | 5 | 8;
+          }>;
+      }>;
+    "2026-14-sunday": string;
+    "2026-14-thursday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: 2 | 4 | 5;
+          }>;
+      }>;
+    "2026-14-tuesday": string;
+    "2026-14-wednesday": Array<{
+        slot: string;
+        tables: Array<{
+            number: number;
+            room: string;
+            size: 2 | 4 | 5 | 8;
+          }>;
+      }>;
+  };
+};
+",
+    "zod": "import { z } from "zod";
+
+export const AvailableTables = z.object({
+  "days": z.object({
+    "2026-10-friday": z.array(z.unknown()),
+    "2026-10-monday": z.string(),
+    "2026-10-saturday": z.array(z.unknown()),
+    "2026-10-sunday": z.string(),
+    "2026-10-thursday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-10-tuesday": z.string(),
+    "2026-10-wednesday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-11-friday": z.array(z.unknown()),
+    "2026-11-monday": z.string(),
+    "2026-11-saturday": z.array(z.unknown()),
+    "2026-11-sunday": z.string(),
+    "2026-11-thursday": z.array(z.unknown()),
+    "2026-11-tuesday": z.string(),
+    "2026-11-wednesday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-12-friday": z.array(z.unknown()),
+    "2026-12-monday": z.string(),
+    "2026-12-saturday": z.array(z.unknown()),
+    "2026-12-sunday": z.string(),
+    "2026-12-thursday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-12-tuesday": z.string(),
+    "2026-12-wednesday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-13-friday": z.array(z.unknown()),
+    "2026-13-monday": z.string(),
+    "2026-13-saturday": z.array(z.unknown()),
+    "2026-13-sunday": z.string(),
+    "2026-13-thursday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-13-tuesday": z.string(),
+    "2026-13-wednesday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.number().int(),
+          })),
+      })),
+    "2026-14-friday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.union([z.literal(3), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10), z.literal(11)]),
+            "room": z.string(),
+            "size": z.union([z.literal(2), z.literal(4), z.literal(5), z.literal(8)]),
+          })),
+      })),
+    "2026-14-monday": z.string(),
+    "2026-14-saturday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.union([z.literal(3), z.literal(5), z.literal(6), z.literal(7), z.literal(8), z.literal(9), z.literal(10), z.literal(11)]),
+            "room": z.string(),
+            "size": z.union([z.literal(2), z.literal(4), z.literal(5), z.literal(8)]),
+          })),
+      })),
+    "2026-14-sunday": z.string(),
+    "2026-14-thursday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.union([z.literal(2), z.literal(4), z.literal(5)]),
+          })),
+      })),
+    "2026-14-tuesday": z.string(),
+    "2026-14-wednesday": z.array(z.object({
+        "slot": z.string(),
+        "tables": z.array(z.object({
+            "number": z.number().int(),
+            "room": z.string(),
+            "size": z.union([z.literal(2), z.literal(4), z.literal(5), z.literal(8)]),
+          })),
+      })),
+  }),
+});
+
+export type AvailableTables = z.infer<typeof AvailableTables>;
+",
+  },
+}
