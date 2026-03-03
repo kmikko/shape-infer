@@ -1,6 +1,6 @@
 {
   "name": "shape-infer",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "packageManager": "pnpm@10.30.3",
   "description": "Infer a unified schema from JSON/JSONL records and emit TypeScript, Zod, or JSON Schema.",
