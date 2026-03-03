@@ -15,7 +15,7 @@ curl -s "https://swapi.info/api/planets" | npx shape-infer -t Planet -f zod
 ```ts
 import { z } from "zod";
 
-export const PlanetSchema = z.object({
+export const Planet = z.object({
   climate: z.string(),
   created: z.string().datetime(),
   diameter: z.string(),
@@ -41,7 +41,7 @@ export const PlanetSchema = z.object({
   url: z.string().url(),
 });
 
-export type Planet = z.infer<typeof PlanetSchema>;
+export type Planet = z.infer<typeof Planet>;
 ```
 
 No install required. Pipe any JSON or JSONL source and get back something you can use.
@@ -92,10 +92,10 @@ cat data.json | shape-infer [options]
 Want runtime validation alongside your types? Start here:
 
 ```sh
-$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f zod
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t Planet -f zod
 import { z } from "zod";
 
-export const SwapiPlanetSchema = z.object({
+export const Planet = z.object({
   "climate": z.string(),
   "created": z.string().datetime(),
   "diameter": z.string(),
@@ -112,7 +112,7 @@ export const SwapiPlanetSchema = z.object({
   "url": z.string().url(),
 });
 
-export type SwapiPlanet = z.infer<typeof SwapiPlanetSchema>;
+export type Planet = z.infer<typeof Planet>;
 ```
 
 ### TypeScript type
@@ -120,8 +120,8 @@ export type SwapiPlanet = z.infer<typeof SwapiPlanetSchema>;
 Don't need runtime parsing? Emit a plain type instead:
 
 ```sh
-$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f ts
-export type SwapiPlanet = {
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t Planet -f ts
+export type Planet = {
   climate: string;
   created: string;
   diameter: string;
@@ -144,10 +144,10 @@ export type SwapiPlanet = {
 Not in the TypeScript ecosystem? Output JSON Schema instead:
 
 ```sh
-$ curl -s "https://swapi.info/api/planets" | shape-infer -t SwapiPlanet -f json-schema
+$ curl -s "https://swapi.info/api/planets" | shape-infer -t Planet -f json-schema
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SwapiPlanet",
+  "title": "Planet",
   "type": "object",
   "properties": {
     "climate": { "type": "string" },

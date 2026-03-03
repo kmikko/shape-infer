@@ -110,7 +110,7 @@ exports[`public api golden snapshots > matches typescript output snapshot 1`] = 
 exports[`public api golden snapshots > matches zod output snapshot 1`] = `
 "import { z } from "zod";
 
-export const UserSchemaSchema = z.object({
+export const UserSchema = z.object({
   "email": z.union([z.string(), z.null()]).optional(),
   "flags": z.object({
     "valid": z.boolean().optional(),
@@ -129,6 +129,6 @@ export const UserSchemaSchema = z.object({
   "roles": z.array(z.string()),
 });
 
-export type UserSchema = z.infer<typeof UserSchemaSchema>;
+export type UserSchema = z.infer<typeof UserSchema>;
 "
 `;

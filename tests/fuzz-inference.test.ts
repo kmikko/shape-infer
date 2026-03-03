@@ -131,7 +131,7 @@ describe("fuzz-like inference invariants", () => {
 
       expect(first).toEqual(second);
       expect(first.tsStrict).toContain("export type FuzzRoot");
-      expect(first.zodStrict).toContain("export const FuzzRootSchema");
+      expect(first.zodStrict).toContain("export const FuzzRoot");
       expect(first.jsonSchemaStrict).toContain('"title": "FuzzRoot"');
     });
   }

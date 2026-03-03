@@ -37,7 +37,6 @@ export function emitZodSchema(
   options: ZodEmitterOptions = {},
 ): string {
   const rootTypeName = options.rootTypeName ?? "Root";
-  const schemaName = `${rootTypeName}Schema`;
   const exportSchema = options.exportSchema ?? true;
   const exportType = options.exportType ?? true;
   const schemaKeyword = exportSchema ? "export " : "";
@@ -62,9 +61,9 @@ export function emitZodSchema(
     'import { z } from "zod";',
     "",
     ...helperLines,
-    `${schemaKeyword}const ${schemaName} = ${schemaText};`,
+    `${schemaKeyword}const ${rootTypeName} = ${schemaText};`,
     "",
-    `${typeKeyword}type ${rootTypeName} = z.infer<typeof ${schemaName}>;`,
+    `${typeKeyword}type ${rootTypeName} = z.infer<typeof ${rootTypeName}>;`,
     "",
   ].join("\n");
 }
