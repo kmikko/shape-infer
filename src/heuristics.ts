@@ -15,6 +15,9 @@ const STRING_FORMAT_THRESHOLD = 0.9;
 const MIN_FORMAT_COUNT = 5;
 const RECORD_MIN_KEYS = 40;
 const RECORD_MAX_PRESENCE = 0.35;
+const PATTERN_KEY_SEPARATORS = ["-", "_", "/", "."] as const;
+const PATTERN_MIN_KEYS = 6;
+const PATTERN_MIN_SEGMENTS = 2;
 
 interface EnumCandidate<T extends string | number> {
   values: T[];
@@ -165,6 +168,27 @@ export function isRecordLikeObject(variant: ObjectVariant): boolean {
   return (
     maxPresence <= RECORD_MAX_PRESENCE && averagePresence <= RECORD_MAX_PRESENCE
   );
+}
+
+export function inferKeyPattern(variant: ObjectVariant): boolean {
+  if (variant.properties.size < PATTERN_MIN_KEYS) {
+    return false;
+  }
+
+  const keys = [...variant.properties.keys()];
+
+  for (const separator of PATTERN_KEY_SEPARATORS) {
+    const segmentCounts = keys.map((key) => key.split(separator).length);
+    const firstCount = segmentCounts[0];
+    if (
+      firstCount >= PATTERN_MIN_SEGMENTS &&
+      segmentCounts.every((count) => count === firstCount)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function buildRecordValueNode(

@@ -1,0 +1,1950 @@
+{
+    "days": {
+        "2026-10-monday": "restaurantClosed",
+        "2026-10-tuesday": "restaurantClosed",
+        "2026-10-wednesday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            }
+        ],
+        "2026-10-thursday": [
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    }
+                ]
+            }
+        ],
+        "2026-10-friday": [],
+        "2026-10-saturday": [],
+        "2026-10-sunday": "restaurantClosed",
+        "2026-11-monday": "restaurantClosed",
+        "2026-11-tuesday": "restaurantClosed",
+        "2026-11-wednesday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            }
+        ],
+        "2026-11-thursday": [],
+        "2026-11-friday": [],
+        "2026-11-saturday": [],
+        "2026-11-sunday": "restaurantClosed",
+        "2026-12-monday": "restaurantClosed",
+        "2026-12-tuesday": "restaurantClosed",
+        "2026-12-wednesday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            }
+        ],
+        "2026-12-thursday": [
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            }
+        ],
+        "2026-12-friday": [],
+        "2026-12-saturday": [],
+        "2026-12-sunday": "restaurantClosed",
+        "2026-13-monday": "restaurantClosed",
+        "2026-13-tuesday": "restaurantClosed",
+        "2026-13-wednesday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1615",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1630",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1645",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1700",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            }
+        ],
+        "2026-13-thursday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            }
+        ],
+        "2026-13-friday": [],
+        "2026-13-saturday": [],
+        "2026-13-sunday": "restaurantClosed",
+        "2026-14-monday": "restaurantClosed",
+        "2026-14-tuesday": "restaurantClosed",
+        "2026-14-wednesday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1615",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1630",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1645",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1700",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1715",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1730",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1745",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1800",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    }
+                ]
+            },
+            {
+                "slot": "1815",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1830",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1845",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1900",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1915",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1930",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1945",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    }
+                ]
+            }
+        ],
+        "2026-14-thursday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    }
+                ]
+            },
+            {
+                "slot": "1800",
+                "tables": [
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    }
+                ]
+            },
+            {
+                "slot": "1900",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1915",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1930",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "1945",
+                "tables": [
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    }
+                ]
+            }
+        ],
+        "2026-14-friday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1615",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1630",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1645",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1700",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1800",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1815",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1830",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1845",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1900",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2015",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2030",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2045",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2100",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            }
+        ],
+        "2026-14-saturday": [
+            {
+                "slot": "1600",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1615",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1630",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1645",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1700",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1800",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1815",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1830",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1845",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "1900",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2000",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2015",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2030",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2045",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            },
+            {
+                "slot": "2100",
+                "tables": [
+                    {
+                        "number": 6,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 8,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 9,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 10,
+                        "room": "Sali",
+                        "size": 2
+                    },
+                    {
+                        "number": 5,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 7,
+                        "room": "Sali",
+                        "size": 4
+                    },
+                    {
+                        "number": 11,
+                        "room": "Sali",
+                        "size": 5
+                    },
+                    {
+                        "number": 3,
+                        "room": "Sali",
+                        "size": 8
+                    }
+                ]
+            }
+        ],
+        "2026-14-sunday": "restaurantClosed"
+    }
+}

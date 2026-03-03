@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   buildRecordValueNode,
+  inferKeyPattern,
   inferNumberEnum,
   inferStringEnum,
   inferStringFormat,
@@ -142,5 +143,68 @@ describe("heuristics", () => {
     );
 
     expect(kinds).toEqual(["integer", "null", "string"]);
+  });
+
+  test("inferKeyPattern detects separator-uniform keys like date-day entries", () => {
+    const keys = [
+      "2026-7-monday",
+      "2026-7-tuesday",
+      "2026-7-wednesday",
+      "2026-7-thursday",
+      "2026-7-friday",
+      "2026-7-saturday",
+      "2026-7-sunday",
+    ];
+    const root = inferFromValues([Object.fromEntries(keys.map((k) => [k, 1]))]);
+    const objectVariant = root.variants.object;
+    if (!objectVariant) {
+      throw new Error("Expected object variant.");
+    }
+    expect(inferKeyPattern(objectVariant)).toBe(true);
+  });
+
+  test("inferKeyPattern returns false for plain named-property objects", () => {
+    const root = inferFromValues([
+      {
+        name: "Alice",
+        age: 30,
+        id: 1,
+        role: "admin",
+        active: true,
+        created: "2026-01-01",
+        score: 99,
+      },
+    ]);
+    const objectVariant = root.variants.object;
+    if (!objectVariant) {
+      throw new Error("Expected object variant.");
+    }
+    expect(inferKeyPattern(objectVariant)).toBe(false);
+  });
+
+  test("inferKeyPattern returns false when fewer than 6 keys", () => {
+    const keys = [
+      "2026-7-mon",
+      "2026-7-tue",
+      "2026-7-wed",
+      "2026-7-thu",
+      "2026-7-fri",
+    ];
+    const root = inferFromValues([Object.fromEntries(keys.map((k) => [k, 1]))]);
+    const objectVariant = root.variants.object;
+    if (!objectVariant) {
+      throw new Error("Expected object variant.");
+    }
+    expect(inferKeyPattern(objectVariant)).toBe(false);
+  });
+
+  test("inferKeyPattern returns false when keys have inconsistent segment counts", () => {
+    const keys = ["a-b", "a-b-c", "a-b-c-d", "a-b", "a-b-c", "a-b-c-d", "a-b"];
+    const root = inferFromValues([Object.fromEntries(keys.map((k) => [k, 1]))]);
+    const objectVariant = root.variants.object;
+    if (!objectVariant) {
+      throw new Error("Expected object variant.");
+    }
+    expect(inferKeyPattern(objectVariant)).toBe(false);
   });
 });

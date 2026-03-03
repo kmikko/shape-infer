@@ -6,6 +6,7 @@ import type {
 } from "../ast.ts";
 import {
   buildRecordValueNode,
+  inferKeyPattern,
   inferNumberEnum,
   inferStringEnum,
   inferStringFormat,
@@ -173,7 +174,10 @@ function emitObjectSchema(
   style: ResolvedEmissionStyleOptions,
   context: EmitContext,
 ): string {
-  if (isRecordLikeObject(variant)) {
+  if (
+    (style.typeMode === "loose" && inferKeyPattern(variant)) ||
+    isRecordLikeObject(variant)
+  ) {
     const valueNode = buildRecordValueNode(variant, astMergeOptions);
     const valueSchema = emitNodeSchema(
       valueNode,

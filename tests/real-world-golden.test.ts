@@ -5,7 +5,11 @@ import { describe, expect, test } from "vitest";
 import { generateFromText } from "../src/public-api.ts";
 
 type FixtureInputFormat = "json" | "jsonl";
-type SampleMode = "json-array" | "jsonl-lines" | "json-map-keys";
+type SampleMode =
+  | "json-array"
+  | "jsonl-lines"
+  | "json-map-keys"
+  | "json-single-root";
 
 interface FixtureCase {
   fileName: string;
@@ -77,6 +81,12 @@ const FIXTURE_CASES: FixtureCase[] = [
     sampleMode: "jsonl-lines",
     typeBaseName: "OpenFoodFactsProducts",
   },
+  {
+    fileName: "available-tables.json",
+    inputFormat: "json",
+    sampleMode: "json-single-root",
+    typeBaseName: "AvailableTables",
+  },
 ];
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,6 +147,30 @@ function loadAndSampleFixture(
     throw new Error(
       `Fixture ${fixture.fileName} has incompatible inputFormat/sampleMode: ${fixture.inputFormat}/${fixture.sampleMode}.`,
     );
+  }
+
+  if (fixture.sampleMode === "json-single-root") {
+    const parsedJson = parseJsonValue(raw, fixture.fileName);
+    if (!isRecord(parsedJson)) {
+      throw new Error(
+        `Fixture ${fixture.fileName} uses json-single-root sampling but JSON root is not an object.`,
+      );
+    }
+    return {
+      values: [parsedJson],
+      sampleSummary: {
+        inputFormat: fixture.inputFormat,
+        sampleMode: fixture.sampleMode,
+        emissionModes: ["strict", "loose"],
+        recordsBeforeSampling: 1,
+        recordsAfterSampling: 1,
+        limits: {
+          jsonArrayItems: JSON_ARRAY_SAMPLE_LIMIT,
+          jsonlLines: JSONL_SAMPLE_LIMIT,
+          jsonMapKeys: JSON_MAP_KEY_SAMPLE_LIMIT,
+        },
+      },
+    };
   }
 
   if (fixture.inputFormat === "jsonl") {
