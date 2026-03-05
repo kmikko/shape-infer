@@ -87,7 +87,7 @@ describe("emitter edge cases", () => {
           "2025-01-04",
           "2025-01-05",
         ],
-        expectedFragment: ".date()",
+        expectedFragment: "z.iso.date()",
       },
       {
         name: "email",
@@ -98,7 +98,7 @@ describe("emitter edge cases", () => {
           "delta@example.com",
           "epsilon@example.com",
         ],
-        expectedFragment: ".email()",
+        expectedFragment: "z.email()",
       },
       {
         name: "uuid",
@@ -109,7 +109,7 @@ describe("emitter edge cases", () => {
           "9a52d6e2-0386-4e22-8f7a-2f87f6a8a9fb",
           "123e4567-e89b-12d3-a456-426614174000",
         ],
-        expectedFragment: ".uuid()",
+        expectedFragment: "z.uuid()",
       },
       {
         name: "uri",
@@ -120,7 +120,7 @@ describe("emitter edge cases", () => {
           "https://example.com/d",
           "https://example.com/e",
         ],
-        expectedFragment: ".url()",
+        expectedFragment: "z.url()",
       },
     ] as const;
 

@@ -17,9 +17,9 @@ import { z } from "zod";
 
 export const Planet = z.object({
   climate: z.string(),
-  created: z.string().datetime(),
+  created: z.iso.datetime(),
   diameter: z.string(),
-  edited: z.string().datetime(),
+  edited: z.iso.datetime(),
   films: z.array(
     z.enum([
       "https://swapi.info/api/films/1",
@@ -34,11 +34,11 @@ export const Planet = z.object({
   name: z.string(),
   orbital_period: z.string(),
   population: z.string(),
-  residents: z.array(z.string().url()),
+  residents: z.array(z.url()),
   rotation_period: z.string(),
   surface_water: z.string(),
   terrain: z.string(),
-  url: z.string().url(),
+  url: z.url(),
 });
 
 export type Planet = z.infer<typeof Planet>;
@@ -97,19 +97,19 @@ import { z } from "zod";
 
 export const Planet = z.object({
   "climate": z.string(),
-  "created": z.string().datetime(),
+  "created": z.iso.datetime(),
   "diameter": z.string(),
-  "edited": z.string().datetime(),
+  "edited": z.iso.datetime(),
   "films": z.array(z.enum(["https://swapi.info/api/films/1", "https://swapi.info/api/films/2", "https://swapi.info/api/films/3", "https://swapi.info/api/films/4", "https://swapi.info/api/films/5", "https://swapi.info/api/films/6"])),
   "gravity": z.string(),
   "name": z.string(),
   "orbital_period": z.string(),
   "population": z.string(),
-  "residents": z.array(z.string().url()),
+  "residents": z.array(z.url()),
   "rotation_period": z.string(),
   "surface_water": z.string(),
   "terrain": z.string(),
-  "url": z.string().url(),
+  "url": z.url(),
 });
 
 export type Planet = z.infer<typeof Planet>;

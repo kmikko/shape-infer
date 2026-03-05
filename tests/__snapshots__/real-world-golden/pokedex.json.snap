@@ -172,7 +172,7 @@ export const Pokedex = z.object({
       "egg": z.string(),
       "height": z.string(),
       "id": z.number().int(),
-      "img": z.string().url(),
+      "img": z.url(),
       "multipliers": z.array(z.number()).nullable(),
       "name": z.string(),
       "next_evolution": z.array(z.object({
@@ -429,7 +429,7 @@ export const Pokedex = z.object({
       "egg": z.enum(["10 km", "2 km", "5 km", "Not in Eggs"]),
       "height": z.string(),
       "id": z.number().int(),
-      "img": z.string().url(),
+      "img": z.url(),
       "multipliers": z.union([z.array(z.number()), z.null()]),
       "name": z.string(),
       "next_evolution": z.array(z.object({

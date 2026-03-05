@@ -1853,21 +1853,21 @@
 
 export const GhArchiveEvents = z.object({
   "actor": z.object({
-    "avatar_url": z.string().url(),
+    "avatar_url": z.url(),
     "display_login": z.string(),
     "gravatar_id": z.string(),
     "id": z.number().int(),
     "login": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }),
-  "created_at": z.string().datetime(),
+  "created_at": z.iso.datetime(),
   "id": z.string(),
   "org": z.object({
-    "avatar_url": z.string().url(),
+    "avatar_url": z.url(),
     "gravatar_id": z.string(),
     "id": z.number().int(),
     "login": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }).optional(),
   "payload": z.object({
     "action": z.string().optional(),
@@ -2102,7 +2102,7 @@ export const GhArchiveEvents = z.object({
         "repo": z.object({
           "id": z.number().int(),
           "name": z.string(),
-          "url": z.string().url(),
+          "url": z.url(),
         }),
         "sha": z.string(),
       }),
@@ -2111,13 +2111,13 @@ export const GhArchiveEvents = z.object({
         "repo": z.object({
           "id": z.number().int(),
           "name": z.string(),
-          "url": z.string().url(),
+          "url": z.url(),
         }),
         "sha": z.string(),
       }),
       "id": z.number().int(),
       "number": z.number().int(),
-      "url": z.string().url(),
+      "url": z.url(),
     }).optional(),
     "push_id": z.number().int().optional(),
     "pusher_type": z.string().optional(),
@@ -2213,7 +2213,7 @@ export const GhArchiveEvents = z.object({
   "repo": z.object({
     "id": z.number().int(),
     "name": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }),
   "type": z.string(),
 });
@@ -4120,21 +4120,21 @@ export type GhArchiveEvents = z.infer<typeof GhArchiveEvents>;
 
 export const GhArchiveEvents = z.object({
   "actor": z.object({
-    "avatar_url": z.string().url(),
+    "avatar_url": z.url(),
     "display_login": z.string(),
     "gravatar_id": z.string(),
     "id": z.number().int(),
     "login": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }),
-  "created_at": z.string().datetime(),
+  "created_at": z.iso.datetime(),
   "id": z.string(),
   "org": z.object({
-    "avatar_url": z.string().url(),
+    "avatar_url": z.url(),
     "gravatar_id": z.string(),
     "id": z.number().int(),
     "login": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }).optional(),
   "payload": z.object({
     "action": z.string().optional(),
@@ -4369,7 +4369,7 @@ export const GhArchiveEvents = z.object({
         "repo": z.object({
           "id": z.number().int(),
           "name": z.string(),
-          "url": z.string().url(),
+          "url": z.url(),
         }),
         "sha": z.string(),
       }),
@@ -4378,13 +4378,13 @@ export const GhArchiveEvents = z.object({
         "repo": z.object({
           "id": z.number().int(),
           "name": z.string(),
-          "url": z.string().url(),
+          "url": z.url(),
         }),
         "sha": z.string(),
       }),
       "id": z.number().int(),
       "number": z.number().int(),
-      "url": z.string().url(),
+      "url": z.url(),
     }).optional(),
     "push_id": z.number().int().optional(),
     "pusher_type": z.string().optional(),
@@ -4480,7 +4480,7 @@ export const GhArchiveEvents = z.object({
   "repo": z.object({
     "id": z.number().int(),
     "name": z.string(),
-    "url": z.string().url(),
+    "url": z.url(),
   }),
   "type": z.enum(["CreateEvent", "DeleteEvent", "IssueCommentEvent", "IssuesEvent", "PullRequestEvent", "PullRequestReviewCommentEvent", "PullRequestReviewEvent", "PushEvent", "ReleaseEvent", "WatchEvent"]),
 });
