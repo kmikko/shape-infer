@@ -124,7 +124,7 @@ function emitNodeSchema(
 
   if (node.variants.integer || node.variants.number) {
     if (style.typeMode === "loose") {
-      variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+      variants.add(node.variants.number ? "z.number()" : "z.int()");
     } else {
       const enumCandidate = inferNumberEnum(
         node.variants.integer,
@@ -137,7 +137,7 @@ function emitNodeSchema(
             .join(", ")}])`,
         );
       } else {
-        variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+        variants.add(node.variants.number ? "z.number()" : "z.int()");
       }
     }
   }

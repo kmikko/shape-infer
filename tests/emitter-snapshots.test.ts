@@ -3,6 +3,7 @@ import { emitJsonSchema } from "../src/emitters/json-schema.ts";
 import { emitTypeScriptType } from "../src/emitters/typescript.ts";
 import { emitZodSchema } from "../src/emitters/zod.ts";
 import { inferFromValues } from "../src/infer.ts";
+import { assertNoDeprecatedOrLegacyZodApis } from "./zod-output-policy.ts";
 
 interface SnapshotCase {
   name: string;
@@ -113,6 +114,8 @@ describe("emitter golden snapshots", () => {
         ),
       };
 
+      assertNoDeprecatedOrLegacyZodApis(snapshot.zodStrict);
+      assertNoDeprecatedOrLegacyZodApis(snapshot.zodLooseOptional);
       expect(snapshot).toMatchSnapshot();
     });
   }

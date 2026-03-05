@@ -3,6 +3,7 @@ import { emitJsonSchema } from "../src/emitters/json-schema.ts";
 import { emitTypeScriptType } from "../src/emitters/typescript.ts";
 import { emitZodSchema } from "../src/emitters/zod.ts";
 import { inferFromValues } from "../src/infer.ts";
+import { assertNoDeprecatedOrLegacyZodApis } from "./zod-output-policy.ts";
 
 function mulberry32(seed: number): () => number {
   let current = seed;
@@ -89,6 +90,14 @@ function generateDataset(
 
 function emitAll(values: unknown[]) {
   const root = inferFromValues(values);
+  const zodStrict = emitZodSchema(root, { rootTypeName: "FuzzRoot" });
+  const zodLoose = emitZodSchema(root, {
+    rootTypeName: "FuzzRoot",
+    typeMode: "loose",
+    allOptionalProperties: true,
+  });
+  assertNoDeprecatedOrLegacyZodApis(zodStrict);
+  assertNoDeprecatedOrLegacyZodApis(zodLoose);
 
   return {
     tsStrict: emitTypeScriptType(root, { rootTypeName: "FuzzRoot" }),
@@ -97,12 +106,8 @@ function emitAll(values: unknown[]) {
       typeMode: "loose",
       allOptionalProperties: true,
     }),
-    zodStrict: emitZodSchema(root, { rootTypeName: "FuzzRoot" }),
-    zodLoose: emitZodSchema(root, {
-      rootTypeName: "FuzzRoot",
-      typeMode: "loose",
-      allOptionalProperties: true,
-    }),
+    zodStrict,
+    zodLoose,
     jsonSchemaStrict: JSON.stringify(
       emitJsonSchema(root, { rootTitle: "FuzzRoot" }),
       null,

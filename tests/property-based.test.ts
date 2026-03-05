@@ -10,6 +10,7 @@ import {
 import { emitZodSchema } from "../src/emitters/zod.ts";
 import { inferFromValues } from "../src/infer.ts";
 import { z } from "zod";
+import { assertNoDeprecatedOrLegacyZodApis } from "./zod-output-policy.ts";
 
 type JsonValue =
   | null
@@ -104,6 +105,7 @@ describe("property-based inference invariants", () => {
           const zodSource = emitZodSchema(root, {
             rootTypeName: CORPUS_SCHEMA_NAME,
           });
+          assertNoDeprecatedOrLegacyZodApis(zodSource);
 
           const jsonSchemaValidator = compileAjvValidator(jsonSchema);
           const zodSchema = compileZodSchemaFromEmitterSource(
@@ -126,6 +128,7 @@ function assertRoundTripForValue(value: JsonValue, schemaName: string): void {
   const root = inferFromValues([value]);
   const jsonSchema = emitJsonSchema(root, { rootTitle: schemaName });
   const zodSource = emitZodSchema(root, { rootTypeName: schemaName });
+  assertNoDeprecatedOrLegacyZodApis(zodSource);
   const jsonSchemaValidator = compileAjvValidator(jsonSchema);
   const zodSchema = compileZodSchemaFromEmitterSource(zodSource, schemaName);
 

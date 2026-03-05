@@ -522,7 +522,7 @@ export const OpenLibraryEditions = z.object({
   "classifications": z.object({}).optional(),
   "contributions": z.array(z.string()).optional(),
   "copyright_date": z.string().optional(),
-  "covers": z.array(z.number().int()).optional(),
+  "covers": z.array(z.int()).optional(),
   "created": z.object({
     "type": z.string(),
     "value": z.string(),
@@ -552,7 +552,7 @@ export const OpenLibraryEditions = z.object({
     "type": z.string(),
     "value": z.string(),
   }),
-  "latest_revision": z.number().int(),
+  "latest_revision": z.int(),
   "lc_classifications": z.array(z.string()).optional(),
   "lccn": z.array(z.string()).optional(),
   "links": z.array(z.object({
@@ -564,7 +564,7 @@ export const OpenLibraryEditions = z.object({
     "type": z.string(),
     "value": z.string(),
   }).optional(),
-  "number_of_pages": z.number().int().optional(),
+  "number_of_pages": z.int().optional(),
   "ocaid": z.string().optional(),
   "oclc_number": z.array(z.string()).optional(),
   "oclc_numbers": z.array(z.string()).optional(),
@@ -577,7 +577,7 @@ export const OpenLibraryEditions = z.object({
   "publish_date": z.string().optional(),
   "publish_places": z.array(z.string()).optional(),
   "publishers": z.array(z.string()).optional(),
-  "revision": z.number().int(),
+  "revision": z.int(),
   "series": z.array(z.string()).optional(),
   "source_records": z.array(z.url()).optional(),
   "subject_people": z.array(z.string()).optional(),
@@ -588,7 +588,7 @@ export const OpenLibraryEditions = z.object({
   "subjects": z.array(z.string()).optional(),
   "subtitle": z.string().optional(),
   "table_of_contents": z.array(z.object({
-      "level": z.number().int().optional(),
+      "level": z.int().optional(),
       "title": z.string(),
       "type": z.object({
         "key": z.string(),
@@ -1188,7 +1188,7 @@ export const OpenLibraryEditions = z.object({
   "classifications": z.object({}).optional(),
   "contributions": z.array(z.string()).optional(),
   "copyright_date": z.string().optional(),
-  "covers": z.array(z.number().int()).optional(),
+  "covers": z.array(z.int()).optional(),
   "created": z.object({
     "type": z.string(),
     "value": z.string(),
@@ -1230,7 +1230,7 @@ export const OpenLibraryEditions = z.object({
     "type": z.string(),
     "value": z.string(),
   }).optional(),
-  "number_of_pages": z.number().int().optional(),
+  "number_of_pages": z.int().optional(),
   "ocaid": z.string().optional(),
   "oclc_number": z.array(z.string()).optional(),
   "oclc_numbers": z.array(z.string()).optional(),
@@ -1254,7 +1254,7 @@ export const OpenLibraryEditions = z.object({
   "subjects": z.array(z.string()).optional(),
   "subtitle": z.string().optional(),
   "table_of_contents": z.array(z.object({
-      "level": z.number().int().optional(),
+      "level": z.int().optional(),
       "title": z.string(),
       "type": z.object({
         "key": z.string(),

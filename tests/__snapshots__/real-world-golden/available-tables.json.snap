@@ -76,9 +76,9 @@ export const AvailableTables = z.object({
   "days": z.record(z.string(), z.union([z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })), z.string()])),
 });
@@ -814,18 +814,18 @@ export const AvailableTables = z.object({
     "2026-10-thursday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-10-tuesday": z.string(),
     "2026-10-wednesday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-11-friday": z.array(z.unknown()),
@@ -837,9 +837,9 @@ export const AvailableTables = z.object({
     "2026-11-wednesday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-12-friday": z.array(z.unknown()),
@@ -849,18 +849,18 @@ export const AvailableTables = z.object({
     "2026-12-thursday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-12-tuesday": z.string(),
     "2026-12-wednesday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-13-friday": z.array(z.unknown()),
@@ -870,18 +870,18 @@ export const AvailableTables = z.object({
     "2026-13-thursday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-13-tuesday": z.string(),
     "2026-13-wednesday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
-            "size": z.number().int(),
+            "size": z.int(),
           })),
       })),
     "2026-14-friday": z.array(z.object({
@@ -905,7 +905,7 @@ export const AvailableTables = z.object({
     "2026-14-thursday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
             "size": z.union([z.literal(2), z.literal(4), z.literal(5)]),
           })),
@@ -914,7 +914,7 @@ export const AvailableTables = z.object({
     "2026-14-wednesday": z.array(z.object({
         "slot": z.string(),
         "tables": z.array(z.object({
-            "number": z.number().int(),
+            "number": z.int(),
             "room": z.string(),
             "size": z.union([z.literal(2), z.literal(4), z.literal(5), z.literal(8)]),
           })),
