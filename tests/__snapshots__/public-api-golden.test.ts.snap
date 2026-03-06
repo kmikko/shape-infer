@@ -116,11 +116,11 @@ export const UserSchema = z.object({
     "valid": z.boolean().optional(),
     "verified": z.boolean().optional(),
   }).optional(),
-  "id": z.union([z.string(), z.number().int()]),
+  "id": z.union([z.string(), z.int()]),
   "meta": z.object({
     "extra": z.string().optional(),
     "last_seen": z.union([z.string(), z.null()]).optional(),
-    "login_count": z.number().int().optional(),
+    "login_count": z.int().optional(),
     "preferences": z.object({
       "theme": z.string().optional(),
     }).optional(),

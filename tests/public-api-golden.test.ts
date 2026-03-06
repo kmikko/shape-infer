@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { generateFromText } from "../src/public-api.ts";
+import { assertNoDeprecatedOrLegacyZodApis } from "./zod-output-policy.ts";
 
 // Complex dataset to exercise various inference paths
 const COMPLEX_DATASET = [
@@ -57,6 +58,7 @@ describe("public api golden snapshots", () => {
       typeName: "UserSchema",
       typeMode: "strict",
     });
+    assertNoDeprecatedOrLegacyZodApis(result.output);
     expect(result.output).toMatchSnapshot();
   });
 

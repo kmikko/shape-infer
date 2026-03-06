@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 import { generateFromText } from "../src/public-api.ts";
+import { assertNoDeprecatedOrLegacyZodApis } from "./zod-output-policy.ts";
 
 type FixtureInputFormat = "json" | "jsonl";
 type SampleMode =
@@ -356,6 +357,16 @@ async function emitFixtureOutputs(
   typeMode: "strict" | "loose",
 ): Promise<ModeOutputs> {
   const text = JSON.stringify(values);
+  const zodOutput = (
+    await generateFromText({
+      text,
+      format: "zod",
+      typeName: typeBaseName,
+      typeMode,
+    })
+  ).output;
+  assertNoDeprecatedOrLegacyZodApis(zodOutput);
+
   return {
     typescript: (
       await generateFromText({
@@ -365,14 +376,7 @@ async function emitFixtureOutputs(
         typeMode,
       })
     ).output,
-    zod: (
-      await generateFromText({
-        text,
-        format: "zod",
-        typeName: typeBaseName,
-        typeMode,
-      })
-    ).output,
+    zod: zodOutput,
     jsonSchema: (
       await generateFromText({
         text,

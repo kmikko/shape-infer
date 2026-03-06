@@ -53,6 +53,17 @@ describe("CLI ingestion", () => {
     expect(stderr).toBe("");
   });
 
+  test("does not infer URI in loose zod output when even one sample is invalid", async () => {
+    const { stdout, stderr } = await runCli(
+      ["--type-name", "MixedLinks", "--format", "zod", "--mode", "loose"],
+      '[{"url":"https://example.com/a"},{"url":"https://example.com/b"},{"url":"https://example.com/c"},{"url":"https://example.com/d"},{"url":"https://example.com/e"},{"url":"https://example.com/f"},{"url":"https://example.com/g"},{"url":"https://example.com/h"},{"url":"https://example.com/i"},{"url":":cookie-policy"}]\n',
+    );
+
+    expect(stdout).toMatch(/"url": z\.string\(\)/);
+    expect(stdout).not.toMatch(/z\.url\(\)/);
+    expect(stderr).toBe("");
+  });
+
   test("stdin with --input-format jsonl parses concatenated JSON objects", async () => {
     const { stdout, stderr } = await runCli(
       ["--input-format", "jsonl", "--type-name", "Piped"],

@@ -134,6 +134,10 @@ export function inferStringFormat(
   }
 
   const confidence = bestCount / variant.count;
+  if (bestFormat === "uri" && bestCount !== variant.count) {
+    return undefined;
+  }
+
   if (confidence < STRING_FORMAT_THRESHOLD) {
     return undefined;
   }

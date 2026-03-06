@@ -131,7 +131,7 @@ exports[`emitter golden snapshots > catalog-mixed 1`] = `
 export const SnapshotType = z.object({
   "category": z.string().optional(),
   "certification": z.string().nullable().optional(),
-  "id": z.union([z.string(), z.number().int()]).optional(),
+  "id": z.union([z.string(), z.int()]).optional(),
   "launchedAt": z.string().optional(),
   "price": z.number().nullable().optional(),
   "tags": z.array(z.string()).optional(),
@@ -144,7 +144,7 @@ export type SnapshotType = z.infer<typeof SnapshotType>;
 export const SnapshotType = z.object({
   "category": z.string(),
   "certification": z.union([z.string(), z.null()]),
-  "id": z.union([z.string(), z.number().int()]),
+  "id": z.union([z.string(), z.int()]),
   "launchedAt": z.string(),
   "price": z.union([z.number(), z.null()]),
   "tags": z.array(z.string()),

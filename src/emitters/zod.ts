@@ -124,7 +124,7 @@ function emitNodeSchema(
 
   if (node.variants.integer || node.variants.number) {
     if (style.typeMode === "loose") {
-      variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+      variants.add(node.variants.number ? "z.number()" : "z.int()");
     } else {
       const enumCandidate = inferNumberEnum(
         node.variants.integer,
@@ -137,7 +137,7 @@ function emitNodeSchema(
             .join(", ")}])`,
         );
       } else {
-        variants.add(node.variants.number ? "z.number()" : "z.number().int()");
+        variants.add(node.variants.number ? "z.number()" : "z.int()");
       }
     }
   }
@@ -295,15 +295,15 @@ function emitLooseUnion(variants: string[]): string {
 function applyStringFormat(baseSchema: string, format?: string): string {
   switch (format) {
     case "date-time":
-      return `${baseSchema}.datetime()`;
+      return "z.iso.datetime()";
     case "date":
-      return `${baseSchema}.date()`;
+      return "z.iso.date()";
     case "email":
-      return `${baseSchema}.email()`;
+      return "z.email()";
     case "uuid":
-      return `${baseSchema}.uuid()`;
+      return "z.uuid()";
     case "uri":
-      return `${baseSchema}.url()`;
+      return "z.url()";
     default:
       return baseSchema;
   }

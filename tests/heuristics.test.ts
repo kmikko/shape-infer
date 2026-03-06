@@ -99,6 +99,40 @@ describe("heuristics", () => {
     });
   });
 
+  test("inferStringFormat does not infer uri when any observed value is invalid", () => {
+    const root = inferFromValues([
+      "https://example.com/a",
+      "https://example.com/b",
+      "https://example.com/c",
+      "https://example.com/d",
+      "https://example.com/e",
+      "https://example.com/f",
+      "https://example.com/g",
+      "https://example.com/h",
+      "https://example.com/i",
+      ":cookie-policy",
+    ]);
+
+    const candidate = inferStringFormat(root.variants.string);
+    expect(candidate).toBeUndefined();
+  });
+
+  test("inferStringFormat infers uri when all observed values are valid", () => {
+    const root = inferFromValues([
+      "https://example.com/a",
+      "https://example.com/b",
+      "https://example.com/c",
+      "https://example.com/d",
+      "https://example.com/e",
+    ]);
+
+    const candidate = inferStringFormat(root.variants.string);
+    expect(candidate).toEqual({
+      format: "uri",
+      confidence: 1,
+    });
+  });
+
   test("isRecordLikeObject uses strict default key-count and presence thresholds", () => {
     const sparseRecords = Array.from({ length: 3 }, (_, recordIndex) => {
       return Object.fromEntries(
