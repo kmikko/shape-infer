@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- [#7](https://github.com/kmikko/shape-infer/pull/7) [`2a451ea`](https://github.com/kmikko/shape-infer/commit/2a451ea450652faca2bea5c6496185f7785f8c3c) Thanks [@kmikko](https://github.com/kmikko)! - Fix Zod format emission and URI over-inference.
+  - Emit modern Zod v4 top-level format schemas (`z.iso.datetime()`, `z.iso.date()`, `z.email()`, `z.uuid()`, `z.url()`) instead of deprecated chained `z.string().*` helpers.
+  - Tighten URI inference so format `uri` is inferred only when all observed values are valid URIs, avoiding over-constrained schemas for mixed samples (for example values like `:cookie-policy`).
+  - Add targeted heuristic and CLI regressions, update emitter expectations and README examples, and refresh affected golden snapshots.
+
+- [#7](https://github.com/kmikko/shape-infer/pull/7) [`4826771`](https://github.com/kmikko/shape-infer/commit/48267712135a12291a90f25b9ce0ae0e4421bf13) Thanks [@kmikko](https://github.com/kmikko)! - Prevent deprecated and legacy Zod APIs from appearing in generated Zod output.
+  - Emit `z.int()` for integer-only inference instead of legacy `z.number().int()`.
+  - Add a test-only Zod output policy that auto-detects callable `@deprecated` APIs from installed Zod typings and blocks explicit legacy patterns.
+  - Enforce the policy across snapshot, golden, fuzz, and property-based test paths; refresh affected snapshots.
+  - Run `pnpm run test` in the Changesets publish workflow before version/publish.
+
 ## 0.3.0
 
 ### Minor Changes
